@@ -17,7 +17,8 @@ fares on code written by others; that is what the real-project scan below is
 for.
 
 **Seed** (`corpus/seed/`): ten positive/negative pairs, one per rule family,
-used during development. 10 TP, 0 FP, 0 FN, 10 TN.
+used during development. 10 TP, 0 FP, 0 FN, 10 TN with version 0.4.0
+(`results/regression/seed-metrics.json`).
 
 **Holdout** (`corpus/holdout/`): 48 translation units and 49 labels covering
 host accesses and lifetimes, aliases and byte ranges, synchronization branches,
@@ -46,12 +47,13 @@ failure path of `cudaDeviceSynchronize`, which synchronizes nothing, reached
 the read. Artifacts: `results/holdout-first/` (see
 [results/README.md](../results/README.md) for what each file records).
 
-Version 0.3.0 fixes that (a call in statement position, including an `if` or
+Version 0.3.0 fixed that (a call in statement position, including an `if` or
 loop body, discards its status; `tests/native/checked_return_helpers.cpp`
-covers both forms) and changes other rules after the holdout was seen. On the
-holdout it scores 25 TP, 0 FP, 0 FN, 24 TN
+covers both forms) and changed other rules after the holdout was seen. Version
+0.4.0 scores 25 TP, 0 FP, 0 FN, 24 TN on the holdout, as 0.3.0 did
 (`results/regression/holdout-metrics.json`); because the set has been seen,
-that is a regression result, not a held-out score.
+that is a regression result, not a held-out score. The first, frozen run above
+remains the holdout result.
 
 ## Real projects
 
@@ -71,31 +73,36 @@ The scan covers every configured command of cuda-samples and RMM and the
 dependencies (graphics, MPI, FreeImage, NvSCI) are missing on the build host,
 so those samples are not among its 233 commands.
 
-| Project | TUs | Parsed | Alerts, 0.2.0 | Alerts, 0.3.0 |
-|---|---:|---:|---:|---:|
-| cuda-samples 13.2 | 233 | 223 | 32 | 7 |
-| faiss 1.15.1, `faiss/gpu/` | 190 | 189 | 42 | 29 |
-| RMM 26.10 | 54 | 54 | 2 | 0 |
+| Project | TUs | Parsed | Alerts, 0.2.0 | Alerts, 0.3.0 | Alerts, 0.4.0 |
+|---|---:|---:|---:|---:|---:|
+| cuda-samples 13.2 | 233 | 223 | 32 | 7 | 7 |
+| faiss 1.15.1, `faiss/gpu/` | 190 | 189 | 42 | 29 | 29 |
+| RMM 26.10 | 54 | 54 | 2 | 0 | 0 |
 
 The ten cuda-samples parse failures are nine `min`/`max` overload errors (for
 example in `simpleMultiCopy.cu` and `transpose.cu`) and one unsupported
 initialization of a `__shared__` variable (`globalToShmemAsyncCopy.cu`);
 faiss's one is a `min` overload error in `GpuDistance.cu`.
 
-Parsed is not the same as fully explored. The analysis records, per TU, the
-functions that exhausted the node budget and the CUDA calls that are not
-modeled; those per-TU coverage records are not included in this repository.
-`results/real-projects/summary.json` has the per-project totals:
+Parsed is not the same as fully explored. `scripts/summarize_scan.py` writes
+the per-project totals of the 0.4.0 scan to `results/real-projects/summary.json`
+and the per-TU figures to `results/real-projects/timings.csv`:
 
-- `functionsOverBudget` (385, 232 and 60) counts functions that hit the node
-  budget. The total number of functions analyzed was not recorded, so these
-  are not fractions of anything.
-- `unmodeledCudaFunctions` lists the names of unmodeled calls. They are found
-  by name (`cuda` or `cu` followed by an uppercase letter), so the lists also
-  contain project functions such as cuda-samples' `cudaGraphsManual` and
-  `cuGet`; most real entries for cuda-samples are driver API calls.
+| Project | Top-level functions analyzed | Exhausted the node budget | Hit the 180 s limit | Wall time, 10 processes | Per-TU time, median / max |
+|---|---:|---:|---:|---:|---:|
+| cuda-samples 13.2 | 837 | 385 (46%) | 0 | 97 s | 2.4 s / 74 s |
+| faiss 1.15.1, `faiss/gpu/` | 720 | 232 (32%) | 0 | 166 s | 4.6 s / 143 s |
+| RMM 26.10 | 233 | 60 (26%) | 0 | 20 s | 1.9 s / 19 s |
 
-### What changed
+A function that exhausts the budget was explored only partly, so a TU with one
+is never counted as clean. The wall times are for one run with ten TUs
+analyzed at a time on a 32-thread machine; the per-TU times include that
+concurrency. `unmodeledCudaFunctions` lists the CUDA Runtime and Driver API
+functions the analysis met but does not model (122 in cuda-samples, mostly
+driver API calls); a function counts as a CUDA API call only if it is declared
+in one of the toolkit's API headers.
+
+### What changed from 0.2.0 to 0.3.0
 
 Every 0.2.0 alert had been sorted into a root-cause family
 (`results/real-projects/triage-0.2.0.csv`: 45 false positives, 31 with
@@ -122,7 +129,25 @@ modeled before, and 9 in faiss, where paths 0.2.0 reported at a call it
 mistook for opaque are now reported at a later call (1 portability finding and
 the 8 `getDeviceForAddress` false positives below).
 
-### The 36 alerts of 0.3.0
+### From 0.3.0 to 0.4.0
+
+Version 0.4.0 reports the same 36 alerts as 0.3.0, with the same file, line,
+rule, level and message, so `results/real-projects/triage.csv` carries over
+unchanged. Its changes show in the coverage records instead:
+
+- Six cuda-samples functions that 0.3.0 counted as unmodeled CUDA calls
+  because of their names (`cudaGraphsManual`, `cudaGraphsUsingStreamCapture`,
+  `cudaDeviceInit`, `cuGet`, `cuRand`, `cuEqual`) are no longer counted;
+  cuda-samples' unmodeled-call visits drop from 70,412 to 60,135.
+- RMM's one `cudaMemcpyDefault` copy, whose operands are function parameters
+  of unknown memory kind, is now a recorded coverage gap rather than an
+  unknown copy kind. In cuda-samples and faiss the direction modeling added no
+  alerts and no coverage gaps; the native fixtures
+  `tests/native/memcpy_default*.cpp` exercise it.
+- Rule, level, memory kind and semantic ID are SARIF fields written by the
+  native consumer; they used to be parsed out of the message text.
+
+### The 36 alerts
 
 None of the 36 is a confirmed defect, and all are warnings or notes, so
 `--errors-only` reports nothing on these projects.
@@ -176,11 +201,17 @@ done
   --gcc-toolchain /usr --compatibility-profile profiles/host-headers.json
 python3 scripts/analyze_targets.py --native build/cuda-lifetime-native \
   --toolchain-kind source-assertions --out results/real-projects-run
+python3 scripts/summarize_scan.py --scan results/real-projects-run \
+  --triage results/real-projects/triage.csv \
+  --previous-triage results/real-projects/triage-0.2.0.csv --previous-version 0.2.0 \
+  --out results/real-projects-summary
 python3 probes/completion.py --out results/probes/completion.json
 ```
 
 `analyze_targets.py` restricts faiss to `faiss/gpu/` and runs one TU at a time
-per project. The committed SARIF files were produced with
+per project. The committed results were produced with
 `scripts/analyze_parallel.py --jobs 10` on databases translated with the same
-profiles (faiss already restricted to its `faiss/gpu/` entries); it runs the
-same per-TU analysis in parallel and merges the output.
+profiles (faiss already restricted to its `faiss/gpu/` entries), which runs the
+same per-TU analysis in parallel and records the wall time;
+`summarize_scan.py` reads either layout and refuses a triage that does not
+match the scan's alerts.

@@ -1,36 +1,43 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "budget": {
     "maxNodes": 225000,
-    "timeoutSeconds": 180
+    "timeoutSeconds": 180.0
   },
   "alerts": {
-    "before (0.2.0)": {
-      "cuda-samples": 32,
-      "faiss": 42,
-      "rmm": 2
-    },
-    "after (0.3.0)": {
-      "cuda-samples": 7,
-      "faiss": 29,
-      "rmm": 0
-    }
+    "cuda-samples": 7,
+    "faiss": 29,
+    "rmm": 0
   },
-  "afterByCategory": {
+  "alertsByCategory": {
     "false-positive": 11,
     "informational": 3,
     "portability": 22
   },
-  "beforeByJudgment": {
-    "insufficient-evidence": 31,
-    "false-positive": 45
+  "alertsByLevel": {
+    "note": 3,
+    "warning": 33
   },
   "coverage": {
     "cuda-samples": {
       "translationUnits": 233,
       "parsed": 223,
-      "failed": 10,
+      "failed": [
+        ".deps/cuda-samples-13.2/Samples/0_Introduction/simpleMultiCopy/simpleMultiCopy.cu",
+        ".deps/cuda-samples-13.2/Samples/0_Introduction/simpleStreams/simpleStreams.cu",
+        ".deps/cuda-samples-13.2/Samples/2_Concepts_and_Techniques/reductionMultiBlockCG/reductionMultiBlockCG.cu",
+        ".deps/cuda-samples-13.2/Samples/2_Concepts_and_Techniques/shfl_scan/shfl_scan.cu",
+        ".deps/cuda-samples-13.2/Samples/2_Concepts_and_Techniques/threadFenceReduction/threadFenceReduction.cu",
+        ".deps/cuda-samples-13.2/Samples/3_CUDA_Features/globalToShmemAsyncCopy/globalToShmemAsyncCopy.cu",
+        ".deps/cuda-samples-13.2/Samples/4_CUDA_Libraries/lineOfSight/lineOfSight.cu",
+        ".deps/cuda-samples-13.2/Samples/5_Domain_Specific/dxtc/dxtc.cu",
+        ".deps/cuda-samples-13.2/Samples/6_Performance/alignedTypes/alignedTypes.cu",
+        ".deps/cuda-samples-13.2/Samples/6_Performance/transpose/transpose.cu"
+      ],
+      "functionsAnalyzed": 837,
       "functionsOverBudget": 385,
+      "wallClockTimeouts": 0,
+      "coverageGaps": 50,
       "unmodeledCudaFunctions": [
         "cuArrayCreate_v2",
         "cuArrayDestroy",
@@ -49,8 +56,6 @@
         "cuDeviceGetName",
         "cuDeviceTotalMem_v2",
         "cuDriverGetVersion",
-        "cuEqual",
-        "cuGet",
         "cuGetErrorName",
         "cuGetErrorString",
         "cuInit",
@@ -87,7 +92,6 @@
         "cuOccupancyMaxActiveBlocksPerMultiprocessor",
         "cuOccupancyMaxPotentialBlockSize",
         "cuPointerGetAttribute",
-        "cuRand",
         "cuStreamCreate",
         "cuStreamDestroy_v2",
         "cuStreamSynchronize",
@@ -104,7 +108,6 @@
         "cudaDeviceGetGraphMemAttribute",
         "cudaDeviceGetP2PAttribute",
         "cudaDeviceGraphMemTrim",
-        "cudaDeviceInit",
         "cudaFreeArray",
         "cudaFuncSetCacheConfig",
         "cudaGraphAddHostNode",
@@ -123,8 +126,6 @@
         "cudaGraphGetNodes",
         "cudaGraphSetConditional",
         "cudaGraphUpload",
-        "cudaGraphsManual",
-        "cudaGraphsUsingStreamCapture",
         "cudaIpcGetEventHandle",
         "cudaIpcGetMemHandle",
         "cudaIpcOpenEventHandle",
@@ -160,23 +161,47 @@
         "cudaStreamSynchronize",
         "cudaStreamUpdateCaptureDependencies",
         "kernel-launch"
-      ]
+      ],
+      "wallSeconds": 97.3,
+      "jobs": 10,
+      "tuSeconds": {
+        "sum": 756.1,
+        "median": 2.42,
+        "p95": 7.73,
+        "max": 73.8
+      }
     },
     "faiss": {
       "translationUnits": 190,
       "parsed": 189,
-      "failed": 1,
+      "failed": [
+        ".deps/faiss-1.15.1/faiss/gpu/GpuDistance.cu"
+      ],
+      "functionsAnalyzed": 720,
       "functionsOverBudget": 232,
+      "wallClockTimeouts": 0,
+      "coverageGaps": 565,
       "unmodeledCudaFunctions": [
         "cudaMallocManaged",
         "kernel-launch"
-      ]
+      ],
+      "wallSeconds": 165.9,
+      "jobs": 10,
+      "tuSeconds": {
+        "sum": 1519.0,
+        "median": 4.6,
+        "p95": 26.16,
+        "max": 143.3
+      }
     },
     "rmm": {
       "translationUnits": 54,
       "parsed": 54,
-      "failed": 0,
+      "failed": [],
+      "functionsAnalyzed": 233,
       "functionsOverBudget": 60,
+      "wallClockTimeouts": 0,
+      "coverageGaps": 117,
       "unmodeledCudaFunctions": [
         "cudaMallocManaged",
         "cudaMemAdvise",
@@ -185,10 +210,29 @@
         "cudaMemPoolDestroy",
         "cudaMemPoolSetAttribute",
         "cudaMemPrefetchAsync",
-        "cudaMemcpyAsync",
         "cudaMemcpyBatchAsync",
-        "rmm"
-      ]
+        "rmm::detail::memcpy_async"
+      ],
+      "wallSeconds": 20.3,
+      "jobs": 10,
+      "tuSeconds": {
+        "sum": 159.0,
+        "median": 1.94,
+        "p95": 11.84,
+        "max": 19.2
+      }
+    }
+  },
+  "previous": {
+    "version": "0.2.0",
+    "alerts": {
+      "cuda-samples": 32,
+      "faiss": 42,
+      "rmm": 2
+    },
+    "alertsByCategory": {
+      "false-positive": 45,
+      "insufficient-evidence": 31
     }
   }
 }

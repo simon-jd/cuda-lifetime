@@ -15,7 +15,7 @@ nvcc `compile_commands.json` into Clang host-only commands, runs one analyzer
 process per translation unit and reports coverage gaps instead of hiding them.
 
 **Status: 0 confirmed defects.** On 477 host translation units of
-cuda-samples, faiss and RMM, version 0.3.0 reports 36 alerts, all warnings or
+cuda-samples, faiss and RMM, version 0.4.0 reports 36 alerts, all warnings or
 notes: 22 portability findings (code that is correct only because pageable
 copies are synchronous on current drivers), 3 informational notes and 11 false
 positives. On its hand-written labelled corpora it scores 10/0/0/10 (seed) and
@@ -107,20 +107,26 @@ configured), faiss 1.15.1's GPU module (190) and RMM 26.10 (54), at a budget of
 225,000 nodes and 180 s per TU. cuda-samples and faiss were translated with a
 header profile that puts a CCCL development snapshot ahead of CUDA 13.2's own
 CCCL headers ([docs/compatibility-profile.md](docs/compatibility-profile.md)); without
-it most faiss CUDA sources do not parse. Every alert of this version was
-triaged against the source. None of the previous version's 76 alerts was a
+it most faiss CUDA sources do not parse. Each of these alerts was triaged
+against the source. None of the previous version's 76 alerts was a
 confirmed defect either (45 false positives, 31 with insufficient evidence);
 23 of those were triaged against the source and 53 carry over the judgment of
 an earlier triage of the same sites, matched by fingerprint:
 
-| Project | TUs (parsed) | Alerts before | Alerts now | Portability | Informational | False positive |
+| Project | TUs (parsed) | Alerts, 0.2.0 | Alerts, 0.4.0 | Portability | Informational | False positive |
 |---|---:|---:|---:|---:|---:|---:|
 | cuda-samples 13.2 | 233 (223) | 32 | 7 | 3 | 3 | 1 |
 | faiss 1.15.1, GPU module | 190 (189) | 42 | 29 | 19 | 0 | 10 |
 | RMM 26.10 | 54 (54) | 2 | 0 | 0 | 0 | 0 |
 | Total | 477 | 76 | 36 | 22 | 3 | 11 |
 
-The alerts that went away came from five modeling gaps, each fixed by a rule
+Version 0.3.0 already reported these same 36 alerts. With ten analyzer
+processes the scan takes 97 s, 166 s and 20 s of wall time, and 385 of 837,
+232 of 720 and 60 of 233 top-level functions exhaust the node budget, so
+these projects are only partly explored ([docs/evaluation.md](docs/evaluation.md#real-projects);
+per-TU times in `results/real-projects/timings.csv`).
+
+The alerts that went away after 0.2.0 came from five modeling gaps, each fixed by a rule
 change: blocking `cudaMemcpy` was not modeled (13), events with no history on
 the path were treated as never recorded (16), calls CSA inlines or that only
 query pointer attributes were reported as opaque (12), captured graph work was
@@ -185,18 +191,15 @@ results above.
   buffer ranges with symbolic offsets count as overlapping.
 - Device-to-device races between streams are reported only for stream-ordered
   allocations and event captures, not for ordinary device buffers.
-- An asynchronous copy with `cudaMemcpyDefault` (direction inferred from
-  unified addressing) or an unknown kind creates no pending operation; it is
-  only counted in coverage as an unknown copy kind. Code that relies on UVA
-  copies is therefore not checked.
+- A `cudaMemcpyDefault` copy takes its direction from the memory kinds the
+  analyzer knows for its operands. An operand of unknown kind, such as a
+  pointer parameter of the analyzed function, is left out and recorded as a
+  coverage gap, so code that passes UVA pointers around is mostly unchecked.
 - RMM copies only through `rmm::detail::memcpy_async`, which calls
-  `cudaMemcpyAsync` with `cudaMemcpyDefault` or `cudaMemcpyBatchAsync`, and
-  `models/rmm.json` gives that wrapper no copy direction. Every RMM copy falls
-  under the previous point, so RMM's 0 alerts follow from the model, not from
-  verified code.
-- Unmodeled CUDA calls are recognized by name (`cuda` or `cu` followed by an
-  uppercase letter), so project functions such as cuda-samples'
-  `cudaGraphsManual` are counted as unmodeled CUDA calls.
+  `cudaMemcpyAsync` with `cudaMemcpyDefault` on its parameters, or
+  `cudaMemcpyBatchAsync`; `models/rmm.json` gives that wrapper no copy
+  direction. Every RMM copy is therefore unmodeled or a coverage gap, and
+  RMM's 0 alerts follow from that, not from verified code.
 - The labelled corpora were written from the same semantics document as the
   rules; they test conformance to it, not recall on code written by others.
 

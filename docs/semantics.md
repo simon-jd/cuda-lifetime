@@ -19,7 +19,7 @@ documented guarantee.
 | S9 | Legacy default stream orders known blocking streams | [Stream synchronization behavior](https://docs.nvidia.com/cuda/archive/13.2.2/cuda-runtime-api/stream-sync-behavior.html). Nonblocking streams are excluded. Per-thread default streams are not legacy default streams. Unknown handles must not be assumed distinct or blocking. |
 | S10 | Ordinary cudaFree / stream and event destruction | [Memory API](https://docs.nvidia.com/cuda/archive/13.2.2/cuda-runtime-api/group__CUDART__MEMORY.html), [stream API](https://docs.nvidia.com/cuda/archive/13.2.2/cuda-runtime-api/group__CUDART__STREAM.html), [event API](https://docs.nvidia.com/cuda/archive/13.2.2/cuda-runtime-api/group__CUDART__EVENT.html). Ordinary cudaFree permits implicit synchronization; it is not a definite lifetime violation. Destroy does not imply that queued work vanished. Never generate an error merely because these calls precede an explicit sync. |
 
-Two further modeled facts:
+Further modeled facts:
 
 - **Synchronous copies and memset** ([api-sync-behavior](https://docs.nvidia.com/cuda/archive/13.2.2/cuda-runtime-api/api-sync-behavior.html)).
   `cudaMemcpy`/`cudaMemcpy2D` run on the default stream; with host memory on
@@ -27,6 +27,11 @@ Two further modeled facts:
   the work of streams the legacy default stream waits for) is complete, or, for
   a pageable H2D source, once it is staged. Device-to-device copies do not
   synchronize. `cudaMemset` is asynchronous except on pinned host memory.
+- **Unified-address copies** ([cudaMemcpyAsync](https://docs.nvidia.com/cuda/archive/13.2.2/cuda-runtime-api/group__CUDART__MEMORY.html)).
+  With `cudaMemcpyDefault` the runtime infers the direction from the pointer
+  values. A destination known to be host memory is written by the copy (D2H or
+  H2H) and a host source is read (H2D or H2H), as with the explicit kinds; an
+  operand whose memory kind is unknown gives no direction and is a coverage gap.
 - **Stream capture** ([stream capture](https://docs.nvidia.com/cuda/archive/13.2.2/cuda-c-programming-guide/index.html#creating-a-graph-using-stream-capture)).
   Between `cudaStreamBeginCapture` and `cudaStreamEndCapture`, work queued on
   the capturing stream, or on a stream that joined the capture by waiting on an

@@ -166,5 +166,16 @@
   },
   "ignoredDiagnostics": 0,
   "outsideCorpusDiagnostics": 0,
-  "passed": true
+  "passed": true,
+  "coverageSummary": {
+    "parsed": 20,
+    "failed": 0,
+    "translationUnknown": 0,
+    "budgetExhausted": 0,
+    "unmodeledCudaCalls": 0,
+    "coverageUnknown": 0,
+    "diagnostics": 10,
+    "complete": true
+  },
+  "integrationFailures": []
 }
