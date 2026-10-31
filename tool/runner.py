@@ -4,7 +4,6 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import re
 import shlex
 import shutil
 import subprocess
@@ -17,7 +16,7 @@ RULES = {
     "CL3": "Stream-ordered allocation lifetime violation",
     "CL4": "Event capture does not cover the producer",
 }
-META = re.compile(r"\b(CL[1-4]) \[(error|warning|note); memory=([^;\]]+); semantic=([^\]]+)\]:?\s*")
+LEVELS = ("error", "warning", "note")
 VISIT_COUNTERS = ("modeledCallVisits", "pointerEscapes", "pendingMemberCallUses",
                   "pendingArgumentUses", "pendingPointerEscapes")
 
@@ -86,23 +85,23 @@ def enrich_sarif(document, default_stream, include_contract):
         rules = run.setdefault("tool", {}).setdefault("driver", {}).setdefault("rules", [])
         if not isinstance(rules, list):
             raise ValueError("native SARIF rules must be an array")
-        indices = {}
+        indices = {rule.get("id"): index for index, rule in enumerate(rules) if isinstance(rule, dict)}
         for rule, name in RULES.items():
-            indices[rule] = len(rules)
-            rules.append({"id": rule, "name": name, "shortDescription": {"text": name}})
+            if rule not in indices:
+                indices[rule] = len(rules)
+                rules.append({"id": rule, "name": name, "shortDescription": {"text": name}})
         kept = []
         for result in run.get("results", []):
-            message = result.get("message", {}).get("text", "")
-            match = META.search(message)
-            if match:
-                rule, level, memory, semantic = match.groups()
-                result["ruleId"] = rule
+            rule = result.get("ruleId")
+            if rule in RULES:
+                # The native consumer carries rule, level, memory kind and semantic ID as SARIF fields.
+                props = result.get("properties")
+                level = result.get("level")
+                if level not in LEVELS or not isinstance(props, dict) or not all(
+                        isinstance(props.get(key), str) and props[key] for key in ("memoryKind", "semanticId")):
+                    raise ValueError("native SARIF result lacks its level, memory kind or semantic ID")
                 result["ruleIndex"] = indices[rule]
-                result["level"] = level
-                props = result.setdefault("properties", {})
-                props.update(memoryKind=memory, defaultStream=default_stream,
-                             semanticId=semantic, assumptions=props.get("assumptions", []))
-                result["message"]["text"] = message[:match.start()] + message[match.end():]
+                props.update(defaultStream=default_stream, assumptions=props.get("assumptions", []))
                 if level == "warning" and not include_contract:
                     suppressed += 1
                     continue

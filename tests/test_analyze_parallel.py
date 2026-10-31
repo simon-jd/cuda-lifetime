@@ -48,10 +48,11 @@ source = entry['file']
 physical = {'artifactLocation': {'uri': source, 'index': 1}, 'region': {'startLine': int(case) + 1}}
 runs = []
 for part in range(int(value('RUNS', '1'))):
-    runs.append({'tool': {'driver': {'name': 'parallel-protocol-fixture-not-csa', 'rules': [{'id': 'cuda.AsyncLifetime'}]}},
+    runs.append({'tool': {'driver': {'name': 'parallel-protocol-fixture-not-csa', 'rules': [{'id': 'CL1'}]}},
         'artifacts': [{'location': {'uri': source + '.header', 'index': 0}}, {'location': {'uri': source, 'index': 1}}],
-        'results': [{'ruleId': 'cuda.AsyncLifetime', 'ruleIndex': 0,
-            'message': {'text': 'CL1 [' + value('LEVEL', 'error') + '; memory=pinned; semantic=S1]: fixture ' + case + ':' + str(part)},
+        'results': [{'ruleId': 'CL1', 'ruleIndex': 0, 'level': value('LEVEL', 'error'),
+            'properties': {'memoryKind': 'pinned', 'semanticId': 'S1'},
+            'message': {'text': 'fixture ' + case + ':' + str(part)},
             'locations': [{'physicalLocation': physical}],
             'codeFlows': [{'threadFlows': [{'locations': [{'location': {'physicalLocation': physical,
                 'message': {'text': 'fixture enqueue ' + case + ':' + str(part)}}}]}]}]}]})

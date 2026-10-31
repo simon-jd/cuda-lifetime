@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <optional>
 #include <set>
+#include <utility>
+#include <vector>
 
 using namespace clang;
 using namespace clang::ento;
@@ -41,6 +43,22 @@ bool restoreArtifactOrder(llvm::json::Object &document) {
     });
   }
   return true;
+}
+// SarifResult has no property bag; attach each report's memory kind and
+// semantic ID to the serialized result, which keeps the append order.
+void addReportProperties(llvm::json::Object &document, const std::vector<const cudalifetime::ReportKind *> &kinds) {
+  auto *runs = document.getArray("runs");
+  auto *run = runs && !runs->empty() ? runs->front().getAsObject() : nullptr;
+  auto *results = run ? run->getArray("results") : nullptr;
+  if (!results || results->size() != kinds.size()) {
+    if (!kinds.empty())
+      cudalifetime::info().coverageUnknown.insert("SARIF results do not correspond one to one with CSA reports");
+    return;
+  }
+  for (size_t i = 0; i < kinds.size(); ++i)
+    if (kinds[i])
+      if (auto *result = (*results)[i].getAsObject())
+        (*result)["properties"] = llvm::json::Object{{"memoryKind", kinds[i]->memory}, {"semanticId", kinds[i]->semantic}};
 }
 // LLVM 23's stock SARIF consumer looks up descriptions in the built-in
 // Checkers.inc table and llvm_unreachable()s for externally registered checkers.
@@ -103,15 +121,28 @@ public:
     const std::string toolVersion = std::string(CUDA_LIFETIME_PRODUCT_VERSION) + " (" + getClangFullVersion() + ")";
     writer.createRun("cuda-lifetime-native", "Clang Static Analyzer: CUDA asynchronous lifetime",
                      toolVersion);
+    // The four rules come first, in order, so their indices are stable.
     llvm::StringMap<uint32_t> rules;
+    for (const auto &[id, name] : {std::pair{"CL1", "Host access before asynchronous copy completes"},
+                                   std::pair{"CL2", "Host buffer lifetime ends before asynchronous copy completes"},
+                                   std::pair{"CL3", "Stream-ordered allocation lifetime violation"},
+                                   std::pair{"CL4", "Event capture does not cover the producer"}})
+      rules[id] = writer.createRule(SarifRule::create().setRuleId(id).setName(name).setDescription(name));
+    // Per result, in append order: the checker's report kind, if it has one.
+    std::vector<const cudalifetime::ReportKind *> kinds;
     for (const auto *diagnostic : diagnostics) {
-      llvm::StringRef checker = diagnostic->getCheckerName();
-      auto [entry, inserted] = rules.try_emplace(checker, 0);
+      const auto known = cudalifetime::info().reports.find(diagnostic->getCategory().str());
+      const cudalifetime::ReportKind *kind = known == cudalifetime::info().reports.end() ? nullptr : &known->second;
+      llvm::StringRef ruleId = kind ? llvm::StringRef(kind->rule) : diagnostic->getCheckerName();
+      auto [entry, inserted] = rules.try_emplace(ruleId, 0);
       if (inserted) {
-        auto rule = SarifRule::create().setRuleId(checker).setName(checker)
-            .setDescription("CUDA asynchronous host and stream-ordered allocation lifetime");
+        auto rule = SarifRule::create().setRuleId(ruleId).setName(ruleId)
+            .setDescription("Diagnostic from another Clang Static Analyzer checker");
         entry->second = writer.createRule(rule);
       }
+      const auto level = !kind ? SarifResultLevel::Warning
+          : kind->level == "error" ? SarifResultLevel::Error
+          : kind->level == "note" ? SarifResultLevel::Note : SarifResultLevel::Warning;
       llvm::SmallVector<ThreadFlow, 8> flows;
       for (const auto &piece : diagnostic->path.flatten(false)) {
         auto range = characterRange(piece->getLocation());
@@ -121,16 +152,18 @@ public:
         flows.push_back(ThreadFlow::create().setRange(*range)
             .setImportance(importance).setMessage(piece->getString()));
       }
-      auto result = SarifResult::create(entry->second).setRuleId(checker)
+      auto result = SarifResult::create(entry->second).setRuleId(ruleId)
           .setDiagnosticMessage(diagnostic->getVerboseDescription())
-          .setDiagnosticLevel(SarifResultLevel::Warning)
+          .setDiagnosticLevel(level)
           .addPartialFingerprint("clang/issueHash/v1", diagnostic->getIssueHash(
               compiler.getSourceManager(), compiler.getLangOpts()))
           .setThreadFlows(flows);
       if (auto range = characterRange(diagnostic->getLocation())) result = result.addLocations({*range});
       writer.appendResult(result);
+      kinds.push_back(kind);
     }
     auto document = writer.createDocument();
+    addReportProperties(document, kinds);
     if (!restoreArtifactOrder(document)) {
       cudalifetime::info().coverageUnknown.insert("SARIF writer artifact indices are not a complete unique permutation");
       auto &engine = compiler.getDiagnostics();

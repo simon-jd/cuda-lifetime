@@ -11,7 +11,7 @@ from urllib.parse import unquote, urlparse
 
 def check_allocation_provenance(diagnostics):
     for diagnostic in diagnostics:
-        if 'semantic=S5' not in diagnostic['message']['text']:
+        if diagnostic['properties']['semanticId'] != 'S5':
             continue
         for flow in diagnostic['codeFlows'][0]['threadFlows']:
             locations = [item['location'] for item in flow['locations']]
@@ -33,7 +33,7 @@ with tempfile.TemporaryDirectory() as temp:
     assert run.returncode == 0, run.stdout + run.stderr
     data = json.loads(sarif.read_text())
     results = [r for run in data['runs'] for r in run['results']]
-    actual = {(r['message']['text'].split()[0], r['locations'][0]['physicalLocation']['region']['startLine']) for r in results}
+    actual = {(r['ruleId'], r['locations'][0]['physicalLocation']['region']['startLine']) for r in results}
     expected = {(line.split('// ')[1].strip(), number) for number, line in enumerate((root / 'cases.cpp').read_text().splitlines(), 1) if '// CL' in line}
     assert actual == expected, (actual, expected, run.stderr)
     assert all(r.get('codeFlows') for r in results), 'CSA path diagnostics missing'
@@ -52,7 +52,7 @@ with tempfile.TemporaryDirectory() as temp:
         diagnostics = [r for run in json.loads(sarif.read_text())['runs'] for r in run['results']]
         actual_lines = {r['locations'][0]['physicalLocation']['region']['startLine'] for r in diagnostics}
         assert actual_lines == kernel_expected and len(diagnostics) == len(kernel_expected), (mode, diagnostics)
-        assert all('CL3 [error;' in r['message']['text'] for r in diagnostics), diagnostics
+        assert all(r['ruleId'] == 'CL3' and r['level'] == 'error' for r in diagnostics), diagnostics
         check_allocation_provenance(diagnostics)
         cov = json.loads(coverage.read_text())
         assert cov['kernelLaunches'] == 7 and not cov['unmodeledCudaCalls'], cov
@@ -67,9 +67,8 @@ with tempfile.TemporaryDirectory() as temp:
         mixed = subprocess.run([sys.argv[1], str(mixed_source), '--sarif', str(sarif), '--coverage', str(coverage), '--', *flags], text=True, capture_output=True)
         assert mixed.returncode == 0, mixed.stderr
         diagnostics = [r for run in json.loads(sarif.read_text())['runs'] for r in run['results']]
-        mixed_actual = {(match.group(1), match.group(2), r['locations'][0]['physicalLocation']['region']['startLine'])
-                        for r in diagnostics
-                        if (match := re.match(r'(CL[1-4]) \[(error|warning|note);', r['message']['text']))}
+        mixed_actual = {(r['ruleId'], r['level'], r['locations'][0]['physicalLocation']['region']['startLine'])
+                        for r in diagnostics}
         assert mixed_actual == mixed_expected and len(diagnostics) == len(mixed_expected), (mode, mixed_actual, mixed_expected, mixed.stderr)
         cov = json.loads(coverage.read_text())
         assert cov['defaultStreamMode'] == mode and not cov['unmodeledCudaCalls'] and not cov['budgetExhausted'], cov
@@ -90,8 +89,10 @@ with tempfile.TemporaryDirectory() as temp:
         run = subprocess.run([sys.argv[1], str(source), '--sarif', str(sarif), '--coverage', str(coverage), '--include-contract', '--', '-std=c++17', *flags], text=True, capture_output=True)
         assert run.returncode == 0, run.stderr
         diagnostics = [r for run in json.loads(sarif.read_text())['runs'] for r in run['results']]
-        actual = {(match.group(1), match.group(2), r['locations'][0]['physicalLocation']['region']['startLine'])
-                  for r in diagnostics if (match := re.match(r'(CL[1-4]) \[(error|warning|note);', r['message']['text']))}
+        actual = {(r['ruleId'], r['level'], r['locations'][0]['physicalLocation']['region']['startLine'])
+                  for r in diagnostics}
+        assert all(r['properties']['memoryKind'] and r['properties']['semanticId'] for r in diagnostics), diagnostics
+        assert not any(text in r['message']['text'] for r in diagnostics for text in ('CL1', 'CL2', 'CL3', 'CL4', '[')), diagnostics
         assert actual == expected and len(diagnostics) == len(expected), (fixture, flags, actual, expected, run.stderr)
         assert all(r.get('codeFlows') for r in diagnostics), (fixture, 'CSA path diagnostics missing')
         cov = json.loads(coverage.read_text())

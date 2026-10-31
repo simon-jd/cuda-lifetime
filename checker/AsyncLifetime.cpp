@@ -132,7 +132,9 @@ public:
 class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eval::Call,
     check::Location, check::Bind, check::PostStmt<CUDAKernelCallExpr>, check::EndFunction,
     check::PointerEscape, check::EndAnalysis, check::LiveSymbols, check::BeginFunction> {
-  mutable std::unique_ptr<BugType> bugs[4];
+  // One bug type per (rule, level, memory kind, semantic ID), so reports that
+  // differ only in those stay distinct, as CSA deduplicates by bug type.
+  mutable std::map<std::string, std::unique_ptr<BugType>> bugTypes;
   static const MemRegion *base(SVal v) {
     auto *r = v.getAsRegion();
     return r ? r->StripCasts() : nullptr;
@@ -288,13 +290,19 @@ class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eva
               const std::string &description, Memory mem, const char *semantic,
               const Pending *op = nullptr, bool contract = false, bool informational = false,
               const Allocation *allocation = nullptr, const MemRegion *allocationKey = nullptr) const {
-    if (!bugs[rule - 1]) bugs[rule - 1] = std::make_unique<BugType>(this, "CL" + std::to_string(rule), "CUDA asynchronous lifetime");
     auto *node = c.generateNonFatalErrorNode(s);
     if (!node) return;
     const char *names[] = {"unknown", "pinned", "pageable", "device", "stream-ordered"};
-    bool certain = !contract && (mem == Pinned || mem == Ordered);
-    std::string message = "CL" + std::to_string(rule) + " [" + (informational ? "note" : certain ? "error" : "warning") + "; memory=" + names[mem] + "; semantic=" + semantic + "]: " + description;
-    auto r = std::make_unique<PathSensitiveBugReport>(*bugs[rule - 1], message, node);
+    const bool certain = !contract && (mem == Pinned || mem == Ordered);
+    const cudalifetime::ReportKind kind{"CL" + std::to_string(rule), informational ? "note" : certain ? "error" : "warning",
+                                        names[mem], semantic};
+    const std::string key = kind.rule + "/" + kind.level + "/" + kind.memory + "/" + kind.semantic;
+    auto &type = bugTypes[key];
+    if (!type) {
+      type = std::make_unique<BugType>(this, kind.rule, key);
+      cudalifetime::info().reports[key] = kind;
+    }
+    auto r = std::make_unique<PathSensitiveBugReport>(*type, description, node);
     if (op) {
       r->markInteresting(op->region);
       r->addVisitor(std::make_unique<PendingVisitor>(*op));

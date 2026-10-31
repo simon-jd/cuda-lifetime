@@ -11,8 +11,14 @@ struct Model {
   std::map<std::string, unsigned> args;
   bool assumption = false;
 };
+// What a report is, carried from the checker to the SARIF consumer as data:
+// the consumer looks a diagnostic's bug category up in AnalysisInfo::reports.
+struct ReportKind {
+  std::string rule, level, memory, semantic;
+};
 struct AnalysisInfo {
   std::map<std::string, Model> models;
+  std::map<std::string, ReportKind> reports;
   std::map<std::string, unsigned> unmodeled;
   std::vector<std::string> budgetExhausted;
   std::set<std::string> assumedModels;

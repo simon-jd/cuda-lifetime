@@ -22,10 +22,11 @@ from tool.runner import analyze, enrich_sarif, validate_native_coverage
 def native_fixture_sarif(source="case.cpp", level="error"):
     physical = {"artifactLocation": {"uri": source, "index": 0}, "region": {"startLine": 7}}
     return {"version": "2.1.0", "runs": [{
-        "tool": {"driver": {"name": "protocol-fixture-not-csa", "rules": [{"id": "cuda.AsyncLifetime"}]}},
+        "tool": {"driver": {"name": "protocol-fixture-not-csa", "rules": [{"id": "CL1"}]}},
         "artifacts": [{"location": {"uri": source}}],
-        "results": [{"ruleId": "cuda.AsyncLifetime", "ruleIndex": 0, "level": "warning",
-            "message": {"text": f"CL1 [{level}; memory=pinned; semantic=S1]: pending copy"},
+        "results": [{"ruleId": "CL1", "ruleIndex": 0, "level": level,
+            "properties": {"memoryKind": "pinned", "semanticId": "S1"},
+            "message": {"text": "pending copy"},
             "locations": [{"physicalLocation": physical}],
             "codeFlows": [{"threadFlows": [{"locations": [{
                 "location": {"physicalLocation": physical, "message": {"text": "copy enqueued"}}}]}]}]}]}]}
@@ -283,6 +284,19 @@ class SarifEnrichmentTests(unittest.TestCase):
         runs, suppressed = enrich_sarif(artifact, "per-thread", True)
         self.assertEqual(suppressed, 0)
         self.assertEqual(runs[0]["results"][0]["properties"]["defaultStream"], "per-thread")
+
+    def test_rule_metadata_comes_from_sarif_fields_not_message_text(self):
+        artifact = native_fixture_sarif()
+        artifact["runs"][0]["results"][0]["message"]["text"] = "CL2 [note; memory=device; semantic=S9]: text only"
+        runs, _ = enrich_sarif(artifact, "legacy", True)
+        result = runs[0]["results"][0]
+        self.assertEqual((result["ruleId"], result["level"], result["properties"]["semanticId"]), ("CL1", "error", "S1"))
+        self.assertEqual(result["message"]["text"], "CL2 [note; memory=device; semantic=S9]: text only")
+        for field in ("level", "properties"):
+            incomplete = native_fixture_sarif()
+            del incomplete["runs"][0]["results"][0][field]
+            with self.subTest(missing=field), self.assertRaises(ValueError):
+                enrich_sarif(incomplete, "legacy", True)
 
     def test_rule_index_remains_consistent_and_artifact_indices_unchanged(self):
         runs, _ = enrich_sarif(native_fixture_sarif(), "legacy", True)
