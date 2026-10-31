@@ -1,3 +1,5 @@
+// RUN: %native %s --sarif %t.sarif --coverage %t.json --include-contract -- -std=c++17
+// RUN: %verify %s %t.sarif %t.json
 #include "cuda_runtime_api.h"
 int indirect_call_is_not_sync(void (*hook)(), cudaStream_t stream, void *device) {
   int *host;

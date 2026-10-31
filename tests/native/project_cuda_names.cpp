@@ -1,3 +1,5 @@
+// RUN: %native %s --sarif %t.sarif --coverage %t.json --include-contract -- -std=c++17
+// RUN: %verify %s %t.sarif %t.json --unmodeled cudaGraphCreate
 #include "cuda_runtime_api.h"
 // Project functions whose names start like CUDA API calls are not CUDA calls,
 // whether or not CSA inlines them; only the stub-declared cudaGraphCreate is an

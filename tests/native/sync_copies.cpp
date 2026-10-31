@@ -1,3 +1,5 @@
+// RUN: %native %s --sarif %t.sarif --coverage %t.json --include-contract -- -std=c++17
+// RUN: %verify %s %t.sarif %t.json
 #include "cuda_runtime_api.h"
 // Synchronous cudaMemcpy and cudaMemset (legacy default stream).
 void blocking_d2h_completes_default_stream(void *device) {

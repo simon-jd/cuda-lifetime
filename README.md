@@ -173,7 +173,7 @@ LLVM/Clang 23.1.3 development libraries, CUDA 13.2, CMake and Ninja, Python 3.12
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
   -DLLVM_DIR=/path/to/llvm/lib/cmake/llvm -DClang_DIR=/path/to/llvm/lib/cmake/clang
 cmake --build build
-ctest --test-dir build --output-on-failure            # native fixtures and seed corpus
+ctest --test-dir build --output-on-failure            # lit fixtures, native checks, seed corpus
 python3 -m unittest discover -s tests -p 'test_*.py'  # driver, translator, evaluator
 
 ./cuda-lifetime translate --compdb /project/build --out /project/build-clang \

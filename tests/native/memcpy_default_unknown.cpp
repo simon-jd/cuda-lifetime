@@ -1,3 +1,5 @@
+// RUN: %native %s --sarif %t.sarif --coverage %t.json --include-contract -- -std=c++17
+// RUN: %verify %s %t.sarif %t.json --coverage-gap cudaMemcpyDefault
 #include "cuda_runtime_api.h"
 // Neither operand's memory kind is known, so no direction can be modeled: no
 // diagnostic, and coverage records the gap instead of treating the copy as safe.

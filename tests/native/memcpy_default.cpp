@@ -1,3 +1,5 @@
+// RUN: %native %s --sarif %t.sarif --coverage %t.json --include-contract -- -std=c++17
+// RUN: %verify %s %t.sarif %t.json --no-coverage-gaps --functions 5
 #include "cuda_runtime_api.h"
 // cudaMemcpyDefault (kind 4) takes its direction from the operands' memory kinds.
 int default_d2h_pinned(cudaStream_t stream) {

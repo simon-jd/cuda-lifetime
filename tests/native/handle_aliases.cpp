@@ -1,3 +1,5 @@
+// RUN: %native %s --sarif %t.sarif --coverage %t.json --include-contract -- -std=c++17
+// RUN: %verify %s %t.sarif %t.json
 #include "cuda_runtime_api.h"
 int stream_alias_sync(cudaStream_t stream, cudaStream_t alias, void *device) {
   if (stream != alias) return 0;

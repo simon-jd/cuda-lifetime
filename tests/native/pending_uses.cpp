@@ -1,3 +1,5 @@
+// RUN: %native %s --sarif %t.sarif --coverage %t.json --include-contract -- -std=c++17
+// RUN: %verify %s %t.sarif %t.json
 #include "cuda_runtime_api.h"
 struct Buffer { int value; void opaque_member(); };
 extern void opaque_argument(void *);

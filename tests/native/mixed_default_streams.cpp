@@ -1,3 +1,7 @@
+// RUN: %native %s --sarif %t.sarif --coverage %t.json --include-contract -- -std=c++17
+// RUN: %verify %s %t.sarif %t.json --default-stream legacy
+// RUN: %native %s --sarif %t.pt.sarif --coverage %t.pt.json --include-contract -- -std=c++17 -DCUDA_API_PER_THREAD_DEFAULT_STREAM=1
+// RUN: %verify %s %t.pt.sarif %t.pt.json --default-stream per-thread
 #include "cuda_runtime_api.h"
 #define LEGACY ((cudaStream_t)1)
 #define PER_THREAD ((cudaStream_t)2)

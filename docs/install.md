@@ -25,6 +25,13 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 ctest --test-dir build --output-on-failure
 ```
 
+CTest runs the annotated checker fixtures in `tests/native` as lit tests
+when it finds `llvm-lit` (an LLVM build tree has it in `bin/`; otherwise set
+`-DLLVM_LIT=` to an installed `lit`). Each fixture's `RUN:` lines analyze it
+and check the SARIF against its `// CLn level` comments with
+`tests/native/verify.py`; one fixture can be run alone with
+`llvm-lit -v tests/native/copy_ranges.cpp --param native=build/cuda-lifetime-native`.
+
 The Python package uses the standard library. It can be run directly with
 `./cuda-lifetime` or `python3 -m tool.cli`. An installed native executable is
 selected with `--native /absolute/path/to/cuda-lifetime-native`; otherwise the

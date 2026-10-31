@@ -1,3 +1,5 @@
+// RUN: %native %s --sarif %t.sarif --coverage %t.json --include-contract -- -std=c++17
+// RUN: %verify %s %t.sarif %t.json
 #include "cuda_runtime_api.h"
 int equal_host_alias(int *host, int *alias, void *device, cudaStream_t stream) {
   if (host != alias) return 0;

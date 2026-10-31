@@ -1,3 +1,5 @@
+// RUN: %native %s --sarif %t.sarif --coverage %t.json --include-contract -- -std=c++17
+// RUN: %verify %s %t.sarif %t.json
 #include "cuda_runtime_api.h"
 // Work enqueued during stream capture is recorded into a graph, not run.
 void captured_copy_has_not_run(void *device, cudaStream_t stream) {

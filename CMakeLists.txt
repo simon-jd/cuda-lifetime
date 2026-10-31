@@ -39,4 +39,13 @@ if(BUILD_TESTING AND Python3_Interpreter_FOUND)
   add_test(NAME native-regression COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/native/run.py $<TARGET_FILE:cuda-lifetime-native>)
   add_test(NAME native-prescan COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/native/prescan.py $<TARGET_FILE:cuda-lifetime-native>)
   add_test(NAME native-models COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/native/models.py $<TARGET_FILE:cuda-lifetime-native>)
+  # The annotated fixtures in tests/native are lit tests; llvm-lit comes with an
+  # LLVM build tree, or set LLVM_LIT to a lit installed some other way.
+  find_program(LLVM_LIT NAMES llvm-lit lit HINTS ${LLVM_TOOLS_BINARY_DIR})
+  if(LLVM_LIT)
+    add_test(NAME native-lit COMMAND ${Python3_EXECUTABLE} ${LLVM_LIT} -sv ${CMAKE_CURRENT_SOURCE_DIR}/tests/native
+             --param native=$<TARGET_FILE:cuda-lifetime-native> --param exec_root=${CMAKE_CURRENT_BINARY_DIR}/lit-tests)
+  else()
+    message(WARNING "llvm-lit not found: the annotated fixture tests (native-lit) are not registered")
+  endif()
 endif()
