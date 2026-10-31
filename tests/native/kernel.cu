@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 struct dim3 { unsigned x, y, z; constexpr dim3(unsigned x=1, unsigned y=1, unsigned z=1):x(x),y(y),z(z){} };
 extern int __cudaPushCallConfiguration(dim3, dim3, unsigned long=0, cudaStream_t=0);
 __attribute__((global)) void use(int *);

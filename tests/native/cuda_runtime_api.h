@@ -26,3 +26,4 @@ extern int cudaMemset(void *, int, unsigned long);
 extern int cudaMemsetAsync(void *, int, unsigned long, cudaStream_t);
 extern int cudaStreamBeginCapture(cudaStream_t, int);
 extern int cudaStreamEndCapture(cudaStream_t, cudaGraph_t *);
+extern int cudaGraphCreate(cudaGraph_t *, unsigned);

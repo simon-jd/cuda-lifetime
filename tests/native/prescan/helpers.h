@@ -1,4 +1,4 @@
-#include "../runtime.h"
+#include "../cuda_runtime_api.h"
 inline int header_copy(void *device, cudaStream_t stream) {
   int *host;
   cudaMallocHost((void **)&host, 4);

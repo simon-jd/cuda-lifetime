@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 #ifndef CUDA_API_PER_THREAD_DEFAULT_STREAM
 #define EXPLICIT_DEFAULT ((cudaStream_t)1)
 #else

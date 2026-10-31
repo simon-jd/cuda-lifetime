@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 void default_and_nonblocking_are_distinct(void *source) {
   cudaStream_t stream;
   cudaStreamCreateWithFlags(&stream, 1);

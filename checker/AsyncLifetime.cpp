@@ -16,6 +16,7 @@
 #include "clang/StaticAnalyzer/Frontend/CheckerRegistry.h"
 #include "llvm/ADT/ImmutableSet.h"
 #include "llvm/ADT/SmallPtrSet.h"
+#include "llvm/Support/Path.h"
 #include <algorithm>
 #include <cstdint>
 #include <tuple>
@@ -638,9 +639,7 @@ void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, P
   if (m.args.count("stream") && stream == 0) ++cudalifetime::info().unmodeled[n + ":unknown-stream"];
   auto *r = base(arg(call, m, "ptr"));
   if (e.empty()) {
-    const bool runtimeName = n.size() > 4 && n.rfind("cuda", 0) == 0 && n[4] >= 'A' && n[4] <= 'Z';
-    const bool driverName = n.size() > 2 && n.rfind("cu", 0) == 0 && n[2] >= 'A' && n[2] <= 'Z';
-    if ((runtimeName || driverName) && !isa_and_nonnull<CXXMethodDecl>(call.getDecl())) ++cudalifetime::info().unmodeled[n];
+    if (cudalifetime::isCudaApi(dyn_cast_or_null<FunctionDecl>(call.getDecl()))) ++cudalifetime::info().unmodeled[n];
     // A lifetime ends here whether or not the callee is inlined. Other calls are
     // checked at PostCall, once it is known whether CSA inlined them.
     if (!endsLifetime(call, n)) {
@@ -970,6 +969,23 @@ void AsyncLifetimeChecker::checkEndFunction(const ReturnStmt *, CheckerContext &
         report(c, s, 2, "Stack buffer lifetime ends while asynchronous work may still access it", op.memory, "S4", &op);
   }
 }
+}
+bool cudalifetime::isCudaApi(const FunctionDecl *decl) {
+  if (!decl || isa<CXXMethodDecl>(decl) || !decl->getIdentifier() || !decl->getName().starts_with("cu")) return false;
+  static const std::set<std::string> headers = {
+    "cuda.h", "cuda_runtime.h", "cuda_runtime_api.h", "cuda_device_runtime_api.h", "cudaProfiler.h",
+    "cuda_profiler_api.h", "cudaGL.h", "cuda_gl_interop.h", "cudaEGL.h", "cuda_egl_interop.h", "cudaVDPAU.h",
+    "cuda_vdpau_interop.h", "cudaD3D9.h", "cudaD3D10.h", "cudaD3D11.h", "cuda_d3d9_interop.h",
+    "cuda_d3d10_interop.h", "cuda_d3d11_interop.h"};
+  const SourceManager &sources = decl->getASTContext().getSourceManager();
+  for (const FunctionDecl *redecl : decl->redecls()) {
+    const FunctionDecl *pattern = redecl->getTemplateInstantiationPattern();
+    const SourceLocation location = sources.getFileLoc((pattern ? pattern : redecl)->getLocation());
+    if (location.isInvalid()) continue;
+    if (auto file = sources.getFileEntryRefForID(sources.getFileID(location)))
+      if (headers.count(llvm::sys::path::filename(file->getName()).str())) return true;
+  }
+  return false;
 }
 void cudalifetime::registerChecker(CheckerRegistry &registry) {
   registry.addChecker<AsyncLifetimeChecker>("cuda.AsyncLifetime", "Checks CUDA host and stream-ordered asynchronous buffer lifetimes", "");

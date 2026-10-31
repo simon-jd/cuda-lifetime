@@ -119,4 +119,10 @@ with tempfile.TemporaryDirectory() as temp:
                 for location in locations:
                     reference = location['physicalLocation']['artifactLocation']
                     assert artifacts[reference['index']]['location']['uri'] == reference['uri'], reference
+    names = subprocess.run([sys.argv[1], str(root / 'project_cuda_names.cpp'), '--sarif', str(sarif), '--coverage', str(coverage), '--', '-std=c++17'], text=True, capture_output=True)
+    assert names.returncode == 0, names.stderr
+    assert not [r for run in json.loads(sarif.read_text())['runs'] for r in run['results']]
+    cov = json.loads(coverage.read_text())
+    assert set(cov['unmodeledCudaCalls']) == {'cudaGraphCreate'}, cov['unmodeledCudaCalls']
+    assert not cov['astScan']['skippedNoCudaCalls'], cov
 print('Native CL1–CL4 pairs, CUDA kernels, CSA paths, flags, and budget coverage passed')

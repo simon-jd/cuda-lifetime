@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 extern void current_state();
 // A failed synchronization cannot establish host completion.
 int failed_sync_branch(cudaStream_t s, void *device) {

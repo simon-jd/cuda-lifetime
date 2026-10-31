@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 int stream_alias_sync(cudaStream_t stream, cudaStream_t alias, void *device) {
   if (stream != alias) return 0;
   int *host;

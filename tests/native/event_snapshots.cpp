@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 int wait_snapshot_survives_rerecord(void *device) {
   cudaStream_t a, b;
   cudaStreamCreateWithFlags(&a, 1);

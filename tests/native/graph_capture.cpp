@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 // Work enqueued during stream capture is recorded into a graph, not run.
 void captured_copy_has_not_run(void *device, cudaStream_t stream) {
   void *host;

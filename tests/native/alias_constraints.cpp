@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 int equal_host_alias(int *host, int *alias, void *device, cudaStream_t stream) {
   if (host != alias) return 0;
   cudaHostRegister(host, sizeof(int), 0);

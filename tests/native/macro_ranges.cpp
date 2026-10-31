@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 #define READ_HOST(pointer) (*static_cast<int *>(pointer))
 #define COPY_TO_HOST(host, device, stream) cudaMemcpyAsync(host, device, 4, 2, stream)
 int macro_read(void *device, cudaStream_t stream) {

@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 #include <cstdlib>
 #include <error.h>
 

@@ -45,12 +45,8 @@ public:
   bool found = false;
   void inspect(const FunctionDecl *decl) {
     if (!decl) return;
-    std::string name = decl->getNameAsString();
     std::string qualified = decl->getQualifiedNameAsString();
-    const bool freeFunction = !isa<CXXMethodDecl>(decl);
-    const bool runtime = freeFunction && name.size() > 4 && name.compare(0, 4, "cuda") == 0 && name[4] >= 'A' && name[4] <= 'Z';
-    const bool driver = freeFunction && name.size() > 2 && name.compare(0, 2, "cu") == 0 && name[2] >= 'A' && name[2] <= 'Z';
-    if (runtime || driver || cudalifetime::info().models.count(qualified)) { found = true; return; }
+    if (cudalifetime::isCudaApi(decl) || cudalifetime::info().models.count(qualified)) { found = true; return; }
     if (!visited.insert(decl->getCanonicalDecl()).second) return;
     if (const auto *dtor = dyn_cast<CXXDestructorDecl>(decl)) {
       if (const auto *record = dtor->getParent()->getDefinition()) {

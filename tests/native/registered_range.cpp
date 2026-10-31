@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 int registered_span(cudaStream_t stream, void *device) {
   int buffer[4];
   cudaHostRegister(buffer + 1, 2 * sizeof(int), 0);

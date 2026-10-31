@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 // Events whose history the path does not show, and waits already ordered.
 void event_from_caller(cudaStream_t stream, cudaEvent_t event) {
   cudaStreamWaitEvent(stream, event, 0);

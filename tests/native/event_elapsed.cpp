@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 int elapsed_success(void *device, cudaStream_t stream) {
   void *host;
   cudaMallocHost(&host, 4);

@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 struct Buffer { int value; void opaque_member(); };
 extern void opaque_argument(void *);
 void *escaped;

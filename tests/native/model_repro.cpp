@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 extern void project_wrapper();
 int wrapper_without_assumption(cudaStream_t stream, void *device) {
   int *host;

@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 int offset_copy(cudaStream_t stream, void *device) {
   int *host;
   cudaMallocHost((void **)&host, 16);

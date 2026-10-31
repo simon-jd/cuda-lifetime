@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 void ordinary_free_relies_on_implicit_sync(void *source, cudaStream_t stream) {
   int *device;
   cudaMalloc((void **)&device, 4);

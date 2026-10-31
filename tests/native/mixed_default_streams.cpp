@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 #define LEGACY ((cudaStream_t)1)
 #define PER_THREAD ((cudaStream_t)2)
 #ifdef CUDA_API_PER_THREAD_DEFAULT_STREAM

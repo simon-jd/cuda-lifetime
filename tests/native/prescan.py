@@ -28,6 +28,7 @@ EXPECTED = {
     "header_global_destructor": (False, None),
     "host_template_static": (True, 0),
     "cuda_named_constructor": (True, 0),
+    "project_cuda_names_only": (True, 0),
 }
 MODELED = {"constructor_initializer", "member_destructor", "base_destructor", "local_destructor"}
 

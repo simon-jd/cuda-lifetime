@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 // Synchronous cudaMemcpy and cudaMemset (legacy default stream).
 void blocking_d2h_completes_default_stream(void *device) {
   void *allocated;

@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cuda_runtime_api.h"
 // Calls CSA cannot see into, and calls it inlines.
 extern void reads(const void *);
 extern void writes(void *);

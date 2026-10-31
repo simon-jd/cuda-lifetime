@@ -4,7 +4,7 @@
 #include <set>
 #include <string>
 #include <vector>
-namespace clang { namespace ento { class CheckerRegistry; } }
+namespace clang { class FunctionDecl; namespace ento { class CheckerRegistry; } }
 namespace cudalifetime {
 struct Model {
   std::string function, effect;
@@ -23,6 +23,10 @@ struct AnalysisInfo {
 };
 AnalysisInfo &info();
 bool loadModels(const std::string &directory, std::string &error);
+// A CUDA Runtime or Driver API function: a free function named cu... declared
+// in one of the toolkit's API headers (by file name, so a stub header with the
+// same name also qualifies). Project functions that merely share the prefix are not.
+bool isCudaApi(const clang::FunctionDecl *decl);
 void registerChecker(clang::ento::CheckerRegistry &registry);
 }
 #endif
