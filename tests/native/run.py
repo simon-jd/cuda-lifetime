@@ -79,7 +79,8 @@ with tempfile.TemporaryDirectory() as temp:
         'event_elapsed.cpp', 'pending_uses.cpp', 'macro_ranges.cpp', 'artifact_order_z.cpp', 'checked_return_helpers.cpp',
         'opaque_calls.cpp', 'sync_copies.cpp', 'graph_capture.cpp', 'event_history.cpp', 'semantic_repros.cpp',
         'alias_constraints.cpp', 'copy_ranges.cpp', 'registered_range.cpp', 'handle_aliases.cpp', 'event_snapshots.cpp',
-        'ordinary_free_note.cpp', 'default_stream_distinct.cpp', 'default_stream_handles.cpp', 'empty_model_alias.cpp')]
+        'ordinary_free_note.cpp', 'default_stream_distinct.cpp', 'default_stream_handles.cpp', 'empty_model_alias.cpp',
+        'memcpy_default.cpp')]
     fixtures.append(('default_stream_handles.cpp', ['-DCUDA_API_PER_THREAD_DEFAULT_STREAM=1']))
     for fixture, flags in fixtures:
         source = root / fixture
@@ -98,6 +99,8 @@ with tempfile.TemporaryDirectory() as temp:
         cov = json.loads(coverage.read_text())
         assert cov['tus']['parsed'] == 1 and not cov['tus']['failed'], (fixture, cov)
         assert not cov['unmodeledCudaCalls'] and not cov['budgetExhausted'], cov
+        if fixture == 'memcpy_default.cpp':
+            assert not cov['coverageUnknown'], cov
         if fixture == 'pending_uses.cpp':
             assert cov['pendingArgumentUses'] > 0 and cov['pendingMemberCallUses'] > 0 and cov['pendingPointerEscapes'] > 0, cov
             assert any('opaque ownership' in entry['reason'] for entry in cov['coverageUnknown']), cov
@@ -120,6 +123,11 @@ with tempfile.TemporaryDirectory() as temp:
                 for location in locations:
                     reference = location['physicalLocation']['artifactLocation']
                     assert artifacts[reference['index']]['location']['uri'] == reference['uri'], reference
+    unknown = subprocess.run([sys.argv[1], str(root / 'memcpy_default_unknown.cpp'), '--sarif', str(sarif), '--coverage', str(coverage), '--', '-std=c++17'], text=True, capture_output=True)
+    assert unknown.returncode == 0, unknown.stderr
+    assert not [r for run in json.loads(sarif.read_text())['runs'] for r in run['results']]
+    reasons = {entry['reason'] for entry in json.loads(coverage.read_text())['coverageUnknown']}
+    assert any('cudaMemcpyDefault' in reason for reason in reasons), reasons
     names = subprocess.run([sys.argv[1], str(root / 'project_cuda_names.cpp'), '--sarif', str(sarif), '--coverage', str(coverage), '--', '-std=c++17'], text=True, capture_output=True)
     assert names.returncode == 0, names.stderr
     assert not [r for run in json.loads(sarif.read_text())['runs'] for r in run['results']]

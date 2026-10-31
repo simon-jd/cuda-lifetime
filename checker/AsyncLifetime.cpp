@@ -188,6 +188,9 @@ class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eva
   }
   static Stream defaultStream() { return cudalifetime::info().perThread ? 6 : 4; }
   static bool capturing(ProgramStateRef s, Stream stream) { return stream && s->get<CaptureOrigins>(stream); }
+  static void unknownDirection() {
+    cudalifetime::info().coverageUnknown.insert("cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled");
+  }
   static void noteCapture() {
     cudalifetime::info().coverageUnknown.insert("work enqueued during stream capture is recorded into a graph, not executed; graph contents and launches are not modeled");
   }
@@ -690,6 +693,9 @@ void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, P
     s = enqueue(s, def, c.getSValBuilder().makeZeroVal(c.getASTContext().VoidPtrTy));
     deviceUse(c, s, src, def, "cudaMemcpy"); deviceUse(c, s, dst, def, "cudaMemcpy");
     auto host = [&](const MemRegion *r) { const Memory k = memory(s, r); return k == Pinned || k == Pageable; };
+    // With cudaMemcpyDefault and no operand known to be host memory, the copy
+    // is treated as device to device; say so when an operand's kind is unknown.
+    if (copyKind == 4 && !host(dst) && !host(src) && (memory(s, dst) == Unknown || memory(s, src) == Unknown)) unknownDirection();
     const bool writesHost = copyKind == 0 || copyKind == 2 || (copyKind == 4 && host(dst));
     const bool readsHost = copyKind == 0 || copyKind == 1 || (copyKind == 4 && host(src));
     if (writesHost || readsHost) {
@@ -743,6 +749,18 @@ void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, P
     if (copyKind == 1) { s = pending(s, src, stream, HostWrite, call.getOriginExpr(), c, bits); s = pending(s, dst, stream, DeviceUse, call.getOriginExpr(), c); }
     else if (copyKind == 2) { s = pending(s, dst, stream, HostRead, call.getOriginExpr(), c, bits); s = pending(s, src, stream, DeviceUse, call.getOriginExpr(), c); }
     else if (copyKind == 3) { s = pending(s, dst, stream, DeviceUse, call.getOriginExpr(), c); s = pending(s, src, stream, DeviceUse, call.getOriginExpr(), c); }
+    else if (copyKind == 4) {
+      // cudaMemcpyDefault: unified addressing picks the direction from the
+      // pointers. A host destination is written (D2H or H2H), so the host must
+      // not touch it; a host source is read (H2D or H2H), so the host must not
+      // write it. An operand of unknown memory kind is left out and reported.
+      const Memory dstKind = memory(s, dst, bits), srcKind = memory(s, src, bits);
+      if (dstKind == Pinned || dstKind == Pageable) s = pending(s, dst, stream, HostRead, call.getOriginExpr(), c, bits);
+      else if (dstKind == Device || dstKind == Ordered) s = pending(s, dst, stream, DeviceUse, call.getOriginExpr(), c);
+      if (srcKind == Pinned || srcKind == Pageable) s = pending(s, src, stream, HostWrite, call.getOriginExpr(), c, bits);
+      else if (srcKind == Device || srcKind == Ordered) s = pending(s, src, stream, DeviceUse, call.getOriginExpr(), c);
+      if (dstKind == Unknown || srcKind == Unknown) unknownDirection();
+    }
     else if (copyKind != 0) { ++cudalifetime::info().unmodeled[n + ":unknown-copy-kind"]; }
   } else if (e == "launch") {
     s = enqueue(s, stream, arg(call, m, "stream"));
