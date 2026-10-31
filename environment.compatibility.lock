@@ -28,13 +28,11 @@
   },
   "qualification": {
     "inputImageId": "sha256:f74a5824ae344524f6595cda8a57a6a1c73beafb950dfac0a4d7c6a9bb2dad12",
-    "review": "results/review/compatibility-promotion-review-v1.json",
-    "reviewSha256": "7c69511d82ea33952c1be2f518df4b5f164b9b7b4bc12608cc63f8ce516ddac5",
     "scope": "Only the registered original command populations and tool identities. New projects, configurations or tools do not inherit these measured rates.",
     "cudaThreshold": "10 * passed > 9 * total, separately for each required target",
-    "cudaSamples": {"passed": 104, "total": 114, "allPassed": 223, "allTotal": 233, "round": "samples-round-v2-complete-input-binding"},
-    "faiss": {"passed": 181, "total": 182, "allPassed": 724, "allTotal": 854, "round": "original-container-v1"},
-    "rmm": {"passed": null, "total": 0, "allPassed": 53, "allTotal": 54, "round": "original-container-v1"},
+    "cudaSamples": {"passed": 104, "total": 114, "allPassed": 223, "allTotal": 233},
+    "faiss": {"passed": 181, "total": 182, "allPassed": 724, "allTotal": 854},
+    "rmm": {"passed": null, "total": 0, "allPassed": 53, "allTotal": 54},
     "nvccBuiltCudaObjects": 296,
     "nvccHostMacroParity": "project-only / host-pass unverified",
     "gpuMeasured": false

@@ -167,8 +167,9 @@ SVE, which these x86 drivers do not support, and `GpuDistance.cu` has an
 overload error. RMM's one failure is a host warning promoted to an error.
 Syntax success does not mean complete analyzer coverage.
 
-These counts come from host-only syntax runs whose per-command logs are not
-included in this repository. They agree with the analysis runs in
+These counts come from host-only syntax runs; `environment.compatibility.lock`
+records them under `qualification`, but the per-command logs are not included
+in this repository. They agree with the analysis runs in
 [evaluation.md](evaluation.md): with the profile, 223 of cuda-samples' 233
 commands parse there too, the ten failures are the same nine overload errors
 and one `__shared__` initialization, and the one faiss GPU-module failure is

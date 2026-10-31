@@ -34,9 +34,6 @@
       }
     }
   },
-  "configureCommand": "results/m0/cuCollections/configure.command.json",
-  "buildResult": "results/m0/cuCollections/build.result.json",
-  "translationReport": "targets/cuCollections/clang/translation-report.json",
-  "feasibilityReport": "results/m0/cuCollections/translation-feasibility.json",
-  "decision": "fallback does not satisfy the 90% CUDA host parse gate; preserve failed original-source results"
+  "analyzed": false,
+  "reason": "After translation, 1 of its 19 CUDA compilation commands passed a host-only Clang syntax check, so it is not one of the scanned projects."
 }
