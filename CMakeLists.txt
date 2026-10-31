@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(cuda_lifetime VERSION 0.3.0 LANGUAGES C CXX)
+project(cuda_lifetime VERSION 0.4.0 LANGUAGES C CXX)
 
 option(CUDA_LIFETIME_ALLOW_UNSUPPORTED_LLVM "Allow local development with LLVM other than 23.1.3 (not release validation)" OFF)
 find_package(LLVM REQUIRED CONFIG)

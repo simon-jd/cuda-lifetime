@@ -142,7 +142,7 @@ class PreparedProfile:
         self.entries = {}
         self.output = Path(output).resolve()
         self.lock = {'schemaVersion': 1, 'kind': 'resolved-compatibility-profile', 'profile': name,
-                     'productVersion': '0.3.0', 'template': self.pin(template), 'inputDatabase': self.pin(source),
+                     'productVersion': '0.4.0', 'template': self.pin(template), 'inputDatabase': self.pin(source),
                      'originalEntryCount': len(entries), 'cccl': None, 'hostHeaders': {},
                      'discoveryAttempts': [], 'driverResolutions': [],
                      'tools': self.tools, 'inputFiles': self.inputs, 'entryBindings': {},
