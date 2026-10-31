@@ -8,10 +8,13 @@ from pathlib import Path
 from .metrics import _coverage_files, _diagnostics, normalized_file
 
 
-def compare(manifest, sarif, coverage, mutant_root, native_logs):
+def compare(manifest, sarif, coverage, mutant_root, native_logs, paths_root=None):
+    # Manifest entries are relative to the mutant directory; relative paths in
+    # SARIF and coverage are relative to paths_root (default: the same directory).
     root = Path(mutant_root).resolve()
-    diagnostics, ignored = _diagnostics(sarif, root)
-    analyzed, _ = _coverage_files(coverage, root)
+    paths = Path(paths_root).resolve() if paths_root is not None else root
+    diagnostics, ignored = _diagnostics(sarif, paths)
+    analyzed, _ = _coverage_files(coverage, paths)
 
     def telemetry_problems(value):
         problems = []
@@ -34,10 +37,10 @@ def compare(manifest, sarif, coverage, mutant_root, native_logs):
     per_tu = {}
     for path in Path(native_logs).glob("*.coverage.json"):
         native = json.loads(path.read_text())
-        _coverage_files(native, root)
+        _coverage_files(native, paths)
         telemetry_problems(native)
         for source in native.get("tus", {}).get("analyzed", []):
-            source = normalized_file(source, root)
+            source = normalized_file(source, paths)
             if source in per_tu and per_tu[source] != native:
                 raise ValueError("conflicting per-TU coverage; use an isolated log directory")
             per_tu[source] = native
@@ -52,7 +55,7 @@ def compare(manifest, sarif, coverage, mutant_root, native_logs):
                                      (coverage.get("coverageUnknown", []), "coverage unknown")):
             for entry in entries:
                 filename = entry if isinstance(entry, str) else entry.get("file")
-                if filename and normalized_file(filename, root) == path:
+                if filename and normalized_file(filename, paths) == path:
                     reasons.append(description)
         native = per_tu.get(path)
         if native is None:
@@ -117,11 +120,14 @@ def main(argv=None):
     parser.add_argument("--coverage", required=True)
     parser.add_argument("--native-logs", required=True)
     parser.add_argument("--out", required=True)
+    parser.add_argument("--paths-root", help="directory that relative SARIF and coverage paths are relative to "
+                        "(default: the manifest's directory)")
     args = parser.parse_args(argv)
     try:
         manifest_path = Path(args.manifest)
         result = compare(json.loads(manifest_path.read_text()), json.loads(Path(args.sarif).read_text()),
-                         json.loads(Path(args.coverage).read_text()), manifest_path.parent, args.native_logs)
+                         json.loads(Path(args.coverage).read_text()), manifest_path.parent, args.native_logs,
+                         args.paths_root)
         Path(args.out).write_text(json.dumps(result, indent=2) + "\n")
         print(json.dumps({"coverageComplete": result["coverageComplete"], "mutants": [
             {"id": row["id"], "coverageComplete": row["coverageComplete"],

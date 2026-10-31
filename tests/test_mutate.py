@@ -119,6 +119,21 @@ class MutationReportTests(unittest.TestCase):
         mutate(native)
         path.write_text(json.dumps(native))
 
+    def test_relative_paths_resolve_against_paths_root(self):
+        self.fixture()
+        relative = {absolute: str(Path(absolute).relative_to(self.root.resolve())) for absolute in (self.baseline, self.mutant)}
+        self.coverage["tus"]["analyzed"] = list(relative.values())
+        for path in self.logs.glob("*.coverage.json"):
+            native = json.loads(path.read_text())
+            native["tus"]["analyzed"] = [relative[name] for name in native["tus"]["analyzed"]]
+            path.write_text(json.dumps(native))
+        diagnostic = self.diagnostic()
+        diagnostic["locations"][0]["physicalLocation"]["artifactLocation"]["uri"] = relative[self.mutant]
+        self.sarif["runs"][0]["results"] = [diagnostic]
+        self.assertEqual(self.report()["mutants"][0]["sites"][0]["status"], "unverified-miss")
+        report = compare(self.manifest, self.sarif, self.coverage, self.output, self.logs, self.root)
+        self.assertEqual(report["mutants"][0]["sites"][0]["status"], "observed-at-required-site")
+
     def test_negative_requires_complete_telemetry(self):
         self.fixture(negative=True)
         self.assertEqual(self.status(), "verified-no-finding")
