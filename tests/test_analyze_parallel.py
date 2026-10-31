@@ -59,7 +59,7 @@ for part in range(int(value('RUNS', '1'))):
 coverage = {'tus': {'parsed': 1, 'analyzed': [source], 'failed': []},
     'budgetExhausted': [], 'coverageUnknown': [], 'unmodeledCudaCalls': {},
     'modeledCallVisits': int(case) + 1, 'pointerEscapes': 2,
-    'pendingMemberCallUses': 3, 'pendingArgumentUses': 4, 'pendingPointerEscapes': 5,
+    'pendingMemberCallUses': 3, 'pendingArgumentUses': 4, 'pendingPointerEscapes': 5, 'functionsAnalyzed': 2,
     'peakRssKiB': 1234, 'assumptions': ['fixture success assumption']}
 if mode == 'unknown':
     coverage['unmodeledCudaCalls'] = {'cudaFixtureUnknown': 3}
@@ -185,6 +185,8 @@ class ParallelProtocolTests(unittest.TestCase):
         self.assertEqual(len(cov["budgetExhausted"]), 1)
         self.assertEqual(cov["visitCounts"]["modeledCallVisits"], 6)
         self.assertEqual(cov["visitCounts"]["pendingMemberCallUses"], 9)
+        self.assertEqual(cov["visitCounts"]["functionsAnalyzed"], 6)
+        self.assertEqual([profile["functionsAnalyzed"] for profile in cov["profiles"]], [2, 2, 2])
         self.assertEqual(doc["runs"][-1]["results"][0]["level"], "warning")
 
     def test_unknown_only_and_empty_scopes_are_explicit(self):

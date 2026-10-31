@@ -25,6 +25,8 @@ struct AnalysisInfo {
   std::set<std::string> coverageUnknown;
   unsigned kernelLaunches = 0, escapes = 0, modeledCalls = 0, cudaFailurePathsSkipped = 0;
   unsigned pendingMemberCallUses = 0, pendingArgumentUses = 0, pendingPointerEscapes = 0;
+  // Top-level functions CSA analyzed: the denominator for budgetExhausted.
+  unsigned functionsAnalyzed = 0;
   bool perThread = false;
 };
 AnalysisInfo &info();

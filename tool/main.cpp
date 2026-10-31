@@ -229,6 +229,7 @@ int main(int argc, const char **argv) {
       {"pendingArgumentUses",cudalifetime::info().pendingArgumentUses},
       {"pendingPointerEscapes",cudalifetime::info().pendingPointerEscapes},
       {"modeledCallVisits",cudalifetime::info().modeledCalls},
+      {"functionsAnalyzed",cudalifetime::info().functionsAnalyzed},
       {"cudaFailurePathsSkipped",cudalifetime::info().cudaFailurePathsSkipped},
       {"defaultStreamMode",cudalifetime::info().perThread ? "per-thread" : "legacy"},
       {"seconds",seconds}, {"peakRssKiB",static_cast<int64_t>(usage.ru_maxrss)}, {"assumptions",std::move(assumptions)}};

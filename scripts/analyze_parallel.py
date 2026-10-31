@@ -24,7 +24,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 COUNTERS = ("modeledCallVisits", "pointerEscapes", "pendingMemberCallUses",
-            "pendingArgumentUses", "pendingPointerEscapes")
+            "pendingArgumentUses", "pendingPointerEscapes", "functionsAnalyzed")
 
 
 def write_json(path, value):

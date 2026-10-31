@@ -18,7 +18,7 @@ RULES = {
 }
 LEVELS = ("error", "warning", "note")
 VISIT_COUNTERS = ("modeledCallVisits", "pointerEscapes", "pendingMemberCallUses",
-                  "pendingArgumentUses", "pendingPointerEscapes")
+                  "pendingArgumentUses", "pendingPointerEscapes", "functionsAnalyzed")
 
 
 def default_stream_mode(args):
@@ -228,6 +228,7 @@ def analyze(compdb, sarif, coverage_path=None, native="build/cuda-lifetime-nativ
         key = f"{number:04d}-" + hashlib.sha256(file.encode()).hexdigest()[:10]
         started = time.monotonic()
         peak_rss = None
+        functions = None
         with tempfile.TemporaryDirectory(prefix="cuda-lifetime-tu-") as td:
             td = Path(td)
             write_json(td / "compile_commands.json", [{**entry, "file": file, "directory": str(directory.resolve()), "arguments": args}])
@@ -246,6 +247,7 @@ def analyze(compdb, sarif, coverage_path=None, native="build/cuda-lifetime-nativ
                     cov = json.loads(native_coverage.read_text())
                     validate_native_coverage(cov, file)
                     peak_rss = cov.get("peakRssKiB")
+                    functions = cov.get("functionsAnalyzed")
                     native_mode = cov.get("defaultStreamMode", stream)
                     runs, suppressed = enrich_sarif(json.loads(native_sarif.read_text()), native_mode, include_contract)
                     assumptions = sorted(set(cov.get("assumptions", []) + translation_assumptions.get(file, [])))
@@ -279,5 +281,6 @@ def analyze(compdb, sarif, coverage_path=None, native="build/cuda-lifetime-nativ
                 fail(file, "invalid-native-output", detail=str(exc))
         coverage["profiles"].append({"file": file, "index": number,
                                      "inputCommandSha256": hashlib.sha256(json.dumps(entry, sort_keys=True).encode()).hexdigest(),
-                                     "seconds": time.monotonic() - started, "peakRssKiB": peak_rss})
+                                     "seconds": time.monotonic() - started, "peakRssKiB": peak_rss,
+                                     "functionsAnalyzed": functions})
     return finish()

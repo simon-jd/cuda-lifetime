@@ -449,6 +449,7 @@ public:
     c.addTransition(s);
   }
   void checkEndAnalysis(ExplodedGraph &, BugReporter &, ExprEngine &engine) const {
+    ++cudalifetime::info().functionsAnalyzed;
     if (engine.hasWorkRemaining()) {
       const Decl *decl = engine.getRootStackFrame()->getDecl();
       std::string function = isa<NamedDecl>(decl) ? cast<NamedDecl>(decl)->getQualifiedNameAsString() : "<anonymous>";

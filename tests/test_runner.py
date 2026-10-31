@@ -180,7 +180,7 @@ class RunnerProtocolTests(unittest.TestCase):
 
     def test_pending_visit_counters_sum_across_distinct_translation_units(self):
         counters = {"modeledCallVisits": 13, "pointerEscapes": 17, "pendingMemberCallUses": 2,
-                    "pendingArgumentUses": 3, "pendingPointerEscapes": 5}
+                    "pendingArgumentUses": 3, "pendingPointerEscapes": 5, "functionsAnalyzed": 4}
         other = self.root / "other.cpp"
         other.write_text("void other() {}\n")
         entries = json.loads(self.compdb.read_text())
@@ -194,6 +194,7 @@ class RunnerProtocolTests(unittest.TestCase):
         self.assertEqual(cov["tus"]["parsed"], 2)
         self.assertEqual(cov["visitCounts"], {key: 2 * value for key, value in counters.items()})
         self.assertEqual(json.loads(self.coverage.read_text())["visitCounts"], cov["visitCounts"])
+        self.assertEqual([profile["functionsAnalyzed"] for profile in cov["profiles"]], [4, 4])
         logs = list((self.root / "out.logs").glob("*.coverage.json"))
         self.assertEqual(len(logs), 2)
         for path in logs:

@@ -43,7 +43,9 @@ with tempfile.TemporaryDirectory() as temp:
     assert cov['llvmVersion'] == '23.1.3', cov
     small = subprocess.run([sys.argv[1], str(root / 'cases.cpp'), '--sarif', str(sarif), '--coverage', str(coverage), '--max-nodes', '1', '--', '-std=c++17'], text=True, capture_output=True)
     assert small.returncode == 0, small.stderr
-    assert json.loads(coverage.read_text())['budgetExhausted'], 'Exceeded node budget was not recorded'
+    small_cov = json.loads(coverage.read_text())
+    assert small_cov['budgetExhausted'], 'Exceeded node budget was not recorded'
+    assert small_cov['functionsAnalyzed'] >= len(small_cov['budgetExhausted']), small_cov
     kernel_source = root / 'kernel.cu'
     kernel_expected = {number for number, line in enumerate(kernel_source.read_text().splitlines(), 1) if '// CL3' in line}
     for mode in ('legacy', 'per-thread'):
@@ -101,6 +103,7 @@ with tempfile.TemporaryDirectory() as temp:
         assert not cov['unmodeledCudaCalls'] and not cov['budgetExhausted'], cov
         if fixture == 'memcpy_default.cpp':
             assert not cov['coverageUnknown'], cov
+            assert cov['functionsAnalyzed'] == 5, cov
         if fixture == 'pending_uses.cpp':
             assert cov['pendingArgumentUses'] > 0 and cov['pendingMemberCallUses'] > 0 and cov['pendingPointerEscapes'] > 0, cov
             assert any('opaque ownership' in entry['reason'] for entry in cov['coverageUnknown']), cov
