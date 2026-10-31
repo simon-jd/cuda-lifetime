@@ -17,6 +17,18 @@ the kernel finishes; the pageable copy returns after 18.4 ms, when the kernel
 and the copy are done. This is why the faiss code reported as a portability
 risk in [docs/evaluation.md](../docs/evaluation.md) works today.
 
+`stale_read.cu` is the pattern cuda-lifetime reports as a CL1 error, run on
+the GPU: with a 20 ms kernel queued ahead, it reads the pinned destination of a
+`cudaMemcpyAsync` D2H before synchronizing the stream, then again after.
+`stale_read.py` builds it, runs it for pinned and for pageable host memory, and
+with `--native` also records what the checker reports for the same source:
+
+```sh
+flock /var/tmp/rtx4090.lock python3 probes/stale_read.py --ccbin g++-13 \
+  --native build/cuda-lifetime-native --cuda-path /usr/local/cuda-13.2 \
+  --out results/probes/stale-read.json
+```
+
 `lifetime.cu` and `run.py` are deliberately unsafe microprograms for pinned and
 pageable D2H, ordinary `cudaFree`, `cudaFreeHost`, and cross-stream
 stream-ordered allocation use with and without an event edge, run directly and
