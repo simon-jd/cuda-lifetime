@@ -1,0 +1,47 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4090, 595.99.02",
+  "source": "probes/stale_read.cu",
+  "kernelSpinCycles": 50000000,
+  "sentinel": -1,
+  "written": 42,
+  "observations": {
+    "pinned": {
+      "runs": 20,
+      "beforeSync": {
+        "-1": 20
+      },
+      "afterSync": {
+        "42": 20
+      },
+      "staleReads": 20
+    },
+    "pageable": {
+      "runs": 20,
+      "beforeSync": {
+        "42": 20
+      },
+      "afterSync": {
+        "42": 20
+      },
+      "staleReads": 0
+    }
+  },
+  "checker": [
+    {
+      "ruleId": "CL1",
+      "level": "error",
+      "memoryKind": "pinned",
+      "line": 48,
+      "source": "const int early = *host;  // read before the stream is synchronized",
+      "message": "Host reads the destination before asynchronous D2H completion"
+    },
+    {
+      "ruleId": "CL1",
+      "level": "warning",
+      "memoryKind": "pageable",
+      "line": 48,
+      "source": "const int early = *host;  // read before the stream is synchronized",
+      "message": "Host reads the destination before asynchronous D2H completion"
+    }
+  ]
+}

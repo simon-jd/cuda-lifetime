@@ -61,6 +61,13 @@ Seed and holdout metrics of version 0.4.0 from `tests/run_seed.py`. The
 holdout has been seen, so it was scored as a development set (`split` is
 `dev`), not as a held-out result.
 
+## `probes/stale-read.json`
+
+Output of `probes/stale_read.py` on the same GPU: for pinned and pageable host
+memory, the values `probes/stale_read.cu` read from a `cudaMemcpyAsync` D2H
+destination before and after synchronizing the stream (20 runs each), and the
+checker's reports on that source.
+
 ## `probes/completion.json`
 
 Output of `probes/completion.py` on an RTX 4090 with driver 595.99: how long

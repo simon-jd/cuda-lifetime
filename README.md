@@ -148,7 +148,19 @@ the difference (`results/probes/completion.json`, five runs each):
 | pageable host memory | 18.4 ms | yes |
 
 The same faiss code would race if those buffers were pinned (for example
-through `cudaHostRegister` for faster transfers). The 11 false positives are
+through `cudaHostRegister` for faster transfers). `probes/stale_read.cu` shows
+what that race looks like: it reads the destination of a `cudaMemcpyAsync` D2H
+before synchronizing the stream, with a 20 ms kernel that writes 42 queued
+ahead of the copy. cuda-lifetime reports the read as a CL1 error for pinned
+memory and a CL1 warning for pageable memory, and on the RTX 4090
+(`results/probes/stale-read.json`, 20 runs each):
+
+| Host memory | value read before `cudaStreamSynchronize` | after |
+|---|---|---|
+| pinned (`cudaMallocHost`) | -1, the stale sentinel, in 20 of 20 runs | 42 |
+| pageable (`malloc`) | 42 in 20 of 20 runs | 42 |
+
+The 11 false positives are
 listed in [docs/evaluation.md](docs/evaluation.md); 8 of them come from one
 faiss helper, `getDeviceForAddress`, whose result the analyzer cannot relate
 to the pointer, so it explores copy directions that cannot happen.

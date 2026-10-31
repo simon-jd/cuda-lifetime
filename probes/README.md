@@ -29,6 +29,11 @@ flock /var/tmp/rtx4090.lock python3 probes/stale_read.py --ccbin g++-13 \
   --out results/probes/stale-read.json
 ```
 
+On the RTX 4090 with driver 595.99, all 20 pinned runs read the sentinel -1
+before synchronization and 42 after it; all 20 pageable runs read 42 both
+times. The checker reports the early read as CL1 error (pinned path) and CL1
+warning (pageable path).
+
 `lifetime.cu` and `run.py` are deliberately unsafe microprograms for pinned and
 pageable D2H, ordinary `cudaFree`, `cudaFreeHost`, and cross-stream
 stream-ordered allocation use with and without an event edge, run directly and
