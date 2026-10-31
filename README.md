@@ -182,6 +182,11 @@ python3 -m unittest discover -s tests -p 'test_*.py'  # driver, translator, eval
   --sarif out.sarif --coverage coverage.json
 ```
 
+The GitHub Actions workflow (`.github/workflows/tests.yml`) runs the Python
+unit tests on Python 3.12 and 3.13. They use fake native executables, so CI
+does not cover the checker itself; the checker, its lit fixtures and the seed
+corpus need LLVM 23.1.3 and run under CTest.
+
 `analyze` exits with 2 when coverage is incomplete. `scripts/analyze_parallel.py`
 runs the same analysis with several processes; `scripts/prepare_targets.py`
 downloads and builds the three projects above; `docker/Dockerfile` builds the
