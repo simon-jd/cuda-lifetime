@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 1,
+  "kind": "whole-source-mutation-comparison",
+  "notAPrecisionBenchmark": true,
+  "ignoredInformationalOrOtherRuleDiagnostics": 0,
+  "budget": {
+    "maxNodes": 225000,
+    "timeoutSeconds": 180
+  },
+  "native": {
+    "path": "build-publish/cuda-lifetime-native",
+    "sha256": "841564c7aca475583f72db6a16613bc7cd7a3c2e2c1c0414245ed51b9b59b9f4"
+  },
+  "mutants": [
+    {
+      "id": "delete_final_sync",
+      "category": "delete-synchronization",
+      "coverageComplete": false,
+      "coverageLimitations": [
+        "TU not analyzed",
+        "aggregate coverage incomplete",
+        "analysis failed",
+        "missing per-TU telemetry"
+      ],
+      "unmodeledCudaCalls": {},
+      "sites": [
+        {
+          "ruleId": "CL1",
+          "level": "error",
+          "expect": "warning",
+          "anchor": "            passed &= (h_data_out[j][i] == 1);",
+          "line": 361,
+          "status": "unverified-miss",
+          "matchingFindings": []
+        }
+      ],
+      "allMutantFindings": [],
+      "baselineFindings": [],
+      "baselineCoverageComplete": false,
+      "baselineCoverageLimitations": [
+        "TU not analyzed",
+        "aggregate coverage incomplete",
+        "analysis failed",
+        "missing per-TU telemetry"
+      ],
+      "baselineUnmodeledCudaCalls": {},
+      "oracleLimitations": [
+        "Pinned allocation evidence is stored in global arrays initialized in main; CSA may not retain it through calls and loops.",
+        "processWithStreams executes a loop and is called twice; bounded analysis may miss the final outstanding transfer.",
+        "cudaEventElapsedTime return is ignored here, so the call does not establish a checked-success completion condition."
+      ]
+    },
+    {
+      "id": "sync_after_host_read",
+      "category": "move-synchronization-after-read",
+      "coverageComplete": false,
+      "coverageLimitations": [
+        "TU not analyzed",
+        "aggregate coverage incomplete",
+        "analysis failed",
+        "missing per-TU telemetry"
+      ],
+      "unmodeledCudaCalls": {},
+      "sites": [
+        {
+          "ruleId": "CL1",
+          "level": "error",
+          "expect": "warning",
+          "anchor": "            passed &= (h_data_out[j][i] == 1);",
+          "line": 362,
+          "status": "unverified-miss",
+          "matchingFindings": []
+        }
+      ],
+      "allMutantFindings": [],
+      "baselineFindings": [],
+      "baselineCoverageComplete": false,
+      "baselineCoverageLimitations": [
+        "TU not analyzed",
+        "aggregate coverage incomplete",
+        "analysis failed",
+        "missing per-TU telemetry"
+      ],
+      "baselineUnmodeledCudaCalls": {},
+      "oracleLimitations": [
+        "Pinned allocation evidence is stored in global arrays initialized in main; CSA may not retain it through calls and loops.",
+        "processWithStreams executes a loop and is called twice; bounded analysis may miss the final outstanding transfer.",
+        "cudaEventElapsedTime return is ignored here, so the call does not establish a checked-success completion condition."
+      ]
+    },
+    {
+      "id": "record_before_launch",
+      "category": "move-record-before-launch",
+      "coverageComplete": false,
+      "coverageLimitations": [
+        "TU not analyzed",
+        "aggregate coverage incomplete",
+        "analysis failed",
+        "missing per-TU telemetry"
+      ],
+      "unmodeledCudaCalls": {},
+      "sites": [
+        {
+          "ruleId": "CL4",
+          "level": "warning",
+          "expect": "warning",
+          "anchor": "    cudaEventSynchronize(stop);\n\n    float kernel_time;",
+          "line": 214,
+          "status": "unverified-miss",
+          "matchingFindings": []
+        }
+      ],
+      "allMutantFindings": [],
+      "baselineFindings": [],
+      "baselineCoverageComplete": false,
+      "baselineCoverageLimitations": [
+        "TU not analyzed",
+        "aggregate coverage incomplete",
+        "analysis failed",
+        "missing per-TU telemetry"
+      ],
+      "baselineUnmodeledCudaCalls": {},
+      "oracleLimitations": [
+        "A standalone stale event wait is a legal API call and only a contract warning.",
+        "Earlier setup and loops may exceed the analyzer budget before this site."
+      ]
+    },
+    {
+      "id": "launch_on_legacy_stream",
+      "category": "change-stream",
+      "coverageComplete": false,
+      "coverageLimitations": [
+        "TU not analyzed",
+        "aggregate coverage incomplete",
+        "budget exhausted",
+        "native budget exhausted",
+        "unmodeled CUDA calls"
+      ],
+      "unmodeledCudaCalls": {
+        "cudaDeviceGetDefaultMemPool": 1,
+        "cudaMemPoolSetAttribute": 1
+      },
+      "sites": [
+        {
+          "ruleId": "CL3",
+          "level": "error",
+          "expect": "warning",
+          "anchor": "    vectorAddGPU<<<grid, block, 0, cudaStreamLegacy>>>(d_a, d_b, d_c, nelem);",
+          "line": 83,
+          "status": "observed-at-required-site",
+          "matchingFindings": [
+            {
+              "ruleId": "CL3",
+              "file": "corpus/mutants/generated/launch_on_legacy_stream.cu",
+              "line": 83,
+              "level": "error"
+            }
+          ]
+        }
+      ],
+      "allMutantFindings": [
+        {
+          "ruleId": "CL3",
+          "file": "corpus/mutants/generated/launch_on_legacy_stream.cu",
+          "line": 83,
+          "level": "error"
+        },
+        {
+          "ruleId": "CL3",
+          "file": "corpus/mutants/generated/launch_on_legacy_stream.cu",
+          "line": 85,
+          "level": "error"
+        },
+        {
+          "ruleId": "CL3",
+          "file": "corpus/mutants/generated/launch_on_legacy_stream.cu",
+          "line": 86,
+          "level": "error"
+        },
+        {
+          "ruleId": "CL3",
+          "file": "corpus/mutants/generated/launch_on_legacy_stream.cu",
+          "line": 88,
+          "level": "error"
+        }
+      ],
+      "baselineFindings": [],
+      "baselineCoverageComplete": false,
+      "baselineCoverageLimitations": [
+        "TU not analyzed",
+        "aggregate coverage incomplete",
+        "budget exhausted",
+        "native budget exhausted",
+        "unmodeled CUDA calls"
+      ],
+      "baselineUnmodeledCudaCalls": {
+        "cudaDeviceGetDefaultMemPool": 1,
+        "cudaMemPoolSetAttribute": 1
+      },
+      "oracleLimitations": [
+        "CUDA setup/helper wrappers and allocation aliases must be modeled or explored.",
+        "One kernel uses three affected allocations; diagnostics may share a primary source line."
+      ]
+    },
+    {
+      "id": "pageable_synchronized_control",
+      "category": "replace-pinned-with-pageable",
+      "coverageComplete": false,
+      "coverageLimitations": [
+        "TU not analyzed",
+        "aggregate coverage incomplete",
+        "budget exhausted",
+        "native budget exhausted"
+      ],
+      "unmodeledCudaCalls": {},
+      "sites": [
+        {
+          "ruleId": "CL1",
+          "level": null,
+          "expect": "none",
+          "anchor": "        if (data[i] != x) {",
+          "line": 57,
+          "status": "unverified-no-finding",
+          "matchingFindings": []
+        }
+      ],
+      "allMutantFindings": [],
+      "baselineFindings": [],
+      "baselineCoverageComplete": false,
+      "baselineCoverageLimitations": [
+        "TU not analyzed",
+        "aggregate coverage incomplete",
+        "budget exhausted",
+        "native budget exhausted"
+      ],
+      "baselineUnmodeledCudaCalls": {},
+      "oracleLimitations": [
+        "This is a synchronized negative control, not a claimed guaranteed pageable asynchronous error.",
+        "A successful cudaEventQuery/cudaEventElapsedTime check must be understood before accepting a no-warning result.",
+        "A corresponding free substitution avoids introducing unrelated allocator/deallocator mismatch."
+      ]
+    }
+  ],
+  "coverageComplete": false
+}

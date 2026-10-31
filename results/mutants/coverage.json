@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "tus": {
+    "total": 8,
+    "parsed": 4,
+    "analyzed": [
+      "corpus/mutants/originals/asyncAPI.cu",
+      "corpus/mutants/originals/streamOrderedAllocation.cu",
+      "corpus/mutants/generated/launch_on_legacy_stream.cu",
+      "corpus/mutants/generated/pageable_synchronized_control.cu"
+    ],
+    "failed": [
+      {
+        "file": "corpus/mutants/originals/simpleMultiCopy.cu",
+        "reason": "native-analysis-failed",
+        "returncode": 1,
+        "log": "results/mutants/out.logs/0001-8e721cbe4a.log"
+      },
+      {
+        "file": "corpus/mutants/generated/delete_final_sync.cu",
+        "reason": "native-analysis-failed",
+        "returncode": 1,
+        "log": "results/mutants/out.logs/0003-b3d65787da.log"
+      },
+      {
+        "file": "corpus/mutants/generated/record_before_launch.cu",
+        "reason": "native-analysis-failed",
+        "returncode": 1,
+        "log": "results/mutants/out.logs/0006-12a185bc20.log"
+      },
+      {
+        "file": "corpus/mutants/generated/sync_after_host_read.cu",
+        "reason": "native-analysis-failed",
+        "returncode": 1,
+        "log": "results/mutants/out.logs/0007-f00fd79c64.log"
+      }
+    ],
+    "translationUnknown": []
+  },
+  "budgetExhausted": [
+    {
+      "file": "corpus/mutants/originals/asyncAPI.cu",
+      "function": "main",
+      "reason": "CSA work remains: node budget, loop limit, or aborted block"
+    },
+    {
+      "file": "corpus/mutants/originals/streamOrderedAllocation.cu",
+      "function": "main",
+      "reason": "CSA work remains: node budget, loop limit, or aborted block"
+    },
+    {
+      "file": "corpus/mutants/originals/streamOrderedAllocation.cu",
+      "function": "streamOrderedAllocationPostSync",
+      "reason": "CSA work remains: node budget, loop limit, or aborted block"
+    },
+    {
+      "file": "corpus/mutants/generated/launch_on_legacy_stream.cu",
+      "function": "main",
+      "reason": "CSA work remains: node budget, loop limit, or aborted block"
+    },
+    {
+      "file": "corpus/mutants/generated/launch_on_legacy_stream.cu",
+      "function": "streamOrderedAllocationPostSync",
+      "reason": "CSA work remains: node budget, loop limit, or aborted block"
+    },
+    {
+      "file": "corpus/mutants/generated/pageable_synchronized_control.cu",
+      "function": "main",
+      "reason": "CSA work remains: node budget, loop limit, or aborted block"
+    }
+  ],
+  "unmodeledCudaCalls": {
+    "cudaDeviceGetDefaultMemPool": 2,
+    "cudaMemPoolSetAttribute": 2
+  },
+  "coverageUnknown": [],
+  "profiles": [
+    {
+      "file": "corpus/mutants/originals/asyncAPI.cu",
+      "index": 0,
+      "inputCommandSha256": "2d9e5c1a3757c11d437a45981a182f7688c64a02c87cf3a617aa048c84b714bf",
+      "seconds": 2.419569737976417,
+      "peakRssKiB": 216548,
+      "functionsAnalyzed": 2
+    },
+    {
+      "file": "corpus/mutants/originals/simpleMultiCopy.cu",
+      "index": 1,
+      "inputCommandSha256": "17b18bab6363ca27b9808ef0985c5094c2fb7a9812c076a7a551ca2f6601a8ad",
+      "seconds": 0.9157889729831368,
+      "peakRssKiB": null,
+      "functionsAnalyzed": null
+    },
+    {
+      "file": "corpus/mutants/originals/streamOrderedAllocation.cu",
+      "index": 2,
+      "inputCommandSha256": "104b9d70dcd9337f68e76321f541f5372fabaee8c27c06f9228df1d2cb76fe30",
+      "seconds": 2.0683366029988974,
+      "peakRssKiB": 184028,
+      "functionsAnalyzed": 4
+    },
+    {
+      "file": "corpus/mutants/generated/delete_final_sync.cu",
+      "index": 3,
+      "inputCommandSha256": "f1d46899be264d50aebb35ae11299110e61655fce8ebf67489ebdc89f21cf3d1",
+      "seconds": 0.515241167973727,
+      "peakRssKiB": null,
+      "functionsAnalyzed": null
+    },
+    {
+      "file": "corpus/mutants/generated/launch_on_legacy_stream.cu",
+      "index": 4,
+      "inputCommandSha256": "5b1cd83f765cf68af1f6a546a45a6d8d27664f7ab02f875417674a3e3f122d54",
+      "seconds": 2.3186272729653865,
+      "peakRssKiB": 183944,
+      "functionsAnalyzed": 4
+    },
+    {
+      "file": "corpus/mutants/generated/pageable_synchronized_control.cu",
+      "index": 5,
+      "inputCommandSha256": "8f5027cc407588a1ffdae259470427ae741abdb349278cb59720b8ea14af3f97",
+      "seconds": 2.1671715939883143,
+      "peakRssKiB": 217312,
+      "functionsAnalyzed": 2
+    },
+    {
+      "file": "corpus/mutants/generated/record_before_launch.cu",
+      "index": 6,
+      "inputCommandSha256": "f513c2e983eda5d9b1683c4a245d899ad1c3af751afb59613fe54469a7c90325",
+      "seconds": 0.5152433109469712,
+      "peakRssKiB": null,
+      "functionsAnalyzed": null
+    },
+    {
+      "file": "corpus/mutants/generated/sync_after_host_read.cu",
+      "index": 7,
+      "inputCommandSha256": "afb2ba4d85b077e6870c2b406244d683e17a2e433688af926f1de57653d48a02",
+      "seconds": 0.6154268940445036,
+      "peakRssKiB": null,
+      "functionsAnalyzed": null
+    }
+  ],
+  "visitCounts": {
+    "modeledCallVisits": 2308,
+    "pointerEscapes": 80914,
+    "pendingMemberCallUses": 0,
+    "pendingArgumentUses": 0,
+    "pendingPointerEscapes": 0,
+    "functionsAnalyzed": 12
+  },
+  "assumptions": [
+    "single host thread",
+    "single translation unit",
+    "bounded CSA exploration"
+  ],
+  "budget": {
+    "maxNodes": 225000,
+    "timeoutSeconds": 180
+  },
+  "complete": false,
+  "suppressedContractDiagnostics": 0,
+  "native": {
+    "path": "build-publish/cuda-lifetime-native",
+    "sha256": "841564c7aca475583f72db6a16613bc7cd7a3c2e2c1c0414245ed51b9b59b9f4"
+  },
+  "summary": {
+    "parsed": 4,
+    "failed": 4,
+    "translationUnknown": 0,
+    "budgetExhausted": 6,
+    "unmodeledCudaCalls": 4,
+    "coverageUnknown": 0,
+    "diagnostics": 4,
+    "complete": false
+  }
+}

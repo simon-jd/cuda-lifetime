@@ -21,22 +21,25 @@ Each replacement must match exactly once. The tool refuses changed source
 hashes, ambiguous replacements, writes into the source tree, and overwriting
 modified generated files. Repeat generation preserves the first timestamp.
 
-Generate or reproduce the recorded bytes:
+Generate or reproduce the recorded bytes, analyze the eight files and compare
+the findings with the oracle:
 
 ```sh
 python3 -m eval.mutate --recipes corpus/mutants/recipes.json \
   --source-root .deps/cuda-samples-13.2 --out corpus/mutants
 python3 -m eval.mutate --replay-manifest corpus/mutants/manifest.json \
   --source-root .deps/cuda-samples-13.2 --out /tmp/cuda-lifetime-mutant-replay
+./cuda-lifetime analyze --compdb results/mutants/compile_commands.json \
+  --native build/cuda-lifetime-native --sarif mutants-run/out.sarif --coverage mutants-run/coverage.json
 python3 -m eval.mutation_report --manifest corpus/mutants/manifest.json \
-  --sarif results/mutants/out.sarif \
-  --coverage results/mutants/coverage.json \
-  --native-logs results/mutants/out.logs \
-  --out results/mutants/comparison.json
+  --sarif mutants-run/out.sarif --coverage mutants-run/coverage.json \
+  --native-logs mutants-run/out.logs --out mutants-run/comparison.json
 ```
 
-The report expects an analysis of `originals/` and `generated/` in
-`results/mutants/`: its SARIF, coverage report and per-TU native logs.
+`results/mutants/compile_commands.json` holds the commands used: real CUDA
+13.2 headers, host-only Clang, cuda-samples' `Common/` includes and no header
+profile. The report can also be recomputed from the published records with
+`--paths-root .`, since their paths are relative to the repository root.
 
 The static comparison must analyze originals and variants with identical CUDA
 headers, host flags, model files, node limits, and wall-clock budgets. A missing
@@ -54,12 +57,32 @@ The hashes in `manifest.json` cover the files as published here; they were
 recomputed when the marker comments were renamed for publication, which
 changed no code and no line numbers.
 
-The one recorded run of these variants (its outputs are not included in this
-repository) found the original `simpleMultiCopy` and its three variants all
-failing the same host `max` overload check; the other four files parse. That
-run recorded incomplete coverage, four unverified required-site misses
-(including a native crash on the changed launch stream), and unexpected CL1
-findings in the synchronized pageable control. It does not establish a passing
-mutation score, and no mutation score is claimed for this checker. The
-predetermined oracle was not changed after that run; the only later change to
-the variants is the marker-comment rename noted above.
+## Results of version 0.4.0
+
+`results/mutants/` has the analysis of the three originals and five variants
+with version 0.4.0 (SARIF, coverage, per-TU logs) and the oracle comparison:
+
+| Variant | Expected | Result | Why |
+|---|---|---|---|
+| `delete_final_sync` | CL1 error, line 361 | unverified miss | the file does not parse |
+| `sync_after_host_read` | CL1 error, line 362 | unverified miss | the file does not parse |
+| `record_before_launch` | CL4 warning, line 214 | unverified miss | the file does not parse |
+| `launch_on_legacy_stream` | CL3 error, line 83 | found | coverage incomplete: two functions exhausted the node budget |
+| `pageable_synchronized_control` | no CL1 | none reported, unverified | coverage incomplete: `main` exhausted the node budget |
+
+The three misses are parse failures, not checker misses: `simpleMultiCopy.cu`
+and the three variants made from it fail under host-only Clang with the same
+`no matching function for call to 'max'` errors at lines 148, 243 and 245
+(`results/mutants/out.logs/`), the error that also fails `simpleMultiCopy.cu`
+in the cuda-samples scan. For `launch_on_legacy_stream` the checker also
+reports the three `cudaFreeAsync` calls that follow the misplaced launch (lines
+85, 86 and 88), which the oracle lists as possible additional findings. The
+two other originals produce no findings. Because no variant has complete
+coverage, none of this is a passing mutation score, and none is claimed.
+
+The first run of these variants, with an earlier version of the checker, had
+the same three parse failures; its fourth miss was a crash of the native tool
+on `launch_on_legacy_stream`, and it reported CL1 on the pageable control. Its
+outputs are not included. The predetermined oracle was not changed after that
+run; the only later change to the variants is the marker-comment rename noted
+above.

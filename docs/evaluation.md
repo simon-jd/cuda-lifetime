@@ -55,6 +55,16 @@ covers both forms) and changed other rules after the holdout was seen. Version
 that is a regression result, not a held-out score. The first, frozen run above
 remains the holdout result.
 
+**Mutants** (`corpus/mutants/`): five variants of three whole cuda-samples
+files, each with a predetermined expectation (four seeded defects and one
+negative control). With version 0.4.0 the seeded CL3 defect in
+`launch_on_legacy_stream` is found; the three variants of `simpleMultiCopy.cu`
+do not parse under host-only Clang (`max` overload errors), so their defects
+are unverified misses; and the control has no CL1 but cannot be credited
+because `main` exhausted the node budget (`results/mutants/`,
+[corpus/mutants/README.md](../corpus/mutants/README.md)). No mutation score is
+claimed.
+
 ## Real projects
 
 `scripts/prepare_targets.py` downloads and builds cuda-samples 13.2, faiss

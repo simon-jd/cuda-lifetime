@@ -1,0 +1,15 @@
+[
+  "build-publish/cuda-lifetime-native",
+  "-p",
+  "/tmp/cuda-lifetime-tu-30r1b03e",
+  "corpus/mutants/generated/record_before_launch.cu",
+  "--sarif",
+  "/tmp/cuda-lifetime-tu-30r1b03e/out.sarif",
+  "--coverage",
+  "/tmp/cuda-lifetime-tu-30r1b03e/coverage.json",
+  "--model",
+  "models",
+  "--max-nodes",
+  "225000",
+  "--include-contract"
+]

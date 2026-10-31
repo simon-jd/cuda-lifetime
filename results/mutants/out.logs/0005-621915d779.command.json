@@ -1,0 +1,15 @@
+[
+  "build-publish/cuda-lifetime-native",
+  "-p",
+  "/tmp/cuda-lifetime-tu-1umedk77",
+  "corpus/mutants/generated/pageable_synchronized_control.cu",
+  "--sarif",
+  "/tmp/cuda-lifetime-tu-1umedk77/out.sarif",
+  "--coverage",
+  "/tmp/cuda-lifetime-tu-1umedk77/coverage.json",
+  "--model",
+  "models",
+  "--max-nodes",
+  "225000",
+  "--include-contract"
+]

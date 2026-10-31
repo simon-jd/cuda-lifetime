@@ -55,6 +55,14 @@ published `out.sarif` and `coverage.json` against the labels again with
 and the freeze's rule hashes describe the 0.1.0 code, so this check needs a
 copy of the labels with another `split` value.)
 
+## `mutants/`: the cuda-samples mutants with version 0.4.0
+
+The commands, SARIF, coverage and per-TU logs of analyzing the three original
+cuda-samples files and five mutated variants in `corpus/mutants/`, and
+`comparison.json`, the comparison with their predetermined oracle sites
+(`eval.mutation_report`). Paths were made relative to the repository root;
+`corpus/mutants/README.md` explains the results.
+
 ## `regression/`
 
 Seed and holdout metrics of version 0.4.0 from `tests/run_seed.py`. The

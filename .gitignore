@@ -13,6 +13,7 @@ results/**/*.html
 # except the results the README and docs/evaluation.md cite
 !/results/real-projects/
 !/results/regression/
+!/results/mutants/
 !/results/probes/
 /results/probes/*
 !/results/probes/completion.json

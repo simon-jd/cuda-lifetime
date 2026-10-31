@@ -1,0 +1,15 @@
+[
+  "build-publish/cuda-lifetime-native",
+  "-p",
+  "/tmp/cuda-lifetime-tu-10l_eo4d",
+  "corpus/mutants/originals/asyncAPI.cu",
+  "--sarif",
+  "/tmp/cuda-lifetime-tu-10l_eo4d/out.sarif",
+  "--coverage",
+  "/tmp/cuda-lifetime-tu-10l_eo4d/coverage.json",
+  "--model",
+  "models",
+  "--max-nodes",
+  "225000",
+  "--include-contract"
+]
