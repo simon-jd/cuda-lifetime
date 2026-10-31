@@ -76,19 +76,26 @@ with tempfile.TemporaryDirectory() as temp:
     invalid = subprocess.run([sys.argv[1], str(root / 'cases.cpp'), '--sarif', str(sarif), '--coverage', str(coverage), '--', '-fdeliberately-unknown-cuda-lifetime-option'], text=True, capture_output=True)
     assert invalid.returncode != 0, invalid.stderr
     assert json.loads(coverage.read_text())['tus']['failed'], 'driver diagnostic must fail coverage'
-    for fixture in ('event_elapsed.cpp', 'pending_uses.cpp', 'macro_ranges.cpp', 'artifact_order_z.cpp', 'checked_return_helpers.cpp',
-                    'opaque_calls.cpp', 'sync_copies.cpp', 'graph_capture.cpp', 'event_history.cpp'):
+    fixtures = [(name, []) for name in (
+        'event_elapsed.cpp', 'pending_uses.cpp', 'macro_ranges.cpp', 'artifact_order_z.cpp', 'checked_return_helpers.cpp',
+        'opaque_calls.cpp', 'sync_copies.cpp', 'graph_capture.cpp', 'event_history.cpp', 'semantic_repros.cpp',
+        'alias_constraints.cpp', 'copy_ranges.cpp', 'registered_range.cpp', 'handle_aliases.cpp', 'event_snapshots.cpp',
+        'ordinary_free_note.cpp', 'default_stream_distinct.cpp', 'default_stream_handles.cpp', 'empty_model_alias.cpp')]
+    fixtures.append(('default_stream_handles.cpp', ['-DCUDA_API_PER_THREAD_DEFAULT_STREAM=1']))
+    for fixture, flags in fixtures:
         source = root / fixture
         expected = {(match.group(1), match.group(2), number)
                     for number, line in enumerate(source.read_text().splitlines(), 1)
                     if (match := re.search(r'// (CL[1-4]) (error|warning|note)', line))}
-        run = subprocess.run([sys.argv[1], str(source), '--sarif', str(sarif), '--coverage', str(coverage), '--include-contract', '--', '-std=c++17'], text=True, capture_output=True)
+        run = subprocess.run([sys.argv[1], str(source), '--sarif', str(sarif), '--coverage', str(coverage), '--include-contract', '--', '-std=c++17', *flags], text=True, capture_output=True)
         assert run.returncode == 0, run.stderr
         diagnostics = [r for run in json.loads(sarif.read_text())['runs'] for r in run['results']]
         actual = {(match.group(1), match.group(2), r['locations'][0]['physicalLocation']['region']['startLine'])
                   for r in diagnostics if (match := re.match(r'(CL[1-4]) \[(error|warning|note);', r['message']['text']))}
-        assert actual == expected and len(diagnostics) == len(expected), (fixture, actual, expected, run.stderr)
+        assert actual == expected and len(diagnostics) == len(expected), (fixture, flags, actual, expected, run.stderr)
+        assert all(r.get('codeFlows') for r in diagnostics), (fixture, 'CSA path diagnostics missing')
         cov = json.loads(coverage.read_text())
+        assert cov['tus']['parsed'] == 1 and not cov['tus']['failed'], (fixture, cov)
         assert not cov['unmodeledCudaCalls'] and not cov['budgetExhausted'], cov
         if fixture == 'pending_uses.cpp':
             assert cov['pendingArgumentUses'] > 0 and cov['pendingMemberCallUses'] > 0 and cov['pendingPointerEscapes'] > 0, cov

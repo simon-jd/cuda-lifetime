@@ -1,14 +1,14 @@
-#include "../native/runtime.h"
+#include "runtime.h"
 void ordinary_free_relies_on_implicit_sync(void *source, cudaStream_t stream) {
   int *device;
   cudaMalloc((void **)&device, 4);
   cudaMemcpyAsync(device, source, 4, 3, stream);
-  cudaFree(device); // review: CL3 note, ordinary free never definite or contractual here
+  cudaFree(device); // CL3 note: ordinary cudaFree relies on implicit synchronization
 }
 void ordinary_free_after_completion(void *source, cudaStream_t stream) {
   int *device;
   cudaMalloc((void **)&device, 4);
   cudaMemcpyAsync(device, source, 4, 3, stream);
   cudaStreamSynchronize(stream);
-  cudaFree(device); // review: no diagnostic
+  cudaFree(device); // no diagnostic
 }

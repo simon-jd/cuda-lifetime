@@ -1,4 +1,4 @@
-#include "../../native/runtime.h"
+#include "../runtime.h"
 inline int header_copy(void *device, cudaStream_t stream) {
   int *host;
   cudaMallocHost((void **)&host, 4);
@@ -7,7 +7,7 @@ inline int header_copy(void *device, cudaStream_t stream) {
 }
 struct HeaderDtor { ~HeaderDtor() { cudaDeviceSynchronize(); } };
 struct Virtual { virtual void call() = 0; };
-#define REVIEW_DEFINE_CUDA_FUNCTION() int macro_copy(void *device, cudaStream_t stream) { return header_copy(device, stream); }
+#define DEFINE_CUDA_FUNCTION() int macro_copy(void *device, cudaStream_t stream) { return header_copy(device, stream); }
 struct HeaderCtor {
   int value;
   HeaderCtor() : value((cudaDeviceSynchronize(), 0)) {}

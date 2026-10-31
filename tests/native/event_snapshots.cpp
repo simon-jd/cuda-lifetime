@@ -1,4 +1,4 @@
-#include "../native/runtime.h"
+#include "runtime.h"
 int wait_snapshot_survives_rerecord(void *device) {
   cudaStream_t a, b;
   cudaStreamCreateWithFlags(&a, 1);
@@ -14,8 +14,8 @@ int wait_snapshot_survives_rerecord(void *device) {
   cudaMemcpyAsync(later, device, 4, 2, a);
   cudaEventRecord(event, a);
   cudaStreamSynchronize(b);
-  int x = *first; // review: completed by old capture
-  int y = *later; // review: CL1 error, re-record cannot strengthen prior wait
+  int x = *first; // no CL1: completed by the old capture
+  int y = *later; // CL1 error: a re-record cannot strengthen an earlier wait
   cudaDeviceSynchronize();
   return x + y;
 }
@@ -33,7 +33,7 @@ int event_transitive_completion(void *device) {
   cudaStreamWaitEvent(b, first, 0);
   cudaEventRecord(second, b);
   cudaEventSynchronize(second);
-  return *host; // review: no diagnostic, second event captures dependency on a
+  return *host; // no diagnostic: the second event captures the dependency on a
 }
 int wait_is_not_host_completion(void *device) {
   cudaStream_t a, b;
@@ -46,7 +46,7 @@ int wait_is_not_host_completion(void *device) {
   cudaMemcpyAsync(host, device, 4, 2, a);
   cudaEventRecord(event, a);
   cudaStreamWaitEvent(b, event, 0);
-  int value = *host; // review: CL1 error, no host completion
+  int value = *host; // CL1 error: no host completion
   cudaDeviceSynchronize();
   return value;
 }
