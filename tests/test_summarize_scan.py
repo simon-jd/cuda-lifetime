@@ -51,13 +51,15 @@ class SummarizeScanTests(unittest.TestCase):
 
     def test_summary_sarif_and_timings(self):
         previous = self.root / "previous.csv"
-        self.write_triage(previous, [("faiss", "src/a.cpp", 7, "CL1", "warning", "false-positive"),
-                                     ("rmm", "src/a.cpp", 1, "CL2", "warning", "false-positive")])
-        summary = summarize(self.scan, self.triage, self.out, previous, self.root)
+        with previous.open("w", newline="") as stream:  # the 0.2.0 triage's column names
+            csv.writer(stream).writerows([["target", "line", "judgment"], ["faiss", 7, "false-positive"],
+                                          ["rmm", 1, "insufficient-evidence"]])
+        summary = summarize(self.scan, self.triage, self.out, previous, self.root, "0.2.0")
         self.assertEqual(summary["version"], "0.4.0")
         self.assertEqual(summary["alerts"], {"cuda-samples": 0, "faiss": 1, "rmm": 0})
         self.assertEqual(summary["alertsByCategory"], {"portability": 1})
-        self.assertEqual(summary["previous"]["alerts"], {"cuda-samples": 0, "faiss": 1, "rmm": 1})
+        self.assertEqual(summary["previous"], {"version": "0.2.0", "alerts": {"cuda-samples": 0, "faiss": 1, "rmm": 1},
+                                               "alertsByCategory": {"false-positive": 1, "insufficient-evidence": 1}})
         faiss = summary["coverage"]["faiss"]
         self.assertEqual((faiss["functionsAnalyzed"], faiss["functionsOverBudget"], faiss["wallClockTimeouts"]), (4, 1, 1))
         self.assertEqual(faiss["failed"], [".deps/faiss-1.15.1/src/b.cpp"])

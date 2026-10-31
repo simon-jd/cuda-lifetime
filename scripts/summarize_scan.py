@@ -4,11 +4,13 @@
 The scan directory holds one scripts/analyze_parallel.py output per project
 (SCAN/<project>/out.sarif and coverage.json). The triage CSV must have exactly
 one row per alert of the scan, matched by project, file, line and rule; the
-optional previous triage gives the alert counts of the version before.
+optional previous triage gives the alert counts of an earlier version; it may
+use the 0.2.0 triage's columns (target, judgment) instead of (project, category).
 
     python3 scripts/summarize_scan.py --scan results/raw/scan-0.4.0 \\
       --triage results/real-projects/triage.csv \\
-      --previous-triage results/real-projects/triage-0.3.0.csv --out results/real-projects
+      --previous-triage results/real-projects/triage-0.2.0.csv --previous-version 0.2.0 \\
+      --out results/real-projects
 """
 import argparse
 import collections
@@ -74,7 +76,7 @@ def seconds(profiles):
             "p95": round(values[min(len(values) - 1, int(0.95 * len(values)))], 2), "max": round(values[-1], 1)}
 
 
-def summarize(scan, triage_path, out, previous_path=None, root=ROOT):
+def summarize(scan, triage_path, out, previous_path=None, root=ROOT, previous_version=None):
     scan, out, root = Path(scan), Path(out), Path(root).resolve()
     rows, triaged = read_triage(Path(triage_path))
     found, coverage, timings, version = collections.Counter(), {}, [], None
@@ -117,9 +119,12 @@ def summarize(scan, triage_path, out, previous_path=None, root=ROOT):
                "alertsByLevel": dict(sorted(collections.Counter(r["level"] for r in rows).items())),
                "coverage": coverage}
     if previous_path:
-        previous, _ = read_triage(Path(previous_path))
-        summary["previous"] = {"alerts": {p: sum(r["project"] == p for r in previous) for p in PROJECTS},
-                               "alertsByCategory": dict(sorted(collections.Counter(r["category"] for r in previous).items()))}
+        previous = list(csv.DictReader(Path(previous_path).open(newline="")))
+        projects = [r.get("project") or r["target"] for r in previous]
+        categories = [r.get("category") or r["judgment"] for r in previous]
+        summary["previous"] = {"version": previous_version,
+                               "alerts": {p: projects.count(p) for p in PROJECTS},
+                               "alertsByCategory": dict(sorted(collections.Counter(categories).items()))}
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     return summary
 
@@ -129,11 +134,12 @@ def main():
     parser.add_argument("--scan", type=Path, required=True)
     parser.add_argument("--triage", type=Path, required=True)
     parser.add_argument("--previous-triage", type=Path)
+    parser.add_argument("--previous-version", help="version label of the previous triage")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     try:
-        summary = summarize(args.scan, args.triage, args.out, args.previous_triage)
+        summary = summarize(args.scan, args.triage, args.out, args.previous_triage, previous_version=args.previous_version)
     except (OSError, ValueError, KeyError) as error:
         parser.exit(2, f"summarize_scan: {error}\n")
     print(json.dumps({key: summary[key] for key in ("version", "alerts", "alertsByCategory")}))
