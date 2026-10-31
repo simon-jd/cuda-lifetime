@@ -1,25 +1,40 @@
 # cuda-lifetime: a Clang Static Analyzer checker for CUDA asynchronous lifetimes
 
-CUDA host code queues work and returns immediately: `cudaMemcpyAsync`, kernel
-launches and `cudaFreeAsync` take effect later, in stream order. Code that
-reads a destination buffer, overwrites a source, or frees memory before that
-work is known to be complete has a race that tests rarely show, because the
-outcome depends on timing and, for pageable memory, on driver behavior.
+**The problem.** CUDA host code queues work and returns immediately:
+`cudaMemcpyAsync`, kernel launches and `cudaFreeAsync` take effect later, in
+stream order. Code that reads a destination buffer, overwrites a source, or
+frees memory before that work is known to be complete has a race that tests
+rarely show, because the outcome depends on timing and, for pageable memory, on
+driver behavior.
 
-`cuda-lifetime` is an out-of-tree, path-sensitive checker for the Clang Static
-Analyzer (LLVM 23.1.3) that finds these races in host code. It tracks each
-stream's queue, the buffers pending operations use, what each synchronization
-call proves complete, and what each event captures, and reports a SARIF path
-from the queueing call to the conflicting access. A Python driver translates an
-nvcc `compile_commands.json` into Clang host-only commands, runs one analyzer
-process per translation unit and reports coverage gaps instead of hiding them.
+**The approach.** `cuda-lifetime` is an out-of-tree, path-sensitive checker
+for the Clang Static Analyzer (LLVM 23.1.3). Along each path through host code
+it tracks every stream's queue, the buffers pending operations use, what each
+synchronization proves complete and what each event captures, and reports a
+SARIF path from the queueing call to the conflicting access. A Python driver
+translates an nvcc `compile_commands.json` into Clang host-only commands, runs
+one analyzer process per translation unit and reports coverage gaps instead of
+counting them as clean.
 
-**Status: 0 confirmed defects.** On 477 host translation units of
-cuda-samples, faiss and RMM, version 0.4.0 reports 36 alerts, all warnings or
-notes: 22 portability findings (code that is correct only because pageable
-copies are synchronous on current drivers), 3 informational notes and 11 false
-positives. On its hand-written labelled corpora it scores 10/0/0/10 (seed) and
-25/1/0/23 (holdout, first frozen run) as TP/FP/FN/TN.
+**What it found: 0 confirmed defects.** On 477 host translation units of
+cuda-samples 13.2, faiss 1.15.1's GPU module and RMM 26.10, version 0.4.0
+reports 36 alerts, all warnings or notes:
+
+- **22 portability findings**, 19 of them in faiss: host code that reads or
+  frees ordinary `malloc`/`new[]` memory right after `cudaMemcpyAsync`, with
+  no synchronization in between. It works only because current drivers make
+  pageable copies synchronous, which CUDA permits but does not promise. Pin the
+  same buffers, a common optimization, and the copy no longer waits: reading a
+  pinned D2H destination early, [`probes/stale_read.cu`](probes/stale_read.cu)
+  got the stale value in 20 of 20 runs on an RTX 4090, against 0 of 20 with
+  pageable memory.
+- 3 informational notes and 11 false positives, 8 of them from one faiss
+  helper whose result the analyzer cannot relate to the pointer.
+
+On its hand-written labelled corpora it scores 10/0/0/10 (seed) and 25/1/0/23
+(holdout, first frozen run) as TP/FP/FN/TN. Large parts of the scanned code
+were only partly explored, and several CUDA idioms are not modeled; see
+[Limitations](#limitations) before reading the zero as "no races".
 
 ```cpp
 int early_read(void *device, cudaStream_t stream) {
