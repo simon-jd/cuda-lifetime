@@ -1,0 +1,326 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-14T06:57:34.691368+00:00",
+  "split": "holdout",
+  "labels": {
+    "file": "corpus/holdout/labels.json",
+    "sha256": "8a83d42ebd41140f33fe4e84e8c43992c3ea6c28dbacc6b61f4dda0318651d74"
+  },
+  "sources": [
+    {
+      "file": "corpus/holdout/h01_interior_write_bad.cpp",
+      "sha256": "e6e93174402983011ab1d606cde54aa0e647a8228fc79174ac7b3bb0d5beddb9"
+    },
+    {
+      "file": "corpus/holdout/h01_interior_write_good.cpp",
+      "sha256": "7f2a7508c17d9681ebf57f281c9d1e47e866d5719a2fafc1f8d01ef4decf9677"
+    },
+    {
+      "file": "corpus/holdout/h02_wrong_stream_sync_bad.cpp",
+      "sha256": "876dcf7de3af833ced9feb2e1e28facb1fcffd7b893e2e744ad16cc86c69f660"
+    },
+    {
+      "file": "corpus/holdout/h02_wrong_stream_sync_good.cpp",
+      "sha256": "ea9dbc4052bfc6ff9daf7ba9d1f81fe5e564e56466ca1527cb4a8ff13da376c6"
+    },
+    {
+      "file": "corpus/holdout/h03_wait_is_not_host_completion_bad.cpp",
+      "sha256": "ffddbe49e0d7eb3fb1d16ab2e8aa756fbc1dbf2acb692d83f0d9f0e567797508"
+    },
+    {
+      "file": "corpus/holdout/h03_wait_is_not_host_completion_good.cpp",
+      "sha256": "dc07f899b3c0956b1e61bcc014c45e22ec1c47092d0139fcac230e2415eb2a80"
+    },
+    {
+      "file": "corpus/holdout/h04_branch_completion_bad.cpp",
+      "sha256": "253a59be0eea24b2bc05160472d37fb77c94653a074be0eb5be090dfb4de59a3"
+    },
+    {
+      "file": "corpus/holdout/h04_branch_completion_good.cpp",
+      "sha256": "f6e8cc978a4d63441b8ba12e2c2aec43232e32dc019f1d5a3d5d76e34f2417dd"
+    },
+    {
+      "file": "corpus/holdout/h05_sibling_field_bad.cpp",
+      "sha256": "5e72037ce5c8322baa31a0807f964bacf0626b80b3303c282ad4de0aa5290d5c"
+    },
+    {
+      "file": "corpus/holdout/h05_sibling_field_good.cpp",
+      "sha256": "7bfc6c77fb034439e6bae03c845d2f98a8e31c46ab0fd524b37943e49ae9eecc"
+    },
+    {
+      "file": "corpus/holdout/h06_copy_byte_extent_bad.cpp",
+      "sha256": "f78bce8af8c2d628a60c1acd8f4dcdbf0b3d3d42f09d69b96323fe1da10e9aa8"
+    },
+    {
+      "file": "corpus/holdout/h06_copy_byte_extent_good.cpp",
+      "sha256": "b5bb9e533b68bd76e969749aeae42a40818964fd467ceb3124350e1d888c26ca"
+    },
+    {
+      "file": "corpus/holdout/h07_stack_interior_return_bad.cpp",
+      "sha256": "27e30c643bb3dd85e94e9f6552c51b54c8f599052416325ce7b53704f3b2cb94"
+    },
+    {
+      "file": "corpus/holdout/h07_stack_interior_return_good.cpp",
+      "sha256": "120b9a17c1dc59eddf2d86c9ab020095eda4e34e2f74e9e9ef4834165c58ce19"
+    },
+    {
+      "file": "corpus/holdout/h08_unregister_pending_bad.cpp",
+      "sha256": "7957a969795251ebd70caa6bea94500f4e8db65d12d51f2f02825adf8be0365b"
+    },
+    {
+      "file": "corpus/holdout/h08_unregister_pending_good.cpp",
+      "sha256": "d960fdd38f469588150c3bf513a1eff23f52ab8b27589bf42fd337e1d400cb04"
+    },
+    {
+      "file": "corpus/holdout/h09_opaque_destructor_bad.cpp",
+      "sha256": "4ae8b06f26286670456e298af82be3869aef6c2641c25d427d0e1d1f807ade7c"
+    },
+    {
+      "file": "corpus/holdout/h09_opaque_destructor_good.cpp",
+      "sha256": "1088176250df3849df37ad731d604a1ddc2077a6a7721b67387f7bf0c7205023"
+    },
+    {
+      "file": "corpus/holdout/h10_freehost_alias_bad.cpp",
+      "sha256": "f22c4ef59d1cb5ec58decafc1b152ee0de12c07697ef5a6ce1ca6765290240b7"
+    },
+    {
+      "file": "corpus/holdout/h10_freehost_alias_good.cpp",
+      "sha256": "e981daa4b81111910b7eff0457f653b7d7e2c6207f2947713bd46cdfd8f9f652"
+    },
+    {
+      "file": "corpus/holdout/h11_pageable_stack_return_bad.cpp",
+      "sha256": "567c1634dd5bf70f8fa3660e3e8b6d13f12f4c8d76236205123fa348aea56925"
+    },
+    {
+      "file": "corpus/holdout/h11_pageable_stack_return_good.cpp",
+      "sha256": "93eccb35e61c7efad14c431899cde64128f0b008ebb922d02f8cc4aa3a461b2d"
+    },
+    {
+      "file": "corpus/holdout/h12_registered_field_return_bad.cpp",
+      "sha256": "d83956633c5e4b69d909d78e9f93a4a8bcded12036a0be4f87ccb58cdd565d1b"
+    },
+    {
+      "file": "corpus/holdout/h12_registered_field_return_good.cpp",
+      "sha256": "6ca5827f78d43ee9016e1a30cc2878ab729e286d281dd79fe102f2beb65ff837"
+    },
+    {
+      "file": "corpus/holdout/h13_transitive_dependency_bad.cpp",
+      "sha256": "662dda3079de13245a3966a57039097f232cb9ef65651e95df25426b6fd82446"
+    },
+    {
+      "file": "corpus/holdout/h13_transitive_dependency_good.cpp",
+      "sha256": "483132903c4be2a5175ce112f33e105b4930049efc688f9ca9ab2bb4ea1773a8"
+    },
+    {
+      "file": "corpus/holdout/h14_rerecord_replaces_capture_bad.cpp",
+      "sha256": "0bb2ee59b60b60e3c7667932ada893590476a7433eda5bb5831a281014f1bf7b"
+    },
+    {
+      "file": "corpus/holdout/h14_rerecord_replaces_capture_good.cpp",
+      "sha256": "69daf5111d41497ef235bd2d86dd2ab70bdf03e7db493cbf1184afa4c922c156"
+    },
+    {
+      "file": "corpus/holdout/h15_free_after_remote_use_bad.cpp",
+      "sha256": "30181049ee40df35e071cff44b65636fb485d5c43e5b9da317124ff0e83329a7"
+    },
+    {
+      "file": "corpus/holdout/h15_free_after_remote_use_good.cpp",
+      "sha256": "b13cffa7a43a4426ed75830a1d31b9e603bf43d151a8d1b09c283c23de5bb667"
+    },
+    {
+      "file": "corpus/holdout/h16_cudafree_wrong_sync_bad.cpp",
+      "sha256": "0c2a4a003c3c1e2d4dd6487c60d7401eff056a3cbc36d7d0983d96fccee427b2"
+    },
+    {
+      "file": "corpus/holdout/h16_cudafree_wrong_sync_good.cpp",
+      "sha256": "2d21d15e8ac15305c51ee094e8790902f040e3016b3370f98ec0f8c158849ac1"
+    },
+    {
+      "file": "corpus/holdout/h17_legacy_blocking_order_bad.cpp",
+      "sha256": "315d498a464e9de7c44655c6dcb15b76cd8c43078f80f1160dedaded6af5bdef"
+    },
+    {
+      "file": "corpus/holdout/h17_legacy_blocking_order_good.cpp",
+      "sha256": "d74d6cb00c337388a57011493bbee8e9407db0dfc854e17b446624998090217b"
+    },
+    {
+      "file": "corpus/holdout/h18_perthread_not_legacy_bad.cpp",
+      "sha256": "ed45b7919f2ca2944065a9657757f37f6e7f8a4bcd22e2caeee1301327853860"
+    },
+    {
+      "file": "corpus/holdout/h18_perthread_not_legacy_good.cpp",
+      "sha256": "2b4ae9ff43ab507dc8746778ac724315c5a3b84f7d3f9b252c4a595fdfe4f28d"
+    },
+    {
+      "file": "corpus/holdout/h19_empty_event_host_wait_bad.cpp",
+      "sha256": "99e7327257a1c0003dec44c1af29b28b8d80bf465ab638f21cb5743fac8127fa"
+    },
+    {
+      "file": "corpus/holdout/h19_empty_event_host_wait_good.cpp",
+      "sha256": "73f8b40dae8b4010443b68c911bbee2e3495789cec7f6a00e45b3baaa0aab501"
+    },
+    {
+      "file": "corpus/holdout/h20_capture_before_copy_bad.cpp",
+      "sha256": "d875cf07bdbfa5ebffc7d9a9e5619a243cce6a3d24011ef39ae5e19263529db5"
+    },
+    {
+      "file": "corpus/holdout/h20_capture_before_copy_good.cpp",
+      "sha256": "d172e2af2af8d87794d54ffae7d1b97e558b51745ea3ab903f06825dcb129c68"
+    },
+    {
+      "file": "corpus/holdout/h21_capture_between_copies_bad.cpp",
+      "sha256": "55040aa1f318e5902259552d6d34672e04cffd31c0d4f8c1d133a7a81f6e3db5"
+    },
+    {
+      "file": "corpus/holdout/h21_capture_between_copies_good.cpp",
+      "sha256": "74cbb231a31f190829cf5be9a62dcb87b5968bad08175c82e34e47720b9312a7"
+    },
+    {
+      "file": "corpus/holdout/h22_wait_snapshot_not_retroactive_bad.cpp",
+      "sha256": "5a0873360e49135df2bc659d3c45b315adaf8ad490ec6cb809041928ec5e7407"
+    },
+    {
+      "file": "corpus/holdout/h22_wait_snapshot_not_retroactive_good.cpp",
+      "sha256": "493ebee9edd8eeeb8c07bd2fea1f5b6c0c8b7a5d6bffce1f978d394e13fefb97"
+    },
+    {
+      "file": "corpus/holdout/h23_stale_event_host_wait_bad.cpp",
+      "sha256": "2b9ddcbc4a73e0c9110222f3ac9e36647da50f88e9356cecee60bdab684b6068"
+    },
+    {
+      "file": "corpus/holdout/h23_stale_event_host_wait_good.cpp",
+      "sha256": "0ea23de56435954a978f6345f12f262af3e7758dbafdca092ac28f31cf4afff0"
+    },
+    {
+      "file": "corpus/holdout/h24_destroy_is_legal_bad.cpp",
+      "sha256": "08eb2fd87e44937b887ab338885b3d0383e01ebc6aa73f01757fcf4def6193ed"
+    },
+    {
+      "file": "corpus/holdout/h24_destroy_is_legal_good.cpp",
+      "sha256": "0c99a2d626ef5145c582bdefb1f341807467962d96517bf725dfcdeee4186821"
+    }
+  ],
+  "rules": [
+    {
+      "file": "CMakeLists.txt",
+      "sha256": "7386302cf8ab4bf4f85bec4717892970c4277becdea1c7ca06947ec586325ead"
+    },
+    {
+      "file": "build-assertions/cuda-lifetime-native",
+      "sha256": "44f9222f153f585c7bf1dd6bf03ca03449c89a820efa957f61c268915efab7b1"
+    },
+    {
+      "file": "checker/AsyncLifetime.cpp",
+      "sha256": "a7cb48e91c7bc842e02663870d38d82a9d1952c72403ee86f4581cdebc15d238"
+    },
+    {
+      "file": "checker/AsyncLifetime.h",
+      "sha256": "2f0bd78b42920a760177025ab938fda974a82c7a2341d6424e15d87e6fa4ef4e"
+    },
+    {
+      "file": "checker/Models.cpp",
+      "sha256": "c848a0016758b6cf5bc07e9e0c394a2a4b62271a97594e35f3c97c57fdbbf0f6"
+    },
+    {
+      "file": "corpus/holdout/authorship.json",
+      "sha256": "d83f4cccb347102ff985fbe500557c0e2513f0436cb8868c2df650e2a524147f"
+    },
+    {
+      "file": "corpus/include/cuda_runtime.h",
+      "sha256": "5ae5a9ea338d04ed41a44f652246370cce3be278ebcbdaa45257abd2999fc7c0"
+    },
+    {
+      "file": "docs/semantics.md",
+      "sha256": "af8f5b91fe9ee9c9de9125e4471f1d60341b5f9242ec4d9c4a1bd0934172cea4"
+    },
+    {
+      "file": "environment.lock",
+      "sha256": "341328d16a1c5ea9ff378232fc213df6dd17851d20f7e7dcacf45a6894e3394f"
+    },
+    {
+      "file": "eval/__init__.py",
+      "sha256": "a5f91d0019a07b0dab10a3fe9f9b7bb9c1916c887b8f80041c829d3ab6cb9f45"
+    },
+    {
+      "file": "eval/__main__.py",
+      "sha256": "55bf4aa21796064339dadc0ee7829048594577274c7d0c406229b56070f5f9d4"
+    },
+    {
+      "file": "eval/freeze.py",
+      "sha256": "aeed291491848a3367c5fa6a115da0e7fde33182c403e0cb4f90b61c0e42e2b1"
+    },
+    {
+      "file": "eval/metrics.py",
+      "sha256": "b26a27ba7fc978d15e621bb6e6bb5ac387c213c418287aea75475fc9c1b09454"
+    },
+    {
+      "file": "eval/mutate.py",
+      "sha256": "2d6118b5d79e2e822f0a693a3ee1fc494e00ad580246fd2bc4f95b1e7cce4d8f"
+    },
+    {
+      "file": "eval/mutation_report.py",
+      "sha256": "61e0cf5cf9bf5ac7ffa2fabcc45e45f0cb460c4d9252c860065643eb1c3afed6"
+    },
+    {
+      "file": "models/faiss.json",
+      "sha256": "0733fdbb4d7765646ee9a16077ff55be5add8830b2048e67339523f18ab1634d"
+    },
+    {
+      "file": "models/rmm.json",
+      "sha256": "fa6c30c11d809bdb5d99b94ff5c7b78feee5cb6b7277021adc5adcef02ad5c39"
+    },
+    {
+      "file": "results/environment/source-toolchain.json",
+      "sha256": "b66f4f1bda5dc07b9ff6ba0f74d13a205b573bb78483507abb028956b84e673d"
+    },
+    {
+      "file": "results/holdout-dependencies.json",
+      "sha256": "d09c3454bbd64ea1b31aa82d83a4942ed5a97988a6634fc8234cf26a7c93ec31"
+    },
+    {
+      "file": "tests/run_holdout.py",
+      "sha256": "4575a800df8000f1434fc5b05496cacc82d5546176604d57b262f90e0877df1f"
+    },
+    {
+      "file": "tool/SarifConsumer.cpp",
+      "sha256": "1039d778d5ec92763089dbd77042eb846b323c0eed88731cb9c148fe35c03bd2"
+    },
+    {
+      "file": "tool/SarifConsumer.h",
+      "sha256": "cc5bcc93930f6f68e8a8edf0860613d6a7b766b982662fb1366c9f8d47ad1c68"
+    },
+    {
+      "file": "tool/__init__.py",
+      "sha256": "564ec58b0fe98339efe7d7003246f91b2242ade403f4c23a34eb6b645ff1693a"
+    },
+    {
+      "file": "tool/cli.py",
+      "sha256": "cb1a3fd88ad2c5e23696a656fc7c94553e44ec8cf3bf6da48840e70d996d0f70"
+    },
+    {
+      "file": "tool/main.cpp",
+      "sha256": "ed329abc24ed5d077fcaf5a79d3ab246ffca9a1e5124c9eb71e219599fde0d27"
+    },
+    {
+      "file": "tool/runner.py",
+      "sha256": "f32bf0f3277a615f945dd3996520da7670f97207169c8cc64942f9b08145e0ef"
+    },
+    {
+      "file": "translate/__init__.py",
+      "sha256": "05637c26a654821fdfd73e9fff9cb0fb2ce39861ec59f6f814540a8af58b8e80"
+    },
+    {
+      "file": "translate/__main__.py",
+      "sha256": "9815158bfd55c00abaa4b7a79569f7f2dac9e330cc7ee9e9cd2cd65cb73e49be"
+    },
+    {
+      "file": "translate/compdb.py",
+      "sha256": "cfcb64997e637b123962beca90ab3d77e1b53c5f6f729895a4f9142dab1cdadf"
+    },
+    {
+      "file": "translate/macros.py",
+      "sha256": "2e725d68bbad2674ce0bf7d1a64a33921dc817394b74209c2339d8710ce8a3a6"
+    }
+  ],
+  "protocol": "hash-current-artifacts; no claim of pre-development independence"
+}

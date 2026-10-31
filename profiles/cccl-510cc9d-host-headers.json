@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "profile": "cccl-510cc9d-host-headers",
+  "ccclRoot": "/opt/cuda-lifetime-compat/candidate-510cc9d/cccl-510cc9de1ea656a453d6072ea3e1f6097410db9a"
+}

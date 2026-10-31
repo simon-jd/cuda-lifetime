@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "target": "RMM v26.10.00",
+  "models": [
+    {
+      "function": "rmm::detail::memcpy_async",
+      "aliases": [],
+      "effect": "enqueue_copy",
+      "args": {"dst": 0, "src": 1, "stream": 3},
+      "userAssumption": true,
+      "assumption": true,
+      "rationale": "Opaque summary only: memcpyDefault direction and cuda::stream_ref extraction are unknown unless the checker can infer them. Unknown-copy-kind must be reported in coverage, not silently treated as safe. The real CUDA 13 path may use cudaMemcpyBatchAsync.",
+      "source": "cpp/src/cuda_memcpy.cpp:11",
+      "doc": {"url": "https://github.com/rapidsai/rmm/blob/v26.10.00/cpp/src/cuda_memcpy.cpp", "anchor": "L11", "cudaVersion": "13.2.2"}
+    }
+  ]
+}

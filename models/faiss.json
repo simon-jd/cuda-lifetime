@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "target": "faiss v1.15.1",
+  "models": [
+    {
+      "function": "faiss::gpu::synchronizeAllDevices",
+      "aliases": [],
+      "effect": "sync_device",
+      "args": {},
+      "userAssumption": true,
+      "assumption": true,
+      "rationale": "Within the single-device scope, the wrapper synchronizes the current device. Its checked implementation loops over devices and calls cudaDeviceSynchronize.",
+      "source": "faiss/gpu/utils/DeviceUtils.cu:51",
+      "doc": {
+        "url": "https://github.com/facebookresearch/faiss/blob/v1.15.1/faiss/gpu/utils/DeviceUtils.cu",
+        "anchor": "L51",
+        "cudaVersion": "13.2.2"
+      }
+    },
+    {
+      "function": "faiss::gpu::getDeviceForAddress",
+      "aliases": [],
+      "effect": "address_only",
+      "args": {},
+      "userAssumption": true,
+      "assumption": true,
+      "rationale": "Calls cudaPointerGetAttributes on the pointer value and reads the returned attributes; it never dereferences the buffer.",
+      "source": "faiss/gpu/utils/DeviceUtils.cu:107",
+      "doc": {
+        "url": "https://github.com/facebookresearch/faiss/blob/v1.15.1/faiss/gpu/utils/DeviceUtils.cu",
+        "anchor": "L107",
+        "cudaVersion": "13.2.2"
+      }
+    }
+  ]
+}

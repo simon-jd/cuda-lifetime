@@ -1,0 +1,28 @@
+#pragma once
+using cudaStream_t = struct StreamHandle *;
+using cudaEvent_t = struct EventHandle *;
+extern int cudaMallocHost(void **, unsigned long);
+extern int cudaHostRegister(void *, unsigned long, unsigned);
+extern int cudaMalloc(void **, unsigned long);
+extern int cudaMallocAsync(void **, unsigned long, cudaStream_t);
+extern int cudaFreeHost(void *);
+extern int cudaFree(void *);
+extern int cudaFreeAsync(void *, cudaStream_t);
+extern int cudaMemcpyAsync(void *, const void *, unsigned long, int, cudaStream_t);
+extern int cudaDeviceSynchronize();
+extern int cudaStreamSynchronize(cudaStream_t);
+extern int cudaEventSynchronize(cudaEvent_t);
+extern int cudaEventRecord(cudaEvent_t, cudaStream_t);
+extern int cudaStreamWaitEvent(cudaStream_t, cudaEvent_t, unsigned);
+extern int cudaStreamCreateWithFlags(cudaStream_t *, unsigned);
+extern int cudaEventCreate(cudaEvent_t *);
+extern int cudaEventCreateWithFlags(cudaEvent_t *, unsigned);
+extern int cudaEventElapsedTime(float *, cudaEvent_t, cudaEvent_t);
+extern int cudaEventQuery(cudaEvent_t);
+extern int cudaStreamQuery(cudaStream_t);
+using cudaGraph_t = struct GraphHandle *;
+extern int cudaMemcpy(void *, const void *, unsigned long, int);
+extern int cudaMemset(void *, int, unsigned long);
+extern int cudaMemsetAsync(void *, int, unsigned long, cudaStream_t);
+extern int cudaStreamBeginCapture(cudaStream_t, int);
+extern int cudaStreamEndCapture(cudaStream_t, cudaGraph_t *);

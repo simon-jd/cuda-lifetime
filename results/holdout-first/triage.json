@@ -1,0 +1,29 @@
+{
+  "kind": "read-only-first-holdout-result-triage",
+  "recordedAt": "2026-10-14T06:59:58.365065+00:00",
+  "noRuleOrLabelChanges": true,
+  "noRerun": true,
+  "falsePositives": [
+    {
+      "case": "h04_branch_completion_good",
+      "ruleId": "CL1",
+      "file": "corpus/holdout/h04_branch_completion_good.cpp",
+      "line": 9,
+      "level": "error",
+      "expected": "none",
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "observation": "The two complementary branches call stream or device synchronization before the host read. The emitted path takes finish=false, then the true !finish branch containing cudaDeviceSynchronize, yet reports the host read as pending. The predetermined negative oracle is retained."
+    }
+  ],
+  "firstArtifactSha256": {
+    "corpus/holdout/freeze.json": "15192a4ff6c0bb1f4132d4ed90fb9b18815fb5303bbb331603d162226fb88fb8",
+    "corpus/holdout/freeze.json.first-run.json": "81cd45b037ce38b287eb559c99745df8b2a49a40bc7955e8cb35918f3cdba25c",
+    "results/holdout-first/first-result.json": "c46a406c8693db22037ca65e838238644fba77217effb00d2cafdb8961e75338",
+    "results/holdout-first/metrics.json": "b678ca25e1ed7d80b83cfd24e564219d08bc9ea35a52356518ed3dbb0135cc91",
+    "results/holdout-first/out.sarif": "dab374f7d5a3c2f7080ff7d001e1dabf107ee220b0534638865b433a28ad0fb8",
+    "results/holdout-first/coverage.json": "9eb767daf84a28fe041779e4670a32bf59fbf45b34bd0a57284996c30269d691"
+  }
+}

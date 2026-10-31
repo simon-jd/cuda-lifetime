@@ -1,0 +1,644 @@
+{
+  "schemaVersion": 1,
+  "split": "holdout",
+  "authoredAt": "2026-10-14T05:55:29.686816+00:00",
+  "labelOrigin": "Paired scenarios written by hand from docs/semantics.md; sources and labels were written before the rule freeze and before any of these files was run through the checker.",
+  "executionStatus": "not-run",
+  "cases": [
+    {
+      "id": "h01_interior_write_bad",
+      "file": "corpus/holdout/h01_interior_write_bad.cpp",
+      "ruleId": "CL1",
+      "line": 11,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "An interior alias modifies pinned H2D source bytes before covering event completion."
+    },
+    {
+      "id": "h01_interior_write_good",
+      "file": "corpus/holdout/h01_interior_write_good.cpp",
+      "ruleId": "CL1",
+      "line": 12,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "An interior alias modifies pinned H2D source bytes before covering event completion."
+    },
+    {
+      "id": "h02_wrong_stream_sync_bad",
+      "file": "corpus/holdout/h02_wrong_stream_sync_bad.cpp",
+      "ruleId": "CL1",
+      "line": 12,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "Synchronizing an unrelated nonblocking stream does not complete the producing D2H stream."
+    },
+    {
+      "id": "h02_wrong_stream_sync_good",
+      "file": "corpus/holdout/h02_wrong_stream_sync_good.cpp",
+      "ruleId": "CL1",
+      "line": 12,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "Synchronizing an unrelated nonblocking stream does not complete the producing D2H stream."
+    },
+    {
+      "id": "h03_wait_is_not_host_completion_bad",
+      "file": "corpus/holdout/h03_wait_is_not_host_completion_bad.cpp",
+      "ruleId": "CL1",
+      "line": 15,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S1",
+        "S3",
+        "S8"
+      ],
+      "rationale": "A device-side event wait orders b after a, but host access still needs completion; synchronizing b covers the dependency."
+    },
+    {
+      "id": "h03_wait_is_not_host_completion_good",
+      "file": "corpus/holdout/h03_wait_is_not_host_completion_good.cpp",
+      "ruleId": "CL1",
+      "line": 16,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S1",
+        "S3",
+        "S8"
+      ],
+      "rationale": "A device-side event wait orders b after a, but host access still needs completion; synchronizing b covers the dependency."
+    },
+    {
+      "id": "h04_branch_completion_bad",
+      "file": "corpus/holdout/h04_branch_completion_bad.cpp",
+      "ruleId": "CL1",
+      "line": 8,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "There is an unsynchronized branch in the positive; both branch outcomes establish completion in the negative."
+    },
+    {
+      "id": "h04_branch_completion_good",
+      "file": "corpus/holdout/h04_branch_completion_good.cpp",
+      "ruleId": "CL1",
+      "line": 9,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "There is an unsynchronized branch in the positive; both branch outcomes establish completion in the negative."
+    },
+    {
+      "id": "h05_sibling_field_bad",
+      "file": "corpus/holdout/h05_sibling_field_bad.cpp",
+      "ruleId": "CL1",
+      "line": 8,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "A copy of one registered struct field does not create a host hazard on disjoint sibling storage."
+    },
+    {
+      "id": "h05_sibling_field_good",
+      "file": "corpus/holdout/h05_sibling_field_good.cpp",
+      "ruleId": "CL1",
+      "line": 8,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "A copy of one registered struct field does not create a host hazard on disjoint sibling storage."
+    },
+    {
+      "id": "h06_copy_byte_extent_bad",
+      "file": "corpus/holdout/h06_copy_byte_extent_bad.cpp",
+      "ruleId": "CL1",
+      "line": 7,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "The D2H destination covers elements 1 and 2; element 5 is outside the pending transfer range."
+    },
+    {
+      "id": "h06_copy_byte_extent_good",
+      "file": "corpus/holdout/h06_copy_byte_extent_good.cpp",
+      "ruleId": "CL1",
+      "line": 7,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "The D2H destination covers elements 1 and 2; element 5 is outside the pending transfer range."
+    },
+    {
+      "id": "h07_stack_interior_return_bad",
+      "file": "corpus/holdout/h07_stack_interior_return_bad.cpp",
+      "ruleId": "CL2",
+      "line": 7,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "Ending registered automatic storage invalidates every interior region still used by an H2D transfer."
+    },
+    {
+      "id": "h07_stack_interior_return_good",
+      "file": "corpus/holdout/h07_stack_interior_return_good.cpp",
+      "ruleId": "CL2",
+      "line": 8,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "Ending registered automatic storage invalidates every interior region still used by an H2D transfer."
+    },
+    {
+      "id": "h08_unregister_pending_bad",
+      "file": "corpus/holdout/h08_unregister_pending_bad.cpp",
+      "ruleId": "CL2",
+      "line": 9,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "Unregistering a host range while its transfer may remain pending is contract severity; event completion removes the hazard."
+    },
+    {
+      "id": "h08_unregister_pending_good",
+      "file": "corpus/holdout/h08_unregister_pending_good.cpp",
+      "ruleId": "CL2",
+      "line": 10,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "Unregistering a host range while its transfer may remain pending is contract severity; event completion removes the hazard."
+    },
+    {
+      "id": "h09_opaque_destructor_bad",
+      "file": "corpus/holdout/h09_opaque_destructor_bad.cpp",
+      "ruleId": "CL2",
+      "line": 9,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "An opaque destructor ending an object containing the pending registered host buffer is contractual; synchronization must occur before scope exit."
+    },
+    {
+      "id": "h09_opaque_destructor_good",
+      "file": "corpus/holdout/h09_opaque_destructor_good.cpp",
+      "ruleId": "CL2",
+      "line": 10,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "An opaque destructor ending an object containing the pending registered host buffer is contractual; synchronization must occur before scope exit."
+    },
+    {
+      "id": "h10_freehost_alias_bad",
+      "file": "corpus/holdout/h10_freehost_alias_bad.cpp",
+      "ruleId": "CL2",
+      "line": 8,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "Freeing through an alias ends the same pinned allocation; cudaFreeHost itself has no documented completion guarantee."
+    },
+    {
+      "id": "h10_freehost_alias_good",
+      "file": "corpus/holdout/h10_freehost_alias_good.cpp",
+      "ruleId": "CL2",
+      "line": 9,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "Freeing through an alias ends the same pinned allocation; cudaFreeHost itself has no documented completion guarantee."
+    },
+    {
+      "id": "h11_pageable_stack_return_bad",
+      "file": "corpus/holdout/h11_pageable_stack_return_bad.cpp",
+      "ruleId": "CL2",
+      "line": 6,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S2",
+        "S4",
+        "S3"
+      ],
+      "rationale": "Pageable automatic destination lifetime ends without completion: contract severity, not a guaranteed asynchronous failure."
+    },
+    {
+      "id": "h11_pageable_stack_return_good",
+      "file": "corpus/holdout/h11_pageable_stack_return_good.cpp",
+      "ruleId": "CL2",
+      "line": 7,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S2",
+        "S4",
+        "S3"
+      ],
+      "rationale": "Pageable automatic destination lifetime ends without completion: contract severity, not a guaranteed asynchronous failure."
+    },
+    {
+      "id": "h12_registered_field_return_bad",
+      "file": "corpus/holdout/h12_registered_field_return_bad.cpp",
+      "ruleId": "CL2",
+      "line": 8,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "Returning invalidates a registered member array just as it invalidates a directly declared automatic array."
+    },
+    {
+      "id": "h12_registered_field_return_good",
+      "file": "corpus/holdout/h12_registered_field_return_good.cpp",
+      "ruleId": "CL2",
+      "line": 9,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "Returning invalidates a registered member array just as it invalidates a directly declared automatic array."
+    },
+    {
+      "id": "h13_transitive_dependency_bad",
+      "file": "corpus/holdout/h13_transitive_dependency_bad.cpp",
+      "ruleId": "CL3",
+      "line": 16,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S5",
+        "S8"
+      ],
+      "rationale": "Allocation ordering propagates through event captures and waits on a three-stream chain only when the final wait is present."
+    },
+    {
+      "id": "h13_transitive_dependency_good",
+      "file": "corpus/holdout/h13_transitive_dependency_good.cpp",
+      "ruleId": "CL3",
+      "line": 17,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S5",
+        "S8"
+      ],
+      "rationale": "Allocation ordering propagates through event captures and waits on a three-stream chain only when the final wait is present."
+    },
+    {
+      "id": "h14_rerecord_replaces_capture_bad",
+      "file": "corpus/holdout/h14_rerecord_replaces_capture_bad.cpp",
+      "ruleId": "CL3",
+      "line": 15,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S5",
+        "S8"
+      ],
+      "rationale": "Re-recording on an unrelated stream replaces the allocation-covering capture; old captures are not accumulated."
+    },
+    {
+      "id": "h14_rerecord_replaces_capture_good",
+      "file": "corpus/holdout/h14_rerecord_replaces_capture_good.cpp",
+      "ruleId": "CL3",
+      "line": 15,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S5",
+        "S8"
+      ],
+      "rationale": "Re-recording on an unrelated stream replaces the allocation-covering capture; old captures are not accumulated."
+    },
+    {
+      "id": "h15_free_after_remote_use_bad",
+      "file": "corpus/holdout/h15_free_after_remote_use_bad.cpp",
+      "ruleId": "CL3",
+      "line": 14,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S6",
+        "S8"
+      ],
+      "rationale": "Completing allocation does not complete a later use; the freeing stream must cover the consumer operation."
+    },
+    {
+      "id": "h15_free_after_remote_use_good",
+      "file": "corpus/holdout/h15_free_after_remote_use_good.cpp",
+      "ruleId": "CL3",
+      "line": 16,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S6",
+        "S8"
+      ],
+      "rationale": "Completing allocation does not complete a later use; the freeing stream must cover the consumer operation."
+    },
+    {
+      "id": "h16_cudafree_wrong_sync_bad",
+      "file": "corpus/holdout/h16_cudafree_wrong_sync_bad.cpp",
+      "ruleId": "CL3",
+      "line": 12,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S7",
+        "S3"
+      ],
+      "rationale": "Host synchronization of an unrelated stream does not make cudaFree safe for a pending stream-ordered allocation use."
+    },
+    {
+      "id": "h16_cudafree_wrong_sync_good",
+      "file": "corpus/holdout/h16_cudafree_wrong_sync_good.cpp",
+      "ruleId": "CL3",
+      "line": 12,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S7",
+        "S3"
+      ],
+      "rationale": "Host synchronization of an unrelated stream does not make cudaFree safe for a pending stream-ordered allocation use."
+    },
+    {
+      "id": "h17_legacy_blocking_order_bad",
+      "file": "corpus/holdout/h17_legacy_blocking_order_bad.cpp",
+      "ruleId": "CL3",
+      "line": 8,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S5",
+        "S9"
+      ],
+      "rationale": "Legacy default-stream ordering covers a known blocking producer but explicitly excludes nonblocking streams."
+    },
+    {
+      "id": "h17_legacy_blocking_order_good",
+      "file": "corpus/holdout/h17_legacy_blocking_order_good.cpp",
+      "ruleId": "CL3",
+      "line": 8,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S5",
+        "S9"
+      ],
+      "rationale": "Legacy default-stream ordering covers a known blocking producer but explicitly excludes nonblocking streams."
+    },
+    {
+      "id": "h18_perthread_not_legacy_bad",
+      "file": "corpus/holdout/h18_perthread_not_legacy_bad.cpp",
+      "ruleId": "CL3",
+      "line": 9,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S5",
+        "S8",
+        "S9"
+      ],
+      "rationale": "Per-thread default-stream mode does not inherit legacy ordering with ordinary blocking streams."
+    },
+    {
+      "id": "h18_perthread_not_legacy_good",
+      "file": "corpus/holdout/h18_perthread_not_legacy_good.cpp",
+      "ruleId": "CL3",
+      "line": 13,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S5",
+        "S8",
+        "S9"
+      ],
+      "rationale": "Per-thread default-stream mode does not inherit legacy ordering with ordinary blocking streams."
+    },
+    {
+      "id": "h19_empty_event_host_wait_bad",
+      "file": "corpus/holdout/h19_empty_event_host_wait_bad.cpp",
+      "ruleId": "CL4",
+      "line": 6,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S8"
+      ],
+      "rationale": "Before first record, event synchronization covers an empty capture; explicit record establishes its producer capture."
+    },
+    {
+      "id": "h19_empty_event_host_wait_good",
+      "file": "corpus/holdout/h19_empty_event_host_wait_good.cpp",
+      "ruleId": "CL4",
+      "line": 7,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S8"
+      ],
+      "rationale": "Before first record, event synchronization covers an empty capture; explicit record establishes its producer capture."
+    },
+    {
+      "id": "h20_capture_before_copy_bad",
+      "file": "corpus/holdout/h20_capture_before_copy_bad.cpp",
+      "ruleId": "CL4",
+      "line": 12,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S8"
+      ],
+      "rationale": "A capture preceding the producer copy does not include that copy; moving the record after the copy covers it."
+    },
+    {
+      "id": "h20_capture_before_copy_good",
+      "file": "corpus/holdout/h20_capture_before_copy_good.cpp",
+      "ruleId": "CL4",
+      "line": 12,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S8"
+      ],
+      "rationale": "A capture preceding the producer copy does not include that copy; moving the record after the copy covers it."
+    },
+    {
+      "id": "h21_capture_between_copies_bad",
+      "file": "corpus/holdout/h21_capture_between_copies_bad.cpp",
+      "ruleId": "CL4",
+      "line": 13,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S8"
+      ],
+      "rationale": "A nonempty capture may still be stale relative to a second producer operation."
+    },
+    {
+      "id": "h21_capture_between_copies_good",
+      "file": "corpus/holdout/h21_capture_between_copies_good.cpp",
+      "ruleId": "CL4",
+      "line": 13,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S8"
+      ],
+      "rationale": "A nonempty capture may still be stale relative to a second producer operation."
+    },
+    {
+      "id": "h22_wait_snapshot_not_retroactive_bad_cl4",
+      "file": "corpus/holdout/h22_wait_snapshot_not_retroactive_bad.cpp",
+      "ruleId": "CL4",
+      "line": 13,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S8",
+        "S5"
+      ],
+      "rationale": "A later record cannot update an already-issued wait snapshot; stale wait and subsequent unordered use are separately labelled."
+    },
+    {
+      "id": "h22_wait_snapshot_not_retroactive_bad_cl3",
+      "file": "corpus/holdout/h22_wait_snapshot_not_retroactive_bad.cpp",
+      "ruleId": "CL3",
+      "line": 15,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S8",
+        "S5"
+      ],
+      "rationale": "A later record cannot update an already-issued wait snapshot; stale wait and subsequent unordered use are separately labelled."
+    },
+    {
+      "id": "h22_wait_snapshot_not_retroactive_good",
+      "file": "corpus/holdout/h22_wait_snapshot_not_retroactive_good.cpp",
+      "ruleId": "CL4",
+      "line": 15,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S8",
+        "S5"
+      ],
+      "rationale": "A later record cannot update an already-issued wait snapshot; stale wait and subsequent unordered use are separately labelled."
+    },
+    {
+      "id": "h23_stale_event_host_wait_bad",
+      "file": "corpus/holdout/h23_stale_event_host_wait_bad.cpp",
+      "ruleId": "CL4",
+      "line": 8,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S8"
+      ],
+      "rationale": "Host waiting on an old capture cannot be interpreted as completing later producer work."
+    },
+    {
+      "id": "h23_stale_event_host_wait_good",
+      "file": "corpus/holdout/h23_stale_event_host_wait_good.cpp",
+      "ruleId": "CL4",
+      "line": 8,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S8"
+      ],
+      "rationale": "Host waiting on an old capture cannot be interpreted as completing later producer work."
+    },
+    {
+      "id": "h24_destroy_is_legal_bad",
+      "file": "corpus/holdout/h24_destroy_is_legal_bad.cpp",
+      "ruleId": "CL4",
+      "line": 11,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S8",
+        "S10"
+      ],
+      "rationale": "A never-recorded wait is a contract finding; destroying an event or a stream with pending work is permitted and is not a defect by itself."
+    },
+    {
+      "id": "h24_destroy_is_legal_good",
+      "file": "corpus/holdout/h24_destroy_is_legal_good.cpp",
+      "ruleId": "CL4",
+      "line": 11,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S8",
+        "S10"
+      ],
+      "rationale": "A never-recorded wait is a contract finding; destroying an event or a stream with pending work is permitted and is not a defect by itself."
+    }
+  ]
+}

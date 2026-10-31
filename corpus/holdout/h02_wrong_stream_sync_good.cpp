@@ -1,0 +1,13 @@
+#include "cuda_runtime.h"
+
+void case_good(void *device) {
+  cudaStream_t a, b, c;
+  cudaStreamCreateWithFlags(&a, cudaStreamNonBlocking);
+  cudaStreamCreateWithFlags(&b, cudaStreamNonBlocking);
+  cudaStreamCreateWithFlags(&c, cudaStreamNonBlocking);
+  int *host;
+  cudaMallocHost((void **)&host, 8 * sizeof(int));
+  cudaMemcpyAsync(host, device, sizeof(int), cudaMemcpyDeviceToHost, a);
+  cudaStreamSynchronize(a);
+  int value = host[0]; // label-site
+}

@@ -1,0 +1,71 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4090, 595.99.02",
+  "repeats": 5,
+  "kernelSpinCycles": 50000000,
+  "modes": {
+    "pinned-observe": {
+      "copyCallMs": [
+        0.007,
+        0.007,
+        0.006,
+        0.006,
+        0.008
+      ],
+      "copyCallMsMedian": 0.007,
+      "kernelDoneWhenCopyReturned": [
+        false
+      ],
+      "valueAfterSync": [
+        42
+      ]
+    },
+    "pageable-observe": {
+      "copyCallMs": [
+        18.417,
+        18.42,
+        18.431,
+        19.848,
+        19.847
+      ],
+      "copyCallMsMedian": 18.431,
+      "kernelDoneWhenCopyReturned": [
+        true
+      ],
+      "valueAfterSync": [
+        42
+      ]
+    },
+    "pinned-synchronized": {
+      "copyCallMs": [
+        0.007,
+        0.006,
+        0.006,
+        0.006,
+        0.006
+      ],
+      "copyCallMsMedian": 0.006,
+      "kernelDoneWhenCopyReturned": [
+        false
+      ],
+      "valueAfterSync": [
+        42
+      ]
+    },
+    "pageable-synchronized": {
+      "copyCallMs": [
+        18.729,
+        18.729,
+        18.727,
+        17.825,
+        17.826
+      ],
+      "copyCallMsMedian": 18.727,
+      "kernelDoneWhenCopyReturned": [
+        true
+      ],
+      "valueAfterSync": [
+        42
+      ]
+    }
+  }
+}

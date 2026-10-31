@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cuda-lifetime"
+version = "0.3.0"
+description = "CUDA asynchronous lifetime checks built on the Clang Static Analyzer"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+cuda-lifetime = "tool.cli:main"
+
+[tool.setuptools]
+packages = ["tool", "translate", "eval"]

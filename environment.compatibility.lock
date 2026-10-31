@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "kind": "separate-qualified-compatibility-environment",
+  "profileId": "cccl-510cc9d-host-headers",
+  "baseEnvironmentLockSha256": "341328d16a1c5ea9ff378232fc213df6dd17851d20f7e7dcacf45a6894e3394f",
+  "llvm": "23.1.3",
+  "cuda": "13.2.2",
+  "nvcc": "13.2.86",
+  "cmake": "4.4.4",
+  "referenceOS": "Ubuntu 24.04",
+  "observedGcc": "13.3.0",
+  "architectures": ["sm_89"],
+  "cccl": {
+    "commit": "510cc9de1ea656a453d6072ea3e1f6097410db9a",
+    "formalRelease": false,
+    "archiveUrl": "https://codeload.github.com/NVIDIA/cccl/tar.gz/510cc9de1ea656a453d6072ea3e1f6097410db9a",
+    "archiveSha256": "17bc62b70be51107727a2bc5694693fca1fc73d18c182620522a503c5edfe680",
+    "probeTreeSha256": "62acadd639e08afc90ce4edf83515a27c50e9e9008d5643bbf2e0105210e5baa",
+    "orderedIncludeRoots": ["thrust", "cub", "libcudacxx/include"],
+    "appliesTo": ["cuda-samples", "faiss"],
+    "rmmPolicy": "Retain the project's own CCCL 3.5.0; do not apply this dependency override globally."
+  },
+  "hostHeaderDiscovery": {
+    "driverArguments": ["-print-file-name=include"],
+    "matching": "Actual original GCC or G++ executable identity, including explicit NVCC host driver",
+    "clangPlacement": "trailing -idirafter",
+    "referenceArgumentsChanged": false
+  },
+  "qualification": {
+    "inputImageId": "sha256:f74a5824ae344524f6595cda8a57a6a1c73beafb950dfac0a4d7c6a9bb2dad12",
+    "review": "results/review/compatibility-promotion-review-v1.json",
+    "reviewSha256": "7c69511d82ea33952c1be2f518df4b5f164b9b7b4bc12608cc63f8ce516ddac5",
+    "scope": "Only the registered original command populations and tool identities. New projects, configurations or tools do not inherit these measured rates.",
+    "cudaThreshold": "10 * passed > 9 * total, separately for each required target",
+    "cudaSamples": {"passed": 104, "total": 114, "allPassed": 223, "allTotal": 233, "round": "samples-round-v2-complete-input-binding"},
+    "faiss": {"passed": 181, "total": 182, "allPassed": 724, "allTotal": 854, "round": "original-container-v1"},
+    "rmm": {"passed": null, "total": 0, "allPassed": 53, "allTotal": 54, "round": "original-container-v1"},
+    "nvccBuiltCudaObjects": 296,
+    "nvccHostMacroParity": "project-only / host-pass unverified",
+    "gpuMeasured": false
+  }
+}

@@ -1,0 +1,18 @@
+# Imported projects remain read-only. Apply the selected deployment architecture
+# after their own defaults have been set, through CMake's public project hook.
+function(cuda_lifetime_sm89 directory)
+  get_property(targets DIRECTORY "${directory}" PROPERTY BUILDSYSTEM_TARGETS)
+  foreach(target IN LISTS targets)
+    get_target_property(imported "${target}" IMPORTED)
+    if(NOT imported)
+      set_property(TARGET "${target}" PROPERTY CUDA_ARCHITECTURES 89)
+    endif()
+  endforeach()
+  get_property(children DIRECTORY "${directory}" PROPERTY SUBDIRECTORIES)
+  foreach(child IN LISTS children)
+    cuda_lifetime_sm89("${child}")
+  endforeach()
+endfunction()
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+  cmake_language(DEFER CALL cuda_lifetime_sm89 "${CMAKE_SOURCE_DIR}")
+endif()

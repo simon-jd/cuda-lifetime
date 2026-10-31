@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "name": "cuCollections",
+  "source": {
+    "repository": "https://github.com/NVIDIA/cuCollections",
+    "commit": "e348af6e42c5c4e3c2f8a214393bb90e811387f8",
+    "archive": ".deps/downloads/cuCollections-e348af6e42c5c4e3c2f8a214393bb90e811387f8.tar.gz",
+    "url": "https://codeload.github.com/NVIDIA/cuCollections/tar.gz/e348af6e42c5c4e3c2f8a214393bb90e811387f8",
+    "sha256": "9788ab68e7eac2d322cecce18f67da97483ba85b409d92e6473a5809e31d816e",
+    "source": ".deps/cuCollections-e348af6e42c5c4e3c2f8a214393bb90e811387f8",
+    "selection": "latest official dev commit observed on 2026-10-13; repository exposes no version release tags",
+    "verification": {
+      "archiveSourceFilesChecked": 290,
+      "mismatches": [],
+      "sourceUnmodified": true
+    }
+  },
+  "dependencies": {
+    "cccl": {
+      "path": "targets/cuCollections/build/_deps/cccl-src",
+      "gitCommit": "cb9bee55d3f52b06b839c0895edd2d58655c4391",
+      "version": "3.6.0",
+      "archive": {
+        "path": "targets/cuCollections/build/_deps/cccl-subbuild/cccl-populate-prefix/src/cb9bee55d3f52b06b839c0895edd2d58655c4391.tar.gz",
+        "sha256": "e44f9f1375516150234e3657396c9d0372d1a9094450c8a7da17d4a37f84c581"
+      }
+    },
+    "rapids-cmake": {
+      "path": "targets/cuCollections/build/_deps/rapids-cmake-src",
+      "gitCommit": null,
+      "archive": {
+        "path": "targets/cuCollections/build/_deps/rapids-cmake-tmp/main.zip",
+        "sha256": "900beaeda12a066fc4b058c5231cd328b68d08f4e445ca3346bfc664089f66c7"
+      }
+    }
+  },
+  "configureCommand": "results/m0/cuCollections/configure.command.json",
+  "buildResult": "results/m0/cuCollections/build.result.json",
+  "translationReport": "targets/cuCollections/clang/translation-report.json",
+  "feasibilityReport": "results/m0/cuCollections/translation-feasibility.json",
+  "decision": "fallback does not satisfy the 90% CUDA host parse gate; preserve failed original-source results"
+}

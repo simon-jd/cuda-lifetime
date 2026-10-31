@@ -1,0 +1,28 @@
+# Reuse the assertions-enabled LLVM/CUDA toolchain built by docker/Dockerfile:
+#   docker build --target toolchain -t cuda-lifetime-toolchain:23.1.3-13.2.2 -f docker/Dockerfile .
+# Override CUDA_LIFETIME_BASE_IMAGE only for an explicitly recorded retained-input replay.
+ARG CUDA_LIFETIME_BASE_IMAGE=cuda-lifetime-toolchain:23.1.3-13.2.2
+FROM ${CUDA_LIFETIME_BASE_IMAGE} AS compatibility
+ARG BUILD_JOBS=8
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends python3-jsonschema \
+    && rm -rf /var/lib/apt/lists/*
+
+# A complete official development snapshot, not a release or an SDK patch.
+ENV CUDA_LIFETIME_CCCL_ROOT=/opt/cuda-lifetime-compat/candidate-510cc9d/cccl-510cc9de1ea656a453d6072ea3e1f6097410db9a
+RUN mkdir -p /opt/cuda-lifetime-compat/candidate-510cc9d \
+    && curl -fsSL https://codeload.github.com/NVIDIA/cccl/tar.gz/510cc9de1ea656a453d6072ea3e1f6097410db9a -o /tmp/cccl.tar.gz \
+    && echo '17bc62b70be51107727a2bc5694693fca1fc73d18c182620522a503c5edfe680  /tmp/cccl.tar.gz' | sha256sum -c - \
+    && tar -xf /tmp/cccl.tar.gz -C /opt/cuda-lifetime-compat/candidate-510cc9d \
+    && rm /tmp/cccl.tar.gz
+RUN python3 -c 'import hashlib,json,os,pathlib; root=pathlib.Path(os.environ["CUDA_LIFETIME_CCCL_ROOT"]); files={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.rglob("*")) if p.is_file()}; assert hashlib.sha256(json.dumps(files,sort_keys=True).encode()).hexdigest()=="62acadd639e08afc90ce4edf83515a27c50e9e9008d5643bbf2e0105210e5baa"'
+
+WORKDIR /work/cuda-lifetime
+COPY . .
+RUN python3 -c 'import json; assert json.load(open("/usr/local/cuda-13.2/version.json"))["cuda"]["version"] == "13.2.2"' \
+    && cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+       -DLLVM_DIR=/opt/llvm-build/lib/cmake/llvm -DClang_DIR=/opt/llvm-build/lib/cmake/clang \
+    && cmake --build build -j ${BUILD_JOBS} \
+    && python3 -m unittest discover -s tests -p 'test_*.py' \
+    && ctest --test-dir build --output-on-failure
+ENTRYPOINT ["python3", "-m", "tool.cli"]

@@ -1,0 +1,267 @@
+{
+  "schemaVersion": 1,
+  "split": "seed",
+  "labelOrigin": "Hand-authored from the semantics in docs/semantics.md before analyzer execution; not a held-out corpus.",
+  "cases": [
+    {
+      "id": "cl1_pinned_d2h_bad",
+      "file": "corpus/seed/cl1_pinned_d2h_bad.cpp",
+      "ruleId": "CL1",
+      "line": 7,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "Pinned D2H destination read requires completion of the producing stream."
+    },
+    {
+      "id": "cl1_pinned_d2h_good",
+      "file": "corpus/seed/cl1_pinned_d2h_good.cpp",
+      "ruleId": "CL1",
+      "line": 8,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "Pinned D2H destination read requires completion of the producing stream."
+    },
+    {
+      "id": "cl1_pinned_h2d_bad",
+      "file": "corpus/seed/cl1_pinned_h2d_bad.cpp",
+      "ruleId": "CL1",
+      "line": 7,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "Pinned H2D source cannot be modified until transfer completion."
+    },
+    {
+      "id": "cl1_pinned_h2d_good",
+      "file": "corpus/seed/cl1_pinned_h2d_good.cpp",
+      "ruleId": "CL1",
+      "line": 8,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S1",
+        "S3"
+      ],
+      "rationale": "Pinned H2D source cannot be modified until transfer completion."
+    },
+    {
+      "id": "cl1_pageable_d2h_bad",
+      "file": "corpus/seed/cl1_pageable_d2h_bad.cpp",
+      "ruleId": "CL1",
+      "line": 6,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S2",
+        "S3"
+      ],
+      "rationale": "Pageable copy behavior is not guaranteed asynchronous: contract severity only."
+    },
+    {
+      "id": "cl1_pageable_d2h_good",
+      "file": "corpus/seed/cl1_pageable_d2h_good.cpp",
+      "ruleId": "CL1",
+      "line": 7,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S2",
+        "S3"
+      ],
+      "rationale": "Pageable copy behavior is not guaranteed asynchronous: contract severity only."
+    },
+    {
+      "id": "cl2_free_host_bad",
+      "file": "corpus/seed/cl2_free_host_bad.cpp",
+      "ruleId": "CL2",
+      "line": 7,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "cudaFreeHost synchronization is unspecified: pending-copy lifetime end is contract severity."
+    },
+    {
+      "id": "cl2_free_host_good",
+      "file": "corpus/seed/cl2_free_host_good.cpp",
+      "ruleId": "CL2",
+      "line": 8,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "cudaFreeHost synchronization is unspecified: pending-copy lifetime end is contract severity."
+    },
+    {
+      "id": "cl2_stack_return_bad",
+      "file": "corpus/seed/cl2_stack_return_bad.cpp",
+      "ruleId": "CL2",
+      "line": 7,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "Registered stack storage becomes invalid at function return while H2D still reads it."
+    },
+    {
+      "id": "cl2_stack_return_good",
+      "file": "corpus/seed/cl2_stack_return_good.cpp",
+      "ruleId": "CL2",
+      "line": 8,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S4",
+        "S3"
+      ],
+      "rationale": "Registered stack storage becomes invalid at function return while H2D still reads it."
+    },
+    {
+      "id": "cl3_cross_stream_alloc_bad",
+      "file": "corpus/seed/cl3_cross_stream_alloc_bad.cpp",
+      "ruleId": "CL3",
+      "line": 7,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S5",
+        "S8"
+      ],
+      "rationale": "Another stream must have a dependency covering the stream-ordered allocation."
+    },
+    {
+      "id": "cl3_cross_stream_alloc_good",
+      "file": "corpus/seed/cl3_cross_stream_alloc_good.cpp",
+      "ruleId": "CL3",
+      "line": 11,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S5",
+        "S8"
+      ],
+      "rationale": "Another stream must have a dependency covering the stream-ordered allocation."
+    },
+    {
+      "id": "cl3_cross_stream_free_bad",
+      "file": "corpus/seed/cl3_cross_stream_free_bad.cpp",
+      "ruleId": "CL3",
+      "line": 12,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S6",
+        "S8",
+        "S3"
+      ],
+      "rationale": "A free on producer must wait for allocation uses queued on consumer."
+    },
+    {
+      "id": "cl3_cross_stream_free_good",
+      "file": "corpus/seed/cl3_cross_stream_free_good.cpp",
+      "ruleId": "CL3",
+      "line": 13,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S6",
+        "S8",
+        "S3"
+      ],
+      "rationale": "A free on producer must wait for allocation uses queued on consumer."
+    },
+    {
+      "id": "cl3_async_cuda_free_bad",
+      "file": "corpus/seed/cl3_async_cuda_free_bad.cpp",
+      "ruleId": "CL3",
+      "line": 7,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": [
+        "S7",
+        "S3"
+      ],
+      "rationale": "cudaFree on cudaMallocAsync memory does not supply implicit synchronization."
+    },
+    {
+      "id": "cl3_async_cuda_free_good",
+      "file": "corpus/seed/cl3_async_cuda_free_good.cpp",
+      "ruleId": "CL3",
+      "line": 8,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S7",
+        "S3"
+      ],
+      "rationale": "cudaFree on cudaMallocAsync memory does not supply implicit synchronization."
+    },
+    {
+      "id": "cl4_empty_event_bad",
+      "file": "corpus/seed/cl4_empty_event_bad.cpp",
+      "ruleId": "CL4",
+      "line": 6,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S8"
+      ],
+      "rationale": "Never-recorded event captures empty work: contract concern, not CUDA API invalidity."
+    },
+    {
+      "id": "cl4_empty_event_good",
+      "file": "corpus/seed/cl4_empty_event_good.cpp",
+      "ruleId": "CL4",
+      "line": 7,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S8"
+      ],
+      "rationale": "Never-recorded event captures empty work: contract concern, not CUDA API invalidity."
+    },
+    {
+      "id": "cl4_stale_event_bad",
+      "file": "corpus/seed/cl4_stale_event_bad.cpp",
+      "ruleId": "CL4",
+      "line": 10,
+      "expect": "warning",
+      "level": "warning",
+      "semanticIds": [
+        "S8",
+        "S5"
+      ],
+      "rationale": "Capture preceding producer allocation does not cover later work."
+    },
+    {
+      "id": "cl4_stale_event_good",
+      "file": "corpus/seed/cl4_stale_event_good.cpp",
+      "ruleId": "CL4",
+      "line": 10,
+      "expect": "none",
+      "level": null,
+      "semanticIds": [
+        "S8",
+        "S5"
+      ],
+      "rationale": "Capture preceding producer allocation does not cover later work."
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 1,
+  "upstream": {
+    "project": "NVIDIA/cuda-samples",
+    "tag": "v13.2"
+  },
+  "mutations": [
+    {
+      "id": "delete_final_sync",
+      "category": "delete-synchronization",
+      "source": "Samples/0_Introduction/simpleMultiCopy/simpleMultiCopy.cu",
+      "sourceUrl": "https://github.com/NVIDIA/cuda-samples/blob/v13.2/Samples/0_Introduction/simpleMultiCopy/simpleMultiCopy.cu",
+      "sourceSha256": "b3b6d8d2f204f5871e8bc278e7a9de924a7dc9850e026934b954bdfa9d4103b0",
+      "edits": [
+        {
+          "before": "\n    cudaDeviceSynchronize();\n\n    cudaEventElapsedTime(&time, start, stop);",
+          "after": "\n    // cuda-lifetime mutation: final device synchronization removed.\n\n    cudaEventElapsedTime(&time, start, stop);"
+        }
+      ],
+      "oracle": {
+        "policy": "required-site differential, not a fully labelled precision benchmark",
+        "sites": [
+          {
+            "ruleId": "CL1",
+            "level": "error",
+            "expect": "warning",
+            "anchor": "            passed &= (h_data_out[j][i] == 1);"
+          }
+        ],
+        "semanticIds": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "rationale": "Without final device completion, test() can read pinned output still targeted by the final D2H transfer.",
+        "additionalFindings": [
+          "CL2 warning may also arise at cudaFreeHost cleanup while transfers remain pending."
+        ],
+        "coverageLimitations": [
+          "Pinned allocation evidence is stored in global arrays initialized in main; CSA may not retain it through calls and loops.",
+          "processWithStreams executes a loop and is called twice; bounded analysis may miss the final outstanding transfer.",
+          "cudaEventElapsedTime return is ignored here, so the call does not establish a checked-success completion condition."
+        ],
+        "assumptions": [
+          "CUDA API setup succeeds",
+          "SIMULATE_IO remains disabled as in upstream",
+          "single host thread and one device",
+          "no runtime observation is asserted"
+        ]
+      }
+    },
+    {
+      "id": "sync_after_host_read",
+      "category": "move-synchronization-after-read",
+      "source": "Samples/0_Introduction/simpleMultiCopy/simpleMultiCopy.cu",
+      "sourceUrl": "https://github.com/NVIDIA/cuda-samples/blob/v13.2/Samples/0_Introduction/simpleMultiCopy/simpleMultiCopy.cu",
+      "sourceSha256": "b3b6d8d2f204f5871e8bc278e7a9de924a7dc9850e026934b954bdfa9d4103b0",
+      "edits": [
+        {
+          "before": "\n    cudaDeviceSynchronize();\n\n    cudaEventElapsedTime(&time, start, stop);",
+          "after": "\n    // cuda-lifetime mutation: final synchronization moved after host verification.\n\n    cudaEventElapsedTime(&time, start, stop);"
+        },
+        {
+          "before": "    bool bResults = test();\n",
+          "after": "    bool bResults = test();\n    cudaDeviceSynchronize(); // cuda-lifetime mutation: completion occurs after the host read.\n"
+        }
+      ],
+      "oracle": {
+        "policy": "required-site differential, not a fully labelled precision benchmark",
+        "sites": [
+          {
+            "ruleId": "CL1",
+            "level": "error",
+            "expect": "warning",
+            "anchor": "            passed &= (h_data_out[j][i] == 1);"
+          }
+        ],
+        "semanticIds": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "rationale": "Completion after test() does not protect its preceding host read; later cleanup is again covered.",
+        "additionalFindings": [],
+        "coverageLimitations": [
+          "Pinned allocation evidence is stored in global arrays initialized in main; CSA may not retain it through calls and loops.",
+          "processWithStreams executes a loop and is called twice; bounded analysis may miss the final outstanding transfer.",
+          "cudaEventElapsedTime return is ignored here, so the call does not establish a checked-success completion condition."
+        ],
+        "assumptions": [
+          "CUDA API setup succeeds",
+          "SIMULATE_IO remains disabled as in upstream",
+          "single host thread and one device",
+          "no runtime observation is asserted"
+        ]
+      }
+    },
+    {
+      "id": "record_before_launch",
+      "category": "move-record-before-launch",
+      "source": "Samples/0_Introduction/simpleMultiCopy/simpleMultiCopy.cu",
+      "sourceUrl": "https://github.com/NVIDIA/cuda-samples/blob/v13.2/Samples/0_Introduction/simpleMultiCopy/simpleMultiCopy.cu",
+      "sourceSha256": "b3b6d8d2f204f5871e8bc278e7a9de924a7dc9850e026934b954bdfa9d4103b0",
+      "edits": [
+        {
+          "before": "    incKernel<<<grid, block, 0, 0>>>(d_data_out[0], d_data_in[0], N, inner_reps);\n    cudaEventRecord(stop, 0);\n    cudaEventSynchronize(stop);",
+          "after": "    cudaEventRecord(stop, 0);\n    incKernel<<<grid, block, 0, 0>>>(d_data_out[0], d_data_in[0], N, inner_reps);\n    cudaEventSynchronize(stop);"
+        }
+      ],
+      "oracle": {
+        "policy": "required-site differential, not a fully labelled precision benchmark",
+        "sites": [
+          {
+            "ruleId": "CL4",
+            "level": "warning",
+            "expect": "warning",
+            "anchor": "    cudaEventSynchronize(stop);\n\n    float kernel_time;"
+          }
+        ],
+        "semanticIds": [
+          "S8"
+        ],
+        "rationale": "The stop event now captures work before the timed kernel, so its host wait does not cover that producer.",
+        "additionalFindings": [],
+        "coverageLimitations": [
+          "A standalone stale event wait is a legal API call and only a contract warning.",
+          "Earlier setup and loops may exceed the analyzer budget before this site."
+        ],
+        "assumptions": [
+          "CUDA API setup succeeds",
+          "SIMULATE_IO remains disabled as in upstream",
+          "single host thread and one device",
+          "no runtime observation is asserted"
+        ]
+      }
+    },
+    {
+      "id": "launch_on_legacy_stream",
+      "category": "change-stream",
+      "source": "Samples/2_Concepts_and_Techniques/streamOrderedAllocation/streamOrderedAllocation.cu",
+      "sourceUrl": "https://github.com/NVIDIA/cuda-samples/blob/v13.2/Samples/2_Concepts_and_Techniques/streamOrderedAllocation/streamOrderedAllocation.cu",
+      "sourceSha256": "f74d5871ad16b54e60c88ab6cff818759849950128ec5630da726a6f2c7e2fe7",
+      "edits": [
+        {
+          "before": "\n    vectorAddGPU<<<grid, block, 0, stream>>>(d_a, d_b, d_c, nelem);",
+          "after": "\n    vectorAddGPU<<<grid, block, 0, cudaStreamLegacy>>>(d_a, d_b, d_c, nelem);"
+        }
+      ],
+      "oracle": {
+        "policy": "required-site differential, not a fully labelled precision benchmark",
+        "sites": [
+          {
+            "ruleId": "CL3",
+            "level": "error",
+            "expect": "warning",
+            "anchor": "    vectorAddGPU<<<grid, block, 0, cudaStreamLegacy>>>(d_a, d_b, d_c, nelem);"
+          }
+        ],
+        "semanticIds": [
+          "S5",
+          "S6",
+          "S9"
+        ],
+        "rationale": "The three stream-ordered allocations are on an explicitly nonblocking stream; launching on legacy establishes no allocation dependency.",
+        "additionalFindings": [
+          "The following cudaFreeAsync calls may separately violate ordering with the misplaced kernel use."
+        ],
+        "coverageLimitations": [
+          "CUDA setup/helper wrappers and allocation aliases must be modeled or explored.",
+          "One kernel uses three affected allocations; diagnostics may share a primary source line."
+        ],
+        "assumptions": [
+          "CUDA API setup succeeds",
+          "SIMULATE_IO remains disabled as in upstream",
+          "single host thread and one device",
+          "no runtime observation is asserted"
+        ]
+      }
+    },
+    {
+      "id": "pageable_synchronized_control",
+      "category": "replace-pinned-with-pageable",
+      "source": "Samples/0_Introduction/asyncAPI/asyncAPI.cu",
+      "sourceUrl": "https://github.com/NVIDIA/cuda-samples/blob/v13.2/Samples/0_Introduction/asyncAPI/asyncAPI.cu",
+      "sourceSha256": "ac361cc7268ee8df6affd68331541a5b46f2236334112c55b03c3fd5d059db50",
+      "edits": [
+        {
+          "before": "    checkCudaErrors(cudaMallocHost((void **)&a, nbytes));",
+          "after": "    a = (int *)malloc(nbytes); // cuda-lifetime mutation: pageable host allocation.\n    if (a == NULL) return EXIT_FAILURE;"
+        },
+        {
+          "before": "    checkCudaErrors(cudaFreeHost(a));",
+          "after": "    free(a); // Match the changed host allocator."
+        }
+      ],
+      "oracle": {
+        "policy": "required-site differential, not a fully labelled precision benchmark",
+        "sites": [
+          {
+            "ruleId": "CL1",
+            "level": null,
+            "expect": "none",
+            "anchor": "        if (data[i] != x) {"
+          }
+        ],
+        "semanticIds": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "rationale": "Changing pinned allocation to pageable does not create a lifecycle defect while the original event-completion checks remain in place.",
+        "additionalFindings": [],
+        "coverageLimitations": [
+          "This is a synchronized negative control, not a claimed guaranteed pageable asynchronous error.",
+          "A successful cudaEventQuery/cudaEventElapsedTime check must be understood before accepting a no-warning result.",
+          "A corresponding free substitution avoids introducing unrelated allocator/deallocator mismatch."
+        ],
+        "assumptions": [
+          "CUDA API setup succeeds",
+          "SIMULATE_IO remains disabled as in upstream",
+          "single host thread and one device",
+          "no runtime observation is asserted"
+        ]
+      }
+    }
+  ]
+}

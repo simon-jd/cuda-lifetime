@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "split": "dev",
+  "rules": {
+    "CL1": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 0,
+      "tn": 6,
+      "uncoveredNegative": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "CL2": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 0,
+      "tn": 6,
+      "uncoveredNegative": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "CL3": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "tn": 6,
+      "uncoveredNegative": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "CL4": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 0,
+      "tn": 6,
+      "uncoveredNegative": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    }
+  },
+  "totals": {
+    "tp": 25,
+    "fp": 0,
+    "fn": 0,
+    "tn": 24,
+    "uncoveredNegative": 0,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "cases": [
+    {
+      "id": "h01_interior_write_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h01_interior_write_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h02_wrong_stream_sync_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h02_wrong_stream_sync_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h03_wait_is_not_host_completion_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h03_wait_is_not_host_completion_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h04_branch_completion_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h04_branch_completion_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h05_sibling_field_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h05_sibling_field_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h06_copy_byte_extent_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h06_copy_byte_extent_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h07_stack_interior_return_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h07_stack_interior_return_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h08_unregister_pending_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h08_unregister_pending_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h09_opaque_destructor_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h09_opaque_destructor_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h10_freehost_alias_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h10_freehost_alias_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h11_pageable_stack_return_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h11_pageable_stack_return_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h12_registered_field_return_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h12_registered_field_return_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h13_transitive_dependency_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h13_transitive_dependency_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h14_rerecord_replaces_capture_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h14_rerecord_replaces_capture_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h15_free_after_remote_use_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h15_free_after_remote_use_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h16_cudafree_wrong_sync_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h16_cudafree_wrong_sync_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h17_legacy_blocking_order_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h17_legacy_blocking_order_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h18_perthread_not_legacy_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h18_perthread_not_legacy_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h19_empty_event_host_wait_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h19_empty_event_host_wait_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h20_capture_before_copy_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h20_capture_before_copy_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h21_capture_between_copies_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h21_capture_between_copies_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h22_wait_snapshot_not_retroactive_bad_cl4",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h22_wait_snapshot_not_retroactive_bad_cl3",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h22_wait_snapshot_not_retroactive_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h23_stale_event_host_wait_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h23_stale_event_host_wait_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "h24_destroy_is_legal_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "h24_destroy_is_legal_good",
+      "status": "tn",
+      "covered": true
+    }
+  ],
+  "falsePositives": [],
+  "falseNegatives": [],
+  "severityMismatches": [],
+  "duplicateDiagnostics": 0,
+  "coverage": {
+    "labelledFiles": 48,
+    "analyzedLabelledFiles": 48,
+    "uncoveredCases": [],
+    "incompleteFiles": [],
+    "inputComplete": true,
+    "unmodeledCudaCalls": {},
+    "coverageUnknown": [],
+    "missingTelemetry": []
+  },
+  "ignoredDiagnostics": 0,
+  "outsideCorpusDiagnostics": 0,
+  "passed": true
+}

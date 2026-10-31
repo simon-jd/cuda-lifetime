@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "split": "seed",
+  "rules": {
+    "CL1": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 3,
+      "uncoveredNegative": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "CL2": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "tn": 2,
+      "uncoveredNegative": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "CL3": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 3,
+      "uncoveredNegative": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "CL4": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "tn": 2,
+      "uncoveredNegative": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    }
+  },
+  "totals": {
+    "tp": 10,
+    "fp": 0,
+    "fn": 0,
+    "tn": 10,
+    "uncoveredNegative": 0,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "cases": [
+    {
+      "id": "cl1_pinned_d2h_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "cl1_pinned_d2h_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "cl1_pinned_h2d_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "cl1_pinned_h2d_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "cl1_pageable_d2h_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "cl1_pageable_d2h_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "cl2_free_host_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "cl2_free_host_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "cl2_stack_return_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "cl2_stack_return_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "cl3_cross_stream_alloc_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "cl3_cross_stream_alloc_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "cl3_cross_stream_free_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "cl3_cross_stream_free_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "cl3_async_cuda_free_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "cl3_async_cuda_free_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "cl4_empty_event_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "cl4_empty_event_good",
+      "status": "tn",
+      "covered": true
+    },
+    {
+      "id": "cl4_stale_event_bad",
+      "status": "tp",
+      "covered": true
+    },
+    {
+      "id": "cl4_stale_event_good",
+      "status": "tn",
+      "covered": true
+    }
+  ],
+  "falsePositives": [],
+  "falseNegatives": [],
+  "severityMismatches": [],
+  "duplicateDiagnostics": 0,
+  "coverage": {
+    "labelledFiles": 20,
+    "analyzedLabelledFiles": 20,
+    "uncoveredCases": [],
+    "incompleteFiles": [],
+    "inputComplete": true,
+    "unmodeledCudaCalls": {},
+    "coverageUnknown": [],
+    "missingTelemetry": []
+  },
+  "ignoredDiagnostics": 0,
+  "outsideCorpusDiagnostics": 0,
+  "passed": true
+}

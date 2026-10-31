@@ -1,0 +1,432 @@
+{
+  "schemaVersion": 1,
+  "tus": {
+    "total": 48,
+    "parsed": 48,
+    "analyzed": [
+      "corpus/holdout/h01_interior_write_bad.cpp",
+      "corpus/holdout/h01_interior_write_good.cpp",
+      "corpus/holdout/h02_wrong_stream_sync_bad.cpp",
+      "corpus/holdout/h02_wrong_stream_sync_good.cpp",
+      "corpus/holdout/h03_wait_is_not_host_completion_bad.cpp",
+      "corpus/holdout/h03_wait_is_not_host_completion_good.cpp",
+      "corpus/holdout/h04_branch_completion_bad.cpp",
+      "corpus/holdout/h04_branch_completion_good.cpp",
+      "corpus/holdout/h05_sibling_field_bad.cpp",
+      "corpus/holdout/h05_sibling_field_good.cpp",
+      "corpus/holdout/h06_copy_byte_extent_bad.cpp",
+      "corpus/holdout/h06_copy_byte_extent_good.cpp",
+      "corpus/holdout/h07_stack_interior_return_bad.cpp",
+      "corpus/holdout/h07_stack_interior_return_good.cpp",
+      "corpus/holdout/h08_unregister_pending_bad.cpp",
+      "corpus/holdout/h08_unregister_pending_good.cpp",
+      "corpus/holdout/h09_opaque_destructor_bad.cpp",
+      "corpus/holdout/h09_opaque_destructor_good.cpp",
+      "corpus/holdout/h10_freehost_alias_bad.cpp",
+      "corpus/holdout/h10_freehost_alias_good.cpp",
+      "corpus/holdout/h11_pageable_stack_return_bad.cpp",
+      "corpus/holdout/h11_pageable_stack_return_good.cpp",
+      "corpus/holdout/h12_registered_field_return_bad.cpp",
+      "corpus/holdout/h12_registered_field_return_good.cpp",
+      "corpus/holdout/h13_transitive_dependency_bad.cpp",
+      "corpus/holdout/h13_transitive_dependency_good.cpp",
+      "corpus/holdout/h14_rerecord_replaces_capture_bad.cpp",
+      "corpus/holdout/h14_rerecord_replaces_capture_good.cpp",
+      "corpus/holdout/h15_free_after_remote_use_bad.cpp",
+      "corpus/holdout/h15_free_after_remote_use_good.cpp",
+      "corpus/holdout/h16_cudafree_wrong_sync_bad.cpp",
+      "corpus/holdout/h16_cudafree_wrong_sync_good.cpp",
+      "corpus/holdout/h17_legacy_blocking_order_bad.cpp",
+      "corpus/holdout/h17_legacy_blocking_order_good.cpp",
+      "corpus/holdout/h18_perthread_not_legacy_bad.cpp",
+      "corpus/holdout/h18_perthread_not_legacy_good.cpp",
+      "corpus/holdout/h19_empty_event_host_wait_bad.cpp",
+      "corpus/holdout/h19_empty_event_host_wait_good.cpp",
+      "corpus/holdout/h20_capture_before_copy_bad.cpp",
+      "corpus/holdout/h20_capture_before_copy_good.cpp",
+      "corpus/holdout/h21_capture_between_copies_bad.cpp",
+      "corpus/holdout/h21_capture_between_copies_good.cpp",
+      "corpus/holdout/h22_wait_snapshot_not_retroactive_bad.cpp",
+      "corpus/holdout/h22_wait_snapshot_not_retroactive_good.cpp",
+      "corpus/holdout/h23_stale_event_host_wait_bad.cpp",
+      "corpus/holdout/h23_stale_event_host_wait_good.cpp",
+      "corpus/holdout/h24_destroy_is_legal_bad.cpp",
+      "corpus/holdout/h24_destroy_is_legal_good.cpp"
+    ],
+    "failed": [],
+    "translationUnknown": []
+  },
+  "budgetExhausted": [],
+  "unmodeledCudaCalls": {},
+  "coverageUnknown": [],
+  "profiles": [
+    {
+      "file": "corpus/holdout/h01_interior_write_bad.cpp",
+      "index": 0,
+      "inputCommandSha256": "b73a2291e63b29a0f40f3ee852db66af5fabddc51c28aae94b78bfb200360829",
+      "seconds": 0.06899666704703122,
+      "peakRssKiB": 67384
+    },
+    {
+      "file": "corpus/holdout/h01_interior_write_good.cpp",
+      "index": 1,
+      "inputCommandSha256": "bed081768677f6449bacce0eda300e8d0f9bcc30f7d8f1bcf0c6d7686aeeed45",
+      "seconds": 0.05972056393511593,
+      "peakRssKiB": 66956
+    },
+    {
+      "file": "corpus/holdout/h02_wrong_stream_sync_bad.cpp",
+      "index": 2,
+      "inputCommandSha256": "c686a03f26a8a500e804c85a65efe4d6e47f8255635b6bbe27a5793ed7c923e5",
+      "seconds": 0.0357685579219833,
+      "peakRssKiB": 67280
+    },
+    {
+      "file": "corpus/holdout/h02_wrong_stream_sync_good.cpp",
+      "index": 3,
+      "inputCommandSha256": "d38fa2b4333bab6db0a5cbede78e90616f15351c3c8951838a9d9a8608d8160e",
+      "seconds": 0.035873126005753875,
+      "peakRssKiB": 67108
+    },
+    {
+      "file": "corpus/holdout/h03_wait_is_not_host_completion_bad.cpp",
+      "index": 4,
+      "inputCommandSha256": "58c209e160c4de788cead1eb55843567de9816ddb94e7e40ab709d9ac739b442",
+      "seconds": 0.0470244949683547,
+      "peakRssKiB": 67304
+    },
+    {
+      "file": "corpus/holdout/h03_wait_is_not_host_completion_good.cpp",
+      "index": 5,
+      "inputCommandSha256": "d49223da43d13a68822ed61ff25c744ba1eec897ed05e778c84374d7777f8483",
+      "seconds": 0.1660748969297856,
+      "peakRssKiB": 67192
+    },
+    {
+      "file": "corpus/holdout/h04_branch_completion_bad.cpp",
+      "index": 6,
+      "inputCommandSha256": "836c48a63fec061cbd2d1c855e134ef052c04f341f20a7d8f62d66f63dbd21f9",
+      "seconds": 0.039942745002917945,
+      "peakRssKiB": 67340
+    },
+    {
+      "file": "corpus/holdout/h04_branch_completion_good.cpp",
+      "index": 7,
+      "inputCommandSha256": "57c2f5c8195e361bea7810a8debe5a60c63081831f6763d594fb53eec4185363",
+      "seconds": 0.12498219299595803,
+      "peakRssKiB": 67116
+    },
+    {
+      "file": "corpus/holdout/h05_sibling_field_bad.cpp",
+      "index": 8,
+      "inputCommandSha256": "0bcdc812fa844d8905fc98da4ed7c75c003b8006e981edaeed981b7a501fbf5a",
+      "seconds": 0.05486752709839493,
+      "peakRssKiB": 67648
+    },
+    {
+      "file": "corpus/holdout/h05_sibling_field_good.cpp",
+      "index": 9,
+      "inputCommandSha256": "8b8fcc7457ae766cb9e7fe3321d54d69ab2b87ad1720e3f623bbd36641c8600b",
+      "seconds": 0.03547528095077723,
+      "peakRssKiB": 67536
+    },
+    {
+      "file": "corpus/holdout/h06_copy_byte_extent_bad.cpp",
+      "index": 10,
+      "inputCommandSha256": "ad73f01d5463a15ab8eecc60f17457a05d0dce3ff5bd954949c4245b98ebdcb2",
+      "seconds": 0.07152679609134793,
+      "peakRssKiB": 67148
+    },
+    {
+      "file": "corpus/holdout/h06_copy_byte_extent_good.cpp",
+      "index": 11,
+      "inputCommandSha256": "edacd005c9627c43f76a64338a07ae3d9db4ac25b4be33e43abbbee09d70656c",
+      "seconds": 0.0906725429231301,
+      "peakRssKiB": 66704
+    },
+    {
+      "file": "corpus/holdout/h07_stack_interior_return_bad.cpp",
+      "index": 12,
+      "inputCommandSha256": "90391470fd59fb7e448dd902e126ad14f40a1eb8261a2517925225ef16a3df89",
+      "seconds": 0.16847107198555022,
+      "peakRssKiB": 66964
+    },
+    {
+      "file": "corpus/holdout/h07_stack_interior_return_good.cpp",
+      "index": 13,
+      "inputCommandSha256": "ca40d7465e929b0bc612c915bda5af8524d6ca25540275be1a47f7276072737b",
+      "seconds": 0.11578634497709572,
+      "peakRssKiB": 67108
+    },
+    {
+      "file": "corpus/holdout/h08_unregister_pending_bad.cpp",
+      "index": 14,
+      "inputCommandSha256": "c64ab73a4cb1c9ea124e9dcb6cffc9f78fc3eb276fb19912767df86df52fb1cd",
+      "seconds": 0.03502169600687921,
+      "peakRssKiB": 67260
+    },
+    {
+      "file": "corpus/holdout/h08_unregister_pending_good.cpp",
+      "index": 15,
+      "inputCommandSha256": "40338a9f7b93be38239e0725478b207a0cf2bf50282eb11b003c4d892b2efc1a",
+      "seconds": 0.03816514497157186,
+      "peakRssKiB": 67136
+    },
+    {
+      "file": "corpus/holdout/h09_opaque_destructor_bad.cpp",
+      "index": 16,
+      "inputCommandSha256": "668bead3c7168101f316c40a2f2a3d113d06f6c06437eadbbe7c03e31ac25279",
+      "seconds": 0.034594452008605,
+      "peakRssKiB": 67576
+    },
+    {
+      "file": "corpus/holdout/h09_opaque_destructor_good.cpp",
+      "index": 17,
+      "inputCommandSha256": "30eaeb152e42dea5cdd2e2812bf74935eeab86cea4a8d90c84175bcd342d32be",
+      "seconds": 0.03405001398641616,
+      "peakRssKiB": 67392
+    },
+    {
+      "file": "corpus/holdout/h10_freehost_alias_bad.cpp",
+      "index": 18,
+      "inputCommandSha256": "9cbbde778854fed994344f318c9ae9d2e3fd4e475733af312889914e54b79796",
+      "seconds": 0.03367758507374674,
+      "peakRssKiB": 67176
+    },
+    {
+      "file": "corpus/holdout/h10_freehost_alias_good.cpp",
+      "index": 19,
+      "inputCommandSha256": "2d4ac3c675395d6523cb9755b6a7bf6ac305ca19c786cbc2419b6bc6a2ac496e",
+      "seconds": 0.09451336099300534,
+      "peakRssKiB": 66880
+    },
+    {
+      "file": "corpus/holdout/h11_pageable_stack_return_bad.cpp",
+      "index": 20,
+      "inputCommandSha256": "8d2ba3a9ba8f8724fd9509e6b4670a85b21082d9e3a6d27d8381979568b3f617",
+      "seconds": 0.03419681405648589,
+      "peakRssKiB": 66764
+    },
+    {
+      "file": "corpus/holdout/h11_pageable_stack_return_good.cpp",
+      "index": 21,
+      "inputCommandSha256": "0fee67550fae4bc904a041605baae782e7aef5b0caa14d2ecdc78a0e8e33d6a8",
+      "seconds": 0.036234367988072336,
+      "peakRssKiB": 66600
+    },
+    {
+      "file": "corpus/holdout/h12_registered_field_return_bad.cpp",
+      "index": 22,
+      "inputCommandSha256": "2b3f60b4c7fabe96a1a349013e8a29d0cee2588b12f5949d0a38b155c98ba730",
+      "seconds": 0.13081653998233378,
+      "peakRssKiB": 66880
+    },
+    {
+      "file": "corpus/holdout/h12_registered_field_return_good.cpp",
+      "index": 23,
+      "inputCommandSha256": "29c6b7b20008a425c6e0c239cddcd9cef77b1c86ad67dcdb46a1ce8d3873bf22",
+      "seconds": 0.03780834097415209,
+      "peakRssKiB": 67088
+    },
+    {
+      "file": "corpus/holdout/h13_transitive_dependency_bad.cpp",
+      "index": 24,
+      "inputCommandSha256": "85c177fb0592b4fdb72a8066e5414449c2dfd4e7446bb6cab925bf97ba9cb3f9",
+      "seconds": 0.08060949796345085,
+      "peakRssKiB": 67004
+    },
+    {
+      "file": "corpus/holdout/h13_transitive_dependency_good.cpp",
+      "index": 25,
+      "inputCommandSha256": "e37b88083c345a39fd0d7c3e506d501f6df4f44857e6eb968562cdf90a81cf63",
+      "seconds": 0.03854235797189176,
+      "peakRssKiB": 67132
+    },
+    {
+      "file": "corpus/holdout/h14_rerecord_replaces_capture_bad.cpp",
+      "index": 26,
+      "inputCommandSha256": "65d368b69f010edefd85b1892d299e9ebb7126c80de1bf2edd0b8040002c1c02",
+      "seconds": 0.3613110950682312,
+      "peakRssKiB": 67100
+    },
+    {
+      "file": "corpus/holdout/h14_rerecord_replaces_capture_good.cpp",
+      "index": 27,
+      "inputCommandSha256": "8337d046807201a736c70d5894d113206bf5c6d533da32491dd770b208550e45",
+      "seconds": 0.07375820190645754,
+      "peakRssKiB": 66272
+    },
+    {
+      "file": "corpus/holdout/h15_free_after_remote_use_bad.cpp",
+      "index": 28,
+      "inputCommandSha256": "41b8838b37ba513791f2cdd73f3d477893597cac1e12fa9b8c28f00d3c2f1c2d",
+      "seconds": 0.03446067392360419,
+      "peakRssKiB": 67068
+    },
+    {
+      "file": "corpus/holdout/h15_free_after_remote_use_good.cpp",
+      "index": 29,
+      "inputCommandSha256": "5d7ad3956fdf00928a7065972d16516862eee66ee767b33c090fa39da1e55b19",
+      "seconds": 0.06919477810151875,
+      "peakRssKiB": 66464
+    },
+    {
+      "file": "corpus/holdout/h16_cudafree_wrong_sync_bad.cpp",
+      "index": 30,
+      "inputCommandSha256": "d6acb6ef56e53f45cd9631d735dcd19c8d02cd5b5c2920c12f97f87c6ae2fc5b",
+      "seconds": 0.03790987399406731,
+      "peakRssKiB": 67124
+    },
+    {
+      "file": "corpus/holdout/h16_cudafree_wrong_sync_good.cpp",
+      "index": 31,
+      "inputCommandSha256": "065943d72e9d34c4c7ddefe9c3a55d18cc38753b223e717fcf26576f9a869eb1",
+      "seconds": 0.035898370086215436,
+      "peakRssKiB": 66880
+    },
+    {
+      "file": "corpus/holdout/h17_legacy_blocking_order_bad.cpp",
+      "index": 32,
+      "inputCommandSha256": "4b05954b03c4c8c381a2e82adc77dcb3cead9c33ae2112f29385caefbd8145cf",
+      "seconds": 0.02467717998661101,
+      "peakRssKiB": 67004
+    },
+    {
+      "file": "corpus/holdout/h17_legacy_blocking_order_good.cpp",
+      "index": 33,
+      "inputCommandSha256": "3d42f2a9766c94f32275bed02ecec97050ef2b2bb144d48bb61beddb6da7b522",
+      "seconds": 0.08412570192012936,
+      "peakRssKiB": 66472
+    },
+    {
+      "file": "corpus/holdout/h18_perthread_not_legacy_bad.cpp",
+      "index": 34,
+      "inputCommandSha256": "5efaba92a6ba17eb4c53e25ba59935496d3a810b2259e8ae7d6e1267a7271434",
+      "seconds": 0.09322008292656392,
+      "peakRssKiB": 67032
+    },
+    {
+      "file": "corpus/holdout/h18_perthread_not_legacy_good.cpp",
+      "index": 35,
+      "inputCommandSha256": "26e6116623db70d65fd1cdbb000538092827a2a5967ea9c1a0da63564e917807",
+      "seconds": 0.034781449008733034,
+      "peakRssKiB": 66964
+    },
+    {
+      "file": "corpus/holdout/h19_empty_event_host_wait_bad.cpp",
+      "index": 36,
+      "inputCommandSha256": "84aa42df84bc948b1c0df7e829861f7e0e1aa4872caf49d3ca7c4728b778dbd3",
+      "seconds": 0.06531342305243015,
+      "peakRssKiB": 66776
+    },
+    {
+      "file": "corpus/holdout/h19_empty_event_host_wait_good.cpp",
+      "index": 37,
+      "inputCommandSha256": "fdc14f3c4fddb3c82097c1e12869ed0753f1e38614742a5c55a659e2e77af647",
+      "seconds": 0.09397269994951785,
+      "peakRssKiB": 66276
+    },
+    {
+      "file": "corpus/holdout/h20_capture_before_copy_bad.cpp",
+      "index": 38,
+      "inputCommandSha256": "e4e5373cf8f263e3e964c0172fc940a4028f0ea8f7ed7ad05ff5592d22de6c81",
+      "seconds": 0.033946729032322764,
+      "peakRssKiB": 67016
+    },
+    {
+      "file": "corpus/holdout/h20_capture_before_copy_good.cpp",
+      "index": 39,
+      "inputCommandSha256": "8f600f8eec39275341fe207e22553538f3a861aa3854bb6d06b1b37c94e77de9",
+      "seconds": 0.11443173000589013,
+      "peakRssKiB": 66708
+    },
+    {
+      "file": "corpus/holdout/h21_capture_between_copies_bad.cpp",
+      "index": 40,
+      "inputCommandSha256": "f540b8b1cb6675f5d2aeba96def9b58acca4dca3e12310e47ebdcf6b4652eec2",
+      "seconds": 0.04113100899849087,
+      "peakRssKiB": 67132
+    },
+    {
+      "file": "corpus/holdout/h21_capture_between_copies_good.cpp",
+      "index": 41,
+      "inputCommandSha256": "26450d924e68e5305be53cf3300cc3ba2ebb642f098f00b8be1a9cbb7710ec4d",
+      "seconds": 0.12713456992059946,
+      "peakRssKiB": 67004
+    },
+    {
+      "file": "corpus/holdout/h22_wait_snapshot_not_retroactive_bad.cpp",
+      "index": 42,
+      "inputCommandSha256": "36948f1493aa17635345ec686020027a084b0723108af2b15a64190c700d1ab6",
+      "seconds": 0.0713140550069511,
+      "peakRssKiB": 67252
+    },
+    {
+      "file": "corpus/holdout/h22_wait_snapshot_not_retroactive_good.cpp",
+      "index": 43,
+      "inputCommandSha256": "5a3ff271de15296de5cbc979501326eeb9cd4bdac0ba3baaa1ee996301f20d3f",
+      "seconds": 0.09843327605631202,
+      "peakRssKiB": 67136
+    },
+    {
+      "file": "corpus/holdout/h23_stale_event_host_wait_bad.cpp",
+      "index": 44,
+      "inputCommandSha256": "9a58e0949304802d9dd34fd94cadda86f3a947d49a518d8c588a14d075880636",
+      "seconds": 0.11052756104618311,
+      "peakRssKiB": 66648
+    },
+    {
+      "file": "corpus/holdout/h23_stale_event_host_wait_good.cpp",
+      "index": 45,
+      "inputCommandSha256": "200bf4e752de88f78d35807f913d4dc873b3427f7a044778efb5a4ed2c6ef19e",
+      "seconds": 0.10369309992529452,
+      "peakRssKiB": 66584
+    },
+    {
+      "file": "corpus/holdout/h24_destroy_is_legal_bad.cpp",
+      "index": 46,
+      "inputCommandSha256": "9206812da4cc2be390033da20fe3ebaffe9c9fa6266e6539d048e5609e07a839",
+      "seconds": 0.04091415007133037,
+      "peakRssKiB": 67032
+    },
+    {
+      "file": "corpus/holdout/h24_destroy_is_legal_good.cpp",
+      "index": 47,
+      "inputCommandSha256": "8389d296fa8c079a5790d127796514b76dd08b70921f75e039798fe58de11542",
+      "seconds": 0.06737741502001882,
+      "peakRssKiB": 66620
+    }
+  ],
+  "visitCounts": {
+    "modeledCallVisits": 129,
+    "pointerEscapes": 151,
+    "pendingMemberCallUses": 1,
+    "pendingArgumentUses": 0,
+    "pendingPointerEscapes": 0
+  },
+  "assumptions": [
+    "single host thread",
+    "single translation unit",
+    "bounded CSA exploration"
+  ],
+  "budget": {
+    "maxNodes": 225000,
+    "timeoutSeconds": 180.0
+  },
+  "complete": true,
+  "suppressedContractDiagnostics": 0,
+  "native": {
+    "path": "build-assertions/cuda-lifetime-native",
+    "sha256": "44f9222f153f585c7bf1dd6bf03ca03449c89a820efa957f61c268915efab7b1"
+  },
+  "summary": {
+    "parsed": 48,
+    "failed": 0,
+    "translationUnknown": 0,
+    "budgetExhausted": 0,
+    "unmodeledCudaCalls": 0,
+    "coverageUnknown": 0,
+    "diagnostics": 26,
+    "complete": true
+  }
+}

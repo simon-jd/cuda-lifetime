@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "split": "development-real-cuda",
+  "labelOrigin": "Hand-authored from stream-ordered allocation/event semantics before kernel test execution; not a held-out corpus.",
+  "cases": [
+    {
+      "id": "kernel_cross_stream_bad",
+      "file": "corpus/dev/kernel_cross_stream_bad.cu",
+      "ruleId": "CL3",
+      "line": 9,
+      "expect": "warning",
+      "level": "error",
+      "semanticIds": ["S5", "S8"],
+      "rationale": "Kernel argument uses a stream-ordered pointer on a provably distinct stream without a dependency covering allocation."
+    },
+    {
+      "id": "kernel_cross_stream_good",
+      "file": "corpus/dev/kernel_cross_stream_good.cu",
+      "ruleId": "CL3",
+      "line": 13,
+      "expect": "none",
+      "level": null,
+      "semanticIds": ["S5", "S8"],
+      "rationale": "Event capture after allocation and consumer wait establish the required kernel dependency."
+    }
+  ]
+}

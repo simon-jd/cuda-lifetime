@@ -1,0 +1,27 @@
+.deps/
+build*/
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+targets/*/build*/
+results/**/*.html
+
+# Generated run output and bundled runtimes stay on disk, not in git.
+/results/*
+!/results/README.md
+# except the results the README and docs/evaluation.md cite
+!/results/real-projects/
+!/results/regression/
+!/results/probes/
+/results/probes/*
+!/results/probes/completion.json
+!/results/holdout-first/
+/results/holdout-first/*
+!/results/holdout-first/metrics.json
+!/results/holdout-first/coverage.json
+!/results/holdout-first/out.sarif
+!/results/holdout-first/first-result.json
+!/results/holdout-first/triage.json
+/releases/
+/targets/*/clang*/
