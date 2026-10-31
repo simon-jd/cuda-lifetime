@@ -64,7 +64,8 @@ def alerts(document, project):
 
 
 def read_triage(path):
-    rows = list(csv.DictReader(path.open(newline="")))
+    with path.open(newline="") as stream:
+        rows = list(csv.DictReader(stream))
     return rows, collections.Counter((r["project"], r["file"], int(r["line"]), r["rule"], r["level"]) for r in rows)
 
 
@@ -119,7 +120,8 @@ def summarize(scan, triage_path, out, previous_path=None, root=ROOT, previous_ve
                "alertsByLevel": dict(sorted(collections.Counter(r["level"] for r in rows).items())),
                "coverage": coverage}
     if previous_path:
-        previous = list(csv.DictReader(Path(previous_path).open(newline="")))
+        with Path(previous_path).open(newline="") as stream:
+            previous = list(csv.DictReader(stream))
         projects = [r.get("project") or r["target"] for r in previous]
         categories = [r.get("category") or r["judgment"] for r in previous]
         summary["previous"] = {"version": previous_version,

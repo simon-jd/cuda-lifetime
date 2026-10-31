@@ -67,7 +67,8 @@ class SummarizeScanTests(unittest.TestCase):
         self.assertEqual(faiss["tuSeconds"]["sum"], 2.0)
         sarif = json.loads((self.out / "faiss.sarif").read_text())
         self.assertEqual(sarif["runs"][0]["artifacts"][0]["location"]["uri"], ".deps/faiss-1.15.1/src/a.cpp")
-        rows = list(csv.DictReader((self.out / "timings.csv").open()))
+        with (self.out / "timings.csv").open() as stream:
+            rows = list(csv.DictReader(stream))
         self.assertEqual(len(rows), 6)
         self.assertEqual(rows[0]["file"], ".deps/cuda-samples-13.2/src/a.cpp")
         self.assertEqual(rows[0]["functionsOverBudget"], "1")
