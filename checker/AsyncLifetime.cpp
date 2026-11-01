@@ -19,6 +19,7 @@
 #include "llvm/Support/Path.h"
 #include <algorithm>
 #include <cstdint>
+#include <optional>
 #include <tuple>
 using namespace clang;
 using namespace ento;
@@ -346,8 +347,9 @@ class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eva
         report(c, s, 3, std::string(action) + " uses a stream-ordered allocation without an allocation dependency", Ordered, "S5", nullptr, !distinct(s, stream, alloc->stream), false, alloc, key);
     }
   }
-  static std::string name(const CallEvent &call) {
-    if (const auto *fd = dyn_cast_or_null<FunctionDecl>(call.getDecl())) {
+  static std::string name(const CallEvent &call) { return declName(dyn_cast_or_null<FunctionDecl>(call.getDecl())); }
+  static std::string declName(const FunctionDecl *fd) {
+    if (fd) {
       auto qualified = fd->getQualifiedNameAsString();
       if (cudalifetime::info().models.count(qualified)) return qualified;
       auto n = fd->getNameAsString();
@@ -403,9 +405,145 @@ class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eva
              deviceQuery(n)) m.effect = "observe";
     return m;
   }
-  static SVal arg(const CallEvent &call, const cudalifetime::Model &m, const char *key) {
+public:
+  // Summaries of bodies: the copy a function queues on its own parameters,
+  // composed from the CUDA calls, models and other bodies it calls. They are
+  // flow-insensitive "may" summaries: a copy on any path counts, and a body
+  // that synchronizes anything gets none, since it may complete its copies.
+  struct Summary { bool done = false, synchronizes = false, copies = false; std::optional<cudalifetime::Model> copy; };
+  struct Forwarded {
+    int param = -1; bool constant = false; int64_t value = 0;
+    bool valid() const { return param >= 0 || constant; }
+    bool operator==(const Forwarded &o) const { return param == o.param && constant == o.constant && value == o.value; }
+  };
+  // Which parameter of fd an argument expression passes on, or its constant
+  // value. Buffers forward as a pointer parameter or the address of a
+  // reference parameter; a handle may also be read through a wrapper's
+  // accessor or conversion (stream.value(), a cuda_stream_view to stream_ref).
+  static Forwarded forwarded(const Expr *e, const FunctionDecl *fd, bool handle) {
+    Forwarded out;
+    for (unsigned depth = 0; e && depth < 16; ++depth) {
+      e = e->IgnoreImplicit()->IgnoreParens();
+      if (const auto *cast = dyn_cast<ExplicitCastExpr>(e)) { e = cast->getSubExpr(); continue; }
+      if (const auto *temp = dyn_cast<MaterializeTemporaryExpr>(e)) { e = temp->getSubExpr(); continue; }
+      if (handle) {
+        if (const auto *construct = dyn_cast<CXXConstructExpr>(e); construct && construct->getNumArgs() == 1) { e = construct->getArg(0); continue; }
+        if (const auto *member = dyn_cast<CXXMemberCallExpr>(e); member && !member->getNumArgs() && member->getImplicitObjectArgument()) {
+          e = member->getImplicitObjectArgument(); continue;
+        }
+      }
+      break;
+    }
+    if (!e) return out;
+    auto index = [&](const ValueDecl *decl) -> int {
+      const auto *param = dyn_cast_or_null<ParmVarDecl>(decl);
+      if (!param) return -1;
+      for (unsigned i = 0; i < fd->getNumParams(); ++i) if (fd->getParamDecl(i) == param) return static_cast<int>(i);
+      return -1;
+    };
+    if (const auto *unary = dyn_cast<UnaryOperator>(e); unary && unary->getOpcode() == UO_AddrOf) {
+      if (const auto *ref = dyn_cast<DeclRefExpr>(unary->getSubExpr()->IgnoreParens()))
+        if (ref->getDecl()->getType()->isReferenceType()) out.param = index(ref->getDecl());
+      return out;
+    }
+    if (const auto *ref = dyn_cast<DeclRefExpr>(e)) {
+      QualType type = ref->getDecl()->getType().getNonReferenceType();
+      if (type->isPointerType() || type->isIntegralOrEnumerationType() || (handle && type->getAsCXXRecordDecl()))
+        out.param = index(ref->getDecl());
+      if (out.param >= 0) return out;
+    }
+    Expr::EvalResult result;
+    if (!e->isValueDependent() && !e->isTypeDependent() && e->EvaluateAsInt(result, fd->getASTContext())) {
+      out.constant = true; out.value = result.Val.getInt().getExtValue();
+    }
+    return out;
+  }
+  static const Summary &summaryOf(const FunctionDecl *fd) {
+    static std::map<const FunctionDecl *, Summary> memo;
+    fd = fd->getCanonicalDecl();
+    auto &entry = memo[fd];
+    if (entry.done) return entry;
+    entry.done = true;  // a recursive call sees an empty summary
+    const FunctionDecl *definition = fd->getDefinition();
+    if (!definition || !definition->hasBody() || definition->isDependentContext()) return entry;
+    struct Calls : RecursiveASTVisitor<Calls> {
+      std::vector<const CallExpr *> calls;
+      bool VisitCallExpr(CallExpr *call) { calls.push_back(call); return true; }
+      bool TraverseLambdaExpr(LambdaExpr *) { return true; }  // runs only if called
+    } visitor;
+    visitor.TraverseStmt(definition->getBody());
+    Summary result; result.done = true;
+    std::vector<cudalifetime::Model> copies;
+    for (const CallExpr *call : visitor.calls) {
+      const FunctionDecl *callee = call->getDirectCallee();
+      if (!callee || isa<CXXOperatorCallExpr>(call)) continue;
+      cudalifetime::Model m = model(declName(callee));
+      if (m.effect.empty() && !cudalifetime::isCudaApi(callee)) {
+        const Summary &inner = summaryOf(callee);
+        result.synchronizes |= inner.synchronizes;
+        if (inner.copy) m = *inner.copy;
+      }
+      const auto &e = m.effect;
+      if (e == "sync_stream" || e == "sync_device" || e == "sync_event" || e == "event_elapsed" || e == "copy")
+        result.synchronizes = true;
+      if (e != "enqueue_copy") continue;
+      cudalifetime::Model copy; copy.function = definition->getQualifiedNameAsString(); copy.effect = e; copy.assumption = true;
+      bool forwardsBuffer = false, forwardsStream = false;
+      for (const char *key : {"dst", "src", "size", "kind", "stream"}) {
+        Forwarded f;
+        if (auto constant = m.constants.find(key); constant != m.constants.end()) { f.constant = true; f.value = constant->second; }
+        else if (auto it = m.args.find(key); it != m.args.end() && it->second < call->getNumArgs())
+          f = forwarded(call->getArg(it->second), definition, std::string(key) == "stream");
+        if (f.param >= 0) copy.args[key] = static_cast<unsigned>(f.param);
+        else if (f.constant && (std::string(key) == "kind" || std::string(key) == "stream")) copy.constants[key] = f.value;
+        else if (f.constant && std::string(key) == "size" && f.value >= 0) copy.constants[key] = f.value;
+        forwardsBuffer |= (std::string(key) == "dst" || std::string(key) == "src") && f.param >= 0;
+        forwardsStream |= std::string(key) == "stream" && f.valid();
+      }
+      if (forwardsBuffer && forwardsStream) copies.push_back(copy);
+    }
+    result.copies = !copies.empty();
+    bool agree = !copies.empty();
+    for (const auto &copy : copies) agree &= copy.args == copies[0].args && copy.constants == copies[0].constants;
+    if (agree && !result.synchronizes) result.copy = copies[0];
+    memo[fd] = result;
+    return memo[fd];
+  }
+  static SVal arg(ProgramStateRef s, const CallEvent &call, const cudalifetime::Model &m, const char *key) {
+    auto &manager = s->getStateManager();
+    if (auto constant = m.constants.find(key); constant != m.constants.end())
+      return manager.getSValBuilder().makeIntVal(constant->second, manager.getContext().IntTy);
     auto it = m.args.find(key);
-    return it != m.args.end() && it->second < call.getNumArgs() ? call.getArgSVal(it->second) : UnknownVal();
+    if (it == m.args.end() || it->second >= call.getNumArgs()) return UnknownVal();
+    SVal value = call.getArgSVal(it->second);
+    const std::string k = key;
+    if ((k == "stream" || k == "event") && call.getArgExpr(it->second))
+      value = handle(s, value, call.getArgExpr(it->second)->getType());
+    return value;
+  }
+  // A stream or event passed as a wrapper object (rmm::cuda_stream_view,
+  // cuda::stream_ref) is decoded to the handle it holds as its only data
+  // member, so that it names the same stream as the raw handle.
+  static SVal handle(ProgramStateRef s, SVal value, QualType type) {
+    auto &manager = s->getStateManager();
+    for (unsigned depth = 0; depth < 4; ++depth) {
+      const auto *record = type.isNull() ? nullptr : type.getNonReferenceType()->getAsCXXRecordDecl();
+      if (!record) return value;
+      record = record->getDefinition();
+      if (!record || record->getNumBases() || record->isPolymorphic()) return UnknownVal();
+      const FieldDecl *only = nullptr;
+      unsigned fields = 0;
+      for (const auto *field : record->fields()) { only = field; ++fields; }
+      if (fields != 1) return UnknownVal();
+      if (auto lazy = value.getAs<nonloc::LazyCompoundVal>()) {
+        const auto *field = manager.getRegionManager().getFieldRegion(only, lazy->getRegion());
+        value = manager.getStoreManager().getBinding(lazy->getStore(), loc::MemRegionVal(field), only->getType());
+      } else if (const auto *object = dyn_cast_or_null<SubRegion>(value.getAsRegion())) {
+        value = s->getSVal(manager.getRegionManager().getFieldRegion(only, object), only->getType());
+      } else return UnknownVal();
+      type = only->getType();
+    }
+    return UnknownVal();
   }
   static ProgramStateRef pending(ProgramStateRef s, const MemRegion *r, Stream stream,
                                   Access access, const Stmt *origin, CheckerContext &c, uint64_t bits = 0) {
@@ -476,10 +614,20 @@ public:
     auto s = c.getState();
     // A call CSA evaluated conservatively (no body, or not inlined) may access
     // whatever reaches it; an inlined call's accesses were checked one by one.
-    if (model(n).effect.empty() && !c.wasInlined && !endsLifetime(call, n)) s = opaqueCall(call, c, s);
+    const bool conservative = model(n).effect.empty() && !c.wasInlined && !endsLifetime(call, n);
+    if (conservative) s = opaqueCall(call, c, s);
     s = clearReach(s);
     if (n == "malloc" || n == "calloc" || n == "realloc")
       if (auto *region = base(call.getReturnValue())) s = s->set<Memories>(region, Pageable);
+    // A body CSA declined to inline (a container method, or over an inlining
+    // limit) still queues the copies its summary records.
+    if (conservative) if (const auto *fd = dyn_cast_or_null<FunctionDecl>(call.getDecl()))
+      if (fd->hasBody() && !cudalifetime::isCudaApi(fd))
+        if (const auto &summary = summaryOf(fd); summary.copy) {
+          cudalifetime::info().assumedModels.insert("generated summary: " + summary.copy->function);
+          applyCall(call, c, s, &*summary.copy);
+          return;
+        }
     if (s != c.getState()) c.addTransition(s);
   }
   static bool endsLifetime(const CallEvent &call, const std::string &n) {
@@ -536,7 +684,7 @@ public:
     return true;
   }
   bool evalCall(const CallEvent &call, CheckerContext &c) const;
-  void applyCall(const CallEvent &call, CheckerContext &c, ProgramStateRef s) const;
+  void applyCall(const CallEvent &call, CheckerContext &c, ProgramStateRef s, const cudalifetime::Model *given = nullptr) const;
   void applyAllocation(const CallEvent &call, CheckerContext &c, ProgramStateRef s) const;
   void checkLocation(SVal location, bool isLoad, const Stmt *, CheckerContext &c) const;
   void checkBind(SVal location, SVal value, const Stmt *, bool, CheckerContext &c) const;
@@ -649,11 +797,11 @@ ProgramStateRef AsyncLifetimeChecker::opaqueCall(const CallEvent &call, CheckerC
   return s;
 }
 
-void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, ProgramStateRef s) const {
-  auto n = name(call); auto m = model(n); const auto &e = m.effect;
-  Stream stream = streamIdentity(s, arg(call, m, "stream"));
+void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, ProgramStateRef s, const cudalifetime::Model *given) const {
+  auto n = name(call); auto m = given ? *given : model(n); const auto &e = m.effect;
+  Stream stream = streamIdentity(s, arg(s, call, m, "stream"));
   if (m.args.count("stream") && stream == 0) ++cudalifetime::info().unmodeled[n + ":unknown-stream"];
-  auto *r = base(arg(call, m, "ptr"));
+  auto *r = base(arg(s, call, m, "ptr"));
   if (e.empty()) {
     if (cudalifetime::isCudaApi(dyn_cast_or_null<FunctionDecl>(call.getDecl()))) ++cudalifetime::info().unmodeled[n];
     // A lifetime ends here whether or not the callee is inlined. Other calls are
@@ -687,14 +835,14 @@ void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, P
     // pageable H2D source, once the source is staged; device-to-device copies
     // do not synchronize. CUDA 13.2.2 archive: api-sync-behavior#memcpy.
     const Stream def = defaultStream();
-    auto *dst = base(arg(call, m, "dst")), *src = base(arg(call, m, "src"));
+    auto *dst = base(arg(s, call, m, "dst")), *src = base(arg(s, call, m, "src"));
     uint64_t bits = 0;
-    if (auto bytes = arg(call, m, "size").getAs<nonloc::ConcreteInt>()) {
+    if (auto bytes = arg(s, call, m, "size").getAs<nonloc::ConcreteInt>()) {
       uint64_t count = bytes->getValue()->getLimitedValue();
       if (count <= UINT64_MAX / 8) bits = count * 8;
     }
     int copyKind = -1;
-    if (auto v = arg(call, m, "kind").getAs<nonloc::ConcreteInt>()) copyKind = v->getValue()->getSExtValue();
+    if (auto v = arg(s, call, m, "kind").getAs<nonloc::ConcreteInt>()) copyKind = v->getValue()->getSExtValue();
     s = enqueue(s, def, c.getSValBuilder().makeZeroVal(c.getASTContext().VoidPtrTy));
     deviceUse(c, s, src, def, "cudaMemcpy"); deviceUse(c, s, dst, def, "cudaMemcpy");
     auto host = [&](const MemRegion *r) { const Memory k = memory(s, r); return k == Pinned || k == Pageable; };
@@ -717,11 +865,11 @@ void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, P
     // pinned host memory. CUDA 13.2.2 archive: api-sync-behavior#memset.
     const Stream target = e == "memset" ? defaultStream() : stream;
     uint64_t bits = 0;
-    if (auto bytes = arg(call, m, "size").getAs<nonloc::ConcreteInt>()) {
+    if (auto bytes = arg(s, call, m, "size").getAs<nonloc::ConcreteInt>()) {
       uint64_t count = bytes->getValue()->getLimitedValue();
       if (count <= UINT64_MAX / 8) bits = count * 8;
     }
-    s = enqueue(s, target, e == "memset" ? c.getSValBuilder().makeZeroVal(c.getASTContext().VoidPtrTy) : arg(call, m, "stream"));
+    s = enqueue(s, target, e == "memset" ? c.getSValBuilder().makeZeroVal(c.getASTContext().VoidPtrTy) : arg(s, call, m, "stream"));
     deviceUse(c, s, r, target, e == "memset" ? "cudaMemset" : "cudaMemsetAsync");
     const bool pinned = memory(s, r, bits) == Pinned;
     if (e == "memset" && pinned) {
@@ -734,22 +882,22 @@ void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, P
   } else if (e == "capture_end") {
     for (auto entry : s->get<CaptureOrigins>()) if (entry.second == stream) s = s->remove<CaptureOrigins>(entry.first);
     for (auto entry : s->get<CapturedEvents>()) if (entry.second == stream) s = s->remove<CapturedEvents>(entry.first);
-    if (auto out = arg(call, m, "ptr").getAs<Loc>())
+    if (auto out = arg(s, call, m, "ptr").getAs<Loc>())
       s = s->bindLoc(*out, UnknownVal(), c.getStackFrame());
   } else if (e == "graph_launch") {
-    s = enqueue(s, stream, arg(call, m, "stream"));
+    s = enqueue(s, stream, arg(s, call, m, "stream"));
     noteCapture();
   } else if (e == "enqueue_copy") {
-    s = enqueue(s, stream, arg(call, m, "stream"));
-    auto *dst = base(arg(call, m, "dst")), *src = base(arg(call, m, "src"));
+    s = enqueue(s, stream, arg(s, call, m, "stream"));
+    auto *dst = base(arg(s, call, m, "dst")), *src = base(arg(s, call, m, "src"));
     uint64_t bits = 0;
-    if (auto bytes = arg(call, m, "size").getAs<nonloc::ConcreteInt>()) {
+    if (auto bytes = arg(s, call, m, "size").getAs<nonloc::ConcreteInt>()) {
       uint64_t count = bytes->getValue()->getLimitedValue();
       if (!count) { c.addTransition(s); return; }
       if (count <= UINT64_MAX / 8) bits = count * 8;
     }
     int copyKind = -1;
-    if (auto v = arg(call, m, "kind").getAs<nonloc::ConcreteInt>()) copyKind = v->getValue()->getSExtValue();
+    if (auto v = arg(s, call, m, "kind").getAs<nonloc::ConcreteInt>()) copyKind = v->getValue()->getSExtValue();
     deviceUse(c, s, src, stream, "cudaMemcpyAsync"); deviceUse(c, s, dst, stream, "cudaMemcpyAsync");
     if (copyKind == 1) { s = pending(s, src, stream, HostWrite, call.getOriginExpr(), c, bits); s = pending(s, dst, stream, DeviceUse, call.getOriginExpr(), c); }
     else if (copyKind == 2) { s = pending(s, dst, stream, HostRead, call.getOriginExpr(), c, bits); s = pending(s, src, stream, DeviceUse, call.getOriginExpr(), c); }
@@ -768,7 +916,7 @@ void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, P
     }
     else if (copyKind != 0) { ++cudalifetime::info().unmodeled[n + ":unknown-copy-kind"]; }
   } else if (e == "launch") {
-    s = enqueue(s, stream, arg(call, m, "stream"));
+    s = enqueue(s, stream, arg(s, call, m, "stream"));
     for (unsigned i = 0; i < call.getNumArgs(); ++i) {
       if (m.args.count("stream") && m.args.at("stream") == i) continue;
       auto *buffer = base(call.getArgSVal(i));
@@ -782,33 +930,33 @@ void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, P
     // CUDA 13.2.2 event API: an incomplete start or end returns NotReady.
     // A successful timing query therefore proves only their recorded captures.
     for (const char *key : {"start", "end"}) {
-      const uint64_t event = eventIdentity(s, arg(call, m, key));
+      const uint64_t event = eventIdentity(s, arg(s, call, m, key));
       for (auto b : s->get<EventBounds>())
         if (b.first.first == event && b.first.second) s = retire(s, b.first.second, b.second);
     }
-    if (auto out = arg(call, m, "ms").getAs<Loc>())
+    if (auto out = arg(s, call, m, "ms").getAs<Loc>())
       s = s->bindLoc(*out, UnknownVal(), c.getStackFrame());
   } else if (e == "event_record" && capturing(s, stream)) {
     // A record inside a capture is a graph node; a stream that waits on it
     // joins the capture.
-    const uint64_t event = eventIdentity(s, arg(call, m, "event"));
-    s = s->set<EventValues>(event, arg(call, m, "event"));
+    const uint64_t event = eventIdentity(s, arg(s, call, m, "event"));
+    s = s->set<EventValues>(event, arg(s, call, m, "event"));
     for (auto b : s->get<EventBounds>()) if (b.first.first == event) s = s->remove<EventBounds>(b.first);
     s = s->set<RecordedEvents>(event, true)->set<CapturedEvents>(event, *s->get<CaptureOrigins>(stream));
   } else if (e == "event_record") {
-    const uint64_t event = eventIdentity(s, arg(call, m, "event"));
-    s = s->set<EventValues>(event, arg(call, m, "event"));
-    s = enqueue(s, stream, arg(call, m, "stream"));
+    const uint64_t event = eventIdentity(s, arg(s, call, m, "event"));
+    s = s->set<EventValues>(event, arg(s, call, m, "event"));
+    s = enqueue(s, stream, arg(s, call, m, "stream"));
     for (auto b : s->get<EventBounds>()) if (b.first.first == event) s = s->remove<EventBounds>(b.first);
     s = s->set<RecordedEvents>(event, true)->set<EventBounds>({event, stream}, sequence(s, stream));
     for (auto wait : s->get<WaitBounds>()) if (wait.first.first == stream) s = s->set<EventBounds>({event, wait.first.second}, wait.second);
-  } else if (e == "stream_wait_event" && (capturing(s, stream) || s->get<CapturedEvents>(eventIdentity(s, arg(call, m, "event"))))) {
-    if (const auto *origin = s->get<CapturedEvents>(eventIdentity(s, arg(call, m, "event"))))
+  } else if (e == "stream_wait_event" && (capturing(s, stream) || s->get<CapturedEvents>(eventIdentity(s, arg(s, call, m, "event"))))) {
+    if (const auto *origin = s->get<CapturedEvents>(eventIdentity(s, arg(s, call, m, "event"))))
       s = s->set<CaptureOrigins>(stream, *origin);
     noteCapture();
   } else if (e == "stream_wait_event" || e == "sync_event") {
-    const uint64_t event = eventIdentity(s, arg(call, m, "event"));
-    s = s->set<EventValues>(event, arg(call, m, "event"));
+    const uint64_t event = eventIdentity(s, arg(s, call, m, "event"));
+    s = s->set<EventValues>(event, arg(s, call, m, "event"));
     const auto *recorded = s->get<RecordedEvents>(event);
     // Only an event created on this path is known to be unrecorded; one read
     // from an object, a container or another process has unknown history.
@@ -816,7 +964,7 @@ void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, P
       report(c, s, 4, "Event has no recorded capture on this path; waiting establishes no dependency", Unknown, "S8", nullptr, true);
     else if (!recorded)
       cudalifetime::info().coverageUnknown.insert("event with no creation or record on this path: the dependency it carries is unknown");
-    if (e == "stream_wait_event") s = enqueue(s, stream, arg(call, m, "stream"));
+    if (e == "stream_wait_event") s = enqueue(s, stream, arg(s, call, m, "stream"));
     for (auto b : s->get<EventBounds>()) if (b.first.first == event) {
       if (e == "sync_event" && b.first.second) s = retire(s, b.first.second, b.second);
       else s = bound(s, stream, b.first.second, b.second);
@@ -830,7 +978,7 @@ void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, P
           report(c, s, 4, "Event capture predates pending producer work and does not cover it", op.memory, "S8", &op, true);
     }
   } else if (e == "free_async" || e == "free_device") {
-    if (e == "free_async") s = enqueue(s, stream, arg(call, m, "stream"));
+    if (e == "free_async") s = enqueue(s, stream, arg(s, call, m, "stream"));
     if (const auto *key = allocationRegion(s, r)) {
       const auto *alloc = s->get<Allocations>(key);
       bool reported = false;
@@ -867,9 +1015,9 @@ void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, P
 void AsyncLifetimeChecker::applyAllocation(const CallEvent &call, CheckerContext &c, ProgramStateRef s) const {
   auto m = model(name(call)); const auto &e = m.effect;
   if (e == "host_register") {
-    if (auto *r = base(arg(call, m, "ptr"))) {
+    if (auto *r = base(arg(s, call, m, "ptr"))) {
       uint64_t bits = 0;
-      if (auto bytes = arg(call, m, "size").getAs<nonloc::ConcreteInt>()) {
+      if (auto bytes = arg(s, call, m, "size").getAs<nonloc::ConcreteInt>()) {
         uint64_t count = bytes->getValue()->getLimitedValue();
         if (count <= UINT64_MAX / 8) bits = count * 8;
       }
@@ -878,7 +1026,7 @@ void AsyncLifetimeChecker::applyAllocation(const CallEvent &call, CheckerContext
     return;
   }
   if (e != "malloc_host" && e != "malloc_device" && e != "malloc_async" && e != "stream_create" && e != "event_create") return;
-  auto out = arg(call, m, "ptr").getAs<Loc>();
+  auto out = arg(s, call, m, "ptr").getAs<Loc>();
   if (!out) return;
   SVal value = UnknownVal();
   {
@@ -890,18 +1038,18 @@ void AsyncLifetimeChecker::applyAllocation(const CallEvent &call, CheckerContext
   }
   if (e == "stream_create") {
     unsigned streamKind = name(call) == "cudaStreamCreate" ? 2 : 0;
-    if (auto v = arg(call, m, "flags").getAs<nonloc::ConcreteInt>()) streamKind = (v->getValue()->getZExtValue() & 1) ? 3 : 2;
+    if (auto v = arg(s, call, m, "flags").getAs<nonloc::ConcreteInt>()) streamKind = (v->getValue()->getZExtValue() & 1) ? 3 : 2;
     s = s->set<StreamKinds>(identity(value), streamKind)->set<StreamValues>(identity(value), value);
   } else if (e == "event_create") {
     s = s->set<RecordedEvents>(identity(value), false)->set<EventValues>(identity(value), value);
-    if (auto flags = arg(call, m, "flags").getAs<nonloc::ConcreteInt>())
+    if (auto flags = arg(s, call, m, "flags").getAs<nonloc::ConcreteInt>())
       s = s->set<EventTimingDisabled>(identity(value), (flags->getValue()->getZExtValue() & 2) != 0);
   } else if (auto *r = base(value)) {
     Memory mem = e == "malloc_host" ? Pinned : e == "malloc_async" ? Ordered : Device;
     s = s->set<Memories>(r, mem);
     if (mem == Ordered) {
-      Stream stream = streamIdentity(s, arg(call, m, "stream"));
-      s = enqueue(s, stream, arg(call, m, "stream"));
+      Stream stream = streamIdentity(s, arg(s, call, m, "stream"));
+      s = enqueue(s, stream, arg(s, call, m, "stream"));
       s = s->set<Allocations>(r, {stream, sequence(s, stream), false, 0, 0,
                                  call.getOriginExpr(), c.getStackFrame()});
     }
@@ -928,7 +1076,7 @@ bool AsyncLifetimeChecker::evalCall(const CallEvent &call, CheckerContext &c) co
   auto s = c.getState();
   bool impossibleSuccess = false;
   if (m.effect == "event_elapsed") for (const char *key : {"start", "end"}) {
-    const uint64_t event = eventIdentity(s, arg(call, m, key));
+    const uint64_t event = eventIdentity(s, arg(s, call, m, key));
     const auto *recorded = s->get<RecordedEvents>(event);
     const auto *disabled = s->get<EventTimingDisabled>(event);
     impossibleSuccess |= (recorded && !*recorded) || (disabled && *disabled);
@@ -1000,6 +1148,12 @@ void AsyncLifetimeChecker::checkEndFunction(const ReturnStmt *, CheckerContext &
         report(c, s, 2, "Stack buffer lifetime ends while asynchronous work may still access it", op.memory, "S4", &op);
   }
 }
+}
+bool cudalifetime::summarize(const FunctionDecl *decl, Model &out) {
+  const auto &summary = AsyncLifetimeChecker::summaryOf(decl);
+  if (!summary.copy) return false;
+  out = *summary.copy;
+  return true;
 }
 bool cudalifetime::isCudaApi(const FunctionDecl *decl) {
   if (!decl || isa<CXXMethodDecl>(decl) || !decl->getIdentifier() || !decl->getName().starts_with("cu")) return false;

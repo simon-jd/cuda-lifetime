@@ -17,8 +17,11 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/JSON.h"
+#include "llvm/Support/FormatVariadic.h"
+#include "llvm/ADT/SmallString.h"
 #include "llvm/Support/raw_ostream.h"
 #include <chrono>
+#include <map>
 #include <memory>
 #include <set>
 #include <sys/resource.h>
@@ -26,8 +29,9 @@ using namespace clang;
 using namespace clang::tooling;
 namespace {
 llvm::cl::OptionCategory category("cuda-lifetime-native options");
-llvm::cl::opt<std::string> sarif("sarif", llvm::cl::desc("CSA SARIF output file"), llvm::cl::Required, llvm::cl::cat(category));
-llvm::cl::opt<std::string> coverage("coverage", llvm::cl::desc("Coverage JSON output file"), llvm::cl::Required, llvm::cl::cat(category));
+llvm::cl::opt<std::string> sarif("sarif", llvm::cl::desc("CSA SARIF output file"), llvm::cl::cat(category));
+llvm::cl::opt<std::string> coverage("coverage", llvm::cl::desc("Coverage JSON output file"), llvm::cl::cat(category));
+llvm::cl::opt<std::string> summarizeTo("summarize", llvm::cl::desc("Write the copy summaries of this TU's function definitions as a model file instead of analyzing it"), llvm::cl::init(""), llvm::cl::cat(category));
 llvm::cl::opt<std::string> models("model", llvm::cl::desc("Directory containing model JSON files"), llvm::cl::init(""), llvm::cl::cat(category));
 llvm::cl::opt<unsigned> maxNodes("max-nodes", llvm::cl::desc("Maximum exploded nodes per top-level function"), llvm::cl::init(225000), llvm::cl::cat(category));
 llvm::cl::opt<bool> includeContract("include-contract", llvm::cl::desc("Retain contract diagnostics (filtering is performed by the Python frontend)"), llvm::cl::cat(category));
@@ -142,6 +146,51 @@ public:
     if (!skippedNoCuda) analysis->HandleTranslationUnit(ctx);
   }
 };
+// Summaries for other translation units: every function defined in the main
+// file whose body queues a copy on its parameters (cudalifetime::summarize),
+// written in the model format. Names defined more than once (overloads) are
+// left out, since models are looked up by qualified name.
+class Summaries : public ASTConsumer, public RecursiveASTVisitor<Summaries> {
+  SourceManager *sources = nullptr;
+  std::map<std::string, unsigned> definitions;
+  std::map<std::string, std::pair<cudalifetime::Model, unsigned>> found;
+public:
+  bool VisitFunctionDecl(FunctionDecl *decl) {
+    if (!decl->doesThisDeclarationHaveABody() || decl->isDependentContext() || !decl->getIdentifier() || !decl->isExternallyVisible()) return true;
+    if (!sources->isWrittenInMainFile(sources->getExpansionLoc(decl->getLocation()))) return true;
+    std::string qualified = decl->getQualifiedNameAsString();
+    if (cudalifetime::info().models.count(qualified)) return true;
+    ++definitions[qualified];
+    cudalifetime::Model model;
+    if (cudalifetime::summarize(decl, model))
+      found[qualified] = {model, sources->getExpansionLineNumber(decl->getLocation())};
+    return true;
+  }
+  void HandleTranslationUnit(ASTContext &ctx) override {
+    sources = &ctx.getSourceManager();
+    TraverseDecl(ctx.getTranslationUnitDecl());
+    llvm::SmallString<256> path(sources->getFileEntryRefForID(sources->getMainFileID())->getName());
+    llvm::sys::fs::make_absolute(path);
+    llvm::json::Array models;
+    for (const auto &[name, entry] : found) {
+      if (definitions[name] != 1) continue;
+      llvm::json::Object args, constants;
+      for (const auto &[key, index] : entry.first.args) args[key] = index;
+      for (const auto &[key, value] : entry.first.constants) constants[key] = value;
+      models.push_back(llvm::json::Object{{"function", name}, {"aliases", llvm::json::Array{}}, {"effect", entry.first.effect},
+          {"args", std::move(args)}, {"constants", std::move(constants)}, {"assumption", true}, {"generated", true},
+          {"rationale", "Generated from the function body: every copy it queues, through the calls it makes, forwards these parameters; it calls no synchronization."},
+          {"doc", llvm::json::Object{{"url", "file://" + path.str().str()}, {"anchor", "L" + std::to_string(entry.second)}, {"cudaVersion", "13.2.2"}}}});
+    }
+    std::error_code ec;
+    llvm::raw_fd_ostream out(summarizeTo, ec);
+    if (ec) { llvm::errs() << "Cannot write summaries: " << ec.message() << "\n"; return; }
+    out << llvm::formatv("{0:2}", llvm::json::Value(llvm::json::Object{{"schemaVersion", 1}, {"generatedFrom", path.str().str()}, {"models", std::move(models)}})) << "\n";
+  }
+};
+class SummaryAction : public ASTFrontendAction {
+  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &, llvm::StringRef) override { return std::make_unique<Summaries>(); }
+};
 class TrackingDiagnostics : public TextDiagnosticPrinter {
 public:
   bool sawError = false;
@@ -178,6 +227,7 @@ int main(int argc, const char **argv) {
   if (!options) { llvm::errs() << llvm::toString(options.takeError()) << "\n"; return 2; }
   if (options->getSourcePathList().size() != 1) { llvm::errs() << "Run one TU per process to isolate SARIF and budgets; use cuda-lifetime analyze for batches.\n"; return 2; }
   if (!maxNodes) { llvm::errs() << "--max-nodes must be positive\n"; return 2; }
+  if (summarizeTo.empty() && (sarif.empty() || coverage.empty())) { llvm::errs() << "--sarif and --coverage are required unless --summarize is given\n"; return 2; }
   std::string error;
   if (!cudalifetime::loadModels(models, error)) { llvm::errs() << error << "\n"; return 2; }
   ClangTool tool(options->getCompilations(), options->getSourcePathList());
@@ -186,6 +236,10 @@ int main(int argc, const char **argv) {
   DiagnosticOptions diagnosticOptions;
   TrackingDiagnostics diagnostics(diagnosticOptions);
   tool.setDiagnosticConsumer(&diagnostics);
+  if (!summarizeTo.empty()) {
+    int status = tool.run(newFrontendActionFactory<SummaryAction>().get());
+    return diagnostics.sawError ? 1 : status;
+  }
   auto start = std::chrono::steady_clock::now();
   int status = tool.run(newFrontendActionFactory<Action>().get());
   if (diagnostics.sawError) { status = 1; parsed = 0; }

@@ -24,3 +24,4 @@ config.test_exec_root = lit_config.params.get("exec_root", os.path.join(os.path.
 verify = os.path.join(config.test_source_root, "verify.py")
 config.substitutions.append(("%native", f'"{native}"'))
 config.substitutions.append(("%verify", f'"{sys.executable}" "{verify}"'))
+config.substitutions.append(("%python", f'"{sys.executable}"'))

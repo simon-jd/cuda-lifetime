@@ -24,7 +24,7 @@ static bool loadEntry(const llvm::json::Value &entry, std::string &error) {
   Model m; m.function = function->str(); m.effect = effect->str();
   m.assumption = true; // Every external summary is a disclosed user assumption.
   static const std::map<std::string, std::set<std::string>> required = {
-    {"enqueue_copy", {"dst", "src", "stream"}}, {"launch", {"stream"}},
+    {"enqueue_copy", {"stream"}}, {"launch", {"stream"}},
     {"malloc_host", {"ptr"}}, {"host_register", {"ptr"}}, {"host_unregister", {"ptr"}},
     {"malloc_device", {"ptr"}}, {"malloc_async", {"ptr", "stream"}}, {"free_async", {"ptr", "stream"}},
     {"free_host", {"ptr"}}, {"free_device", {"ptr"}}, {"sync_device", {}}, {"sync_stream", {"stream"}},
@@ -42,7 +42,19 @@ static bool loadEntry(const llvm::json::Value &entry, std::string &error) {
       m.args[arg.first.str()] = static_cast<unsigned>(*index);
     }
   }
-  for (const auto &key : required.at(m.effect)) if (!m.args.count(key)) { error = "missing argument " + key + " for model " + m.function; return false; }
+  if (const auto *constants = obj->getObject("constants")) {
+    for (const auto &constant : *constants) {
+      auto value = constant.second.getAsInteger();
+      const std::string key = constant.first.str();
+      if (!value || (key != "kind" && key != "size" && key != "stream")) { error = "model constants must be integers for kind, size or stream"; return false; }
+      if (m.args.count(key)) { error = "model " + key + " is both an argument and a constant: " + m.function; return false; }
+      m.constants[constant.first.str()] = *value;
+    }
+  }
+  for (const auto &key : required.at(m.effect)) if (!m.args.count(key) && !m.constants.count(key)) { error = "missing argument " + key + " for model " + m.function; return false; }
+  // A copy summary needs the host side of the copy among its arguments; the
+  // other side may belong to the receiver (for example a device buffer member).
+  if (m.effect == "enqueue_copy" && !m.args.count("dst") && !m.args.count("src")) { error = "missing argument dst or src for model " + m.function; return false; }
   if (info().models.count(m.function)) { error = "duplicate model function: " + m.function; return false; }
   info().models[m.function] = m;
   if (const auto *aliases = obj->getArray("aliases")) {

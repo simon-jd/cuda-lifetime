@@ -1,5 +1,6 @@
 #ifndef CUDA_LIFETIME_ASYNC_LIFETIME_H
 #define CUDA_LIFETIME_ASYNC_LIFETIME_H
+#include <cstdint>
 #include <map>
 #include <set>
 #include <string>
@@ -9,6 +10,9 @@ namespace cudalifetime {
 struct Model {
   std::string function, effect;
   std::map<std::string, unsigned> args;
+  // Fixed argument values, such as the copy kind of a wrapper that always
+  // passes cudaMemcpyDefault.
+  std::map<std::string, int64_t> constants;
   bool assumption = false;
 };
 // What a report is, carried from the checker to the SARIF consumer as data:
@@ -35,6 +39,10 @@ bool loadModels(const std::string &directory, std::string &error);
 // in one of the toolkit's API headers (by file name, so a stub header with the
 // same name also qualifies). Project functions that merely share the prefix are not.
 bool isCudaApi(const clang::FunctionDecl *decl);
+// The copy a function's body queues on its own parameters, derived from its
+// AST through the calls it makes (CUDA calls, models, other bodies): false
+// when it queues none, synchronizes, or queues copies that disagree.
+bool summarize(const clang::FunctionDecl *decl, Model &out);
 void registerChecker(clang::ento::CheckerRegistry &registry);
 }
 #endif
