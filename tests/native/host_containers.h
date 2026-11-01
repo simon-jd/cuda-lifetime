@@ -11,6 +11,8 @@ template <class T> class vector {
 public:
   explicit vector(unsigned long count);
   vector(const vector &);
+  vector(vector &&);
+  vector &operator=(vector &&);
   ~vector();
   T *data();
   T *begin();

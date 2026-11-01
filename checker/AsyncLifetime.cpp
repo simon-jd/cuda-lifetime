@@ -750,7 +750,24 @@ public:
         if (const auto *known = s->get<ViewResults>(origin->getArg(param->getIndex())->IgnoreImplicit())) return *known;
     return nullptr;
   }
+  // Moving a container moves its buffer: the moved-to object owns it, so the
+  // moved-from one releases nothing (a container returned by value, or
+  // assigned from std::move).
+  static ProgramStateRef transfer(ProgramStateRef s, SVal from, SVal to) {
+    const auto *source = from.getAsRegion(), *target = to.getAsRegion();
+    if (!source || !target) return s;
+    source = source->StripCasts(); target = target->StripCasts();
+    for (auto entry : s->get<ContainerOwners>()) if (entry.second == source) s = s->set<ContainerOwners>(entry.first, target);
+    return s;
+  }
   static ProgramStateRef trackContainers(const CallEvent &call, ProgramStateRef s) {
+    if (const auto *ctor = dyn_cast<CXXConstructorCall>(&call); ctor && ctor->getDecl()->isMoveConstructor() &&
+        call.getNumArgs() == 1 && hostContainer(ctor->getDecl()->getThisType()->getPointeeType()))
+      return transfer(s, call.getArgSVal(0), ctor->getCXXThisVal());
+    if (const auto *assign = dyn_cast<CXXMemberOperatorCall>(&call))
+      if (const auto *method = dyn_cast_or_null<CXXMethodDecl>(assign->getDecl()); method && method->isMoveAssignmentOperator() &&
+          call.getNumArgs() == 1 && hostContainer(method->getThisType()->getPointeeType()))
+        return transfer(s, call.getArgSVal(0), assign->getCXXThisVal());
     if (const auto *ctor = dyn_cast<CXXConstructorCall>(&call)) {
       if (hostView(ctor->getDecl()->getThisType()->getPointeeType()) && call.getNumArgs() >= 1 && call.getArgExpr(0))
         if (const auto *from = owner(s, call.getArgSVal(0), call.getArgExpr(0)->getType()))

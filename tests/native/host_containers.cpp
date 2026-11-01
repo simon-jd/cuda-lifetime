@@ -56,3 +56,23 @@ void view_of_caller_memory(void *device, int *values, stream_view stream) {
 void caller_container(void *device, std::vector<int> &host, cudaStream_t stream) {
   cudaMemcpyAsync(device, host.data(), 16, 1, stream);
 }
+// Returning or moving a container passes its buffer on: the moved-from
+// object releases nothing, and the new owner's end is what counts.
+std::vector<int> returned_by_value(void *device, cudaStream_t stream) {
+  std::vector<int> out(4);
+  cudaMemcpyAsync(out.data(), device, 16, 2, stream);
+  return out;
+}
+void caller_destroys_returned(void *device, cudaStream_t stream) {
+  std::vector<int> host = returned_by_value(device, stream);
+  return; // CL2 warning
+}
+void caller_synchronizes_returned(void *device, cudaStream_t stream) {
+  std::vector<int> host = returned_by_value(device, stream);
+  cudaStreamSynchronize(stream);
+}
+void moved_into_longer_lived(void *device, std::vector<int> &keep, cudaStream_t stream) {
+  std::vector<int> host(4);
+  cudaMemcpyAsync(device, host.data(), 16, 1, stream);
+  keep = static_cast<std::vector<int> &&>(host);
+}
