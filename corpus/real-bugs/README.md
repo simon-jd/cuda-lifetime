@@ -29,26 +29,31 @@ and the fix silences it when the fixed revision has none there.
 ## Results
 
 `scripts/run_real_bugs.py` produced `results/real-bugs/results.json` with
-version 0.4.0 (the compile flags are in `commands.json`). No case was found.
+version 0.5.0. The compile flags are in `commands.json`, together with what
+the runner adds per case: a patched copy of cuDF's `type_dispatcher.hpp`
+searched first (Clang rejects its specializations in CUDA mode), a stand-in
+for gpe's generated `gpe_kernels.h`, and the helper translation units whose
+generated summaries are loaded (RMM's `cuda_memcpy.cpp`,
+`cuda_stream_view.cpp` and `device_buffer.cpp`, cuDF's `cuda_memcpy.cu`).
+The labels are those written before the first run. Three bugs are found,
+and their fixes silence the reports.
 
 | Case | Rule | Result | Why |
 |---|---|---|---|
-| `cudf-json-scoped-host-value` | CL2 | not analyzable | Clang rejects cuDF's `type_dispatcher.hpp` specializations in CUDA mode (20 errors) |
-| `cudf-device-view-staging` | CL2 | not analyzable | same |
-| `cudf-arrow-stream-chunk` | CL2 | not analyzable | same |
-| `cudf-parquet-string-offsets` | CL2 | not analyzable | the native tool aborts on a Clang assertion (`EvaluateAsInt` on a value-dependent expression); `clang++ --analyze` on the same command does not |
-| `gpe-staging-slot-reuse` | CL1 | not analyzable | needs `gpe_kernels.h`, which the project's build generates |
-| `cudf-string-scalar-source` | CL2 | missed | the copy is queued inside `rmm::device_buffer`'s constructor, defined in RMM's own library, and the source string belongs to the caller; 107 of 226 functions exhausted the node budget |
-| `cudf-regex-program` | CL2 | missed | the copy goes through `cudf::detail::cuda_memcpy_async_impl`, defined in another TU, so no pending copy exists; the host vector's buffer is not related to the vector object; `reprog_device::create` itself exhausted the node budget |
-| `rmm-merge-lists-event` | CL4 | missed | the event lives in a member structure, so its history is unknown to the checker (a coverage gap, not a report) |
+| `cudf-json-scoped-host-value` | CL2 | found, fix silences | `set_element_async`, a `device_uvector` method CSA does not inline, is summarized from its body as a copy from its `value` argument (through `rmm::detail::memcpy_async`, summarized from RMM's `cuda_memcpy.cpp`); the block-scoped `single_node` is reported when the function returns, with the call on line 225 on the path |
+| `cudf-device-view-staging` | CL2 | found, fix silences | with the dispatcher patch the TU parses; `cuda_memcpy_async_impl`'s summary queues the copy from the `host_vector` staging buffer, whose destruction at the return is reported (line 89); the fix's `cuda_memcpy` waits through `cuda_stream_view::synchronize`, summarized from RMM |
+| `cudf-string-scalar-source` | CL2 | missed | the copy source is the caller's string: nothing in this TU ends it, and `device_buffer`'s copy takes its stream from a member, so no summary of RMM's `device_buffer.cpp` covers it (107 of 226 functions exhausted the node budget). The buggy revision has four other CL2 warnings, off the labelled line: `set_value` and two constructors return while a copy from a by-value parameter is queued, and a temporary source ends with its full expression (reported inside CCCL's `any_resource` destructor that ends it); all four are portability findings, sources in pageable memory. The fixed revision reports none of them although that code is unchanged; the cause was not established (107 of 226 functions exhaust the budget in both) |
+| `cudf-parquet-string-offsets` | CL2 | missed | analyzable since the crash fix. The pattern (a pinned `host_vector` converted to a `host_span` for `make_device_uvector_async`, destroyed at the end of its block) is reported in a 10-line function, but `decode_page_data` still has work left at 2,000,000 nodes and no explored path reaches the block's end with the copy pending (`results/real-bugs/parquet-budget.json`) |
+| `cudf-regex-program` | CL2 | found, fix silences | the `host_vector` holding the program converts to a `host_span` for `cuda_memcpy_async`, so the copy's source belongs to it; its destruction at the return is reported (line 117) |
+| `cudf-arrow-stream-chunk` | CL2 | not analyzable | the dispatcher patch fixes the CUDA-mode errors; the TU then needs `nanoarrow/nanoarrow.h`, a dependency cuDF's build downloads, which was not fetched |
+| `gpe-staging-slot-reuse` | CL1 | missed | analyzable with the `gpe_kernels.h` stand-in; the copies are driver API calls (`cuMemcpyHtoDAsync`), which the checker does not model, and the slot is reused across calls to `dispatch` |
+| `rmm-merge-lists-event` | CL4 | missed | the defect is a missing re-record: after the wait, the event keyed to the merged blocks no longer covers the donor stream's work, which matters only to waits in later calls. A per-path checker sees nothing wrong in `merge_lists`, and the event's history is in other member functions |
 | `llama-set-tensor-visibility` | outside | missed | device-side ordering between streams |
 | `llama-copy-stream` | outside | missed | device-side ordering between streams |
 | `samples-system-atomics` | outside | missed | managed memory (`cudaMallocManaged` is unmodeled) and all 4 functions exhausted the node budget |
 | `csc-pingpong-mpi-send` | outside | not analyzable | `mpi.h` is not installed |
 | `cail-staged-copy` | outside | not analyzable | `mpi.h` is not installed |
 
-Of the eight bugs within the rules, five could not be analyzed and three were
-analyzed and missed. Every in-scope bug here goes through a library
-abstraction (RMM and cuDF copy helpers, containers, events held in objects,
-Arrow chunks, a staging ring kept across calls) that the checker models only
-where its body is in the same translation unit, or not at all.
+Of the eight bugs within the rules, three are found, four are analyzed and
+missed, and one cannot be analyzed. Version 0.4.0 found none: five could not
+be analyzed (one because the tool crashed) and three were missed.

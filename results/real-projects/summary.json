@@ -1,22 +1,22 @@
 {
-  "version": "0.4.0",
+  "version": "0.5.0",
   "budget": {
     "maxNodes": 225000,
     "timeoutSeconds": 180.0
   },
   "alerts": {
     "cuda-samples": 7,
-    "faiss": 29,
+    "faiss": 39,
     "rmm": 0
   },
   "alertsByCategory": {
     "false-positive": 11,
     "informational": 3,
-    "portability": 22
+    "portability": 32
   },
   "alertsByLevel": {
     "note": 3,
-    "warning": 33
+    "warning": 43
   },
   "coverage": {
     "cuda-samples": {
@@ -162,13 +162,13 @@
         "cudaStreamUpdateCaptureDependencies",
         "kernel-launch"
       ],
-      "wallSeconds": 97.3,
+      "wallSeconds": 81.0,
       "jobs": 10,
       "tuSeconds": {
-        "sum": 756.1,
-        "median": 2.42,
-        "p95": 7.73,
-        "max": 73.8
+        "sum": 718.0,
+        "median": 2.37,
+        "p95": 7.48,
+        "max": 57.9
       }
     },
     "faiss": {
@@ -185,13 +185,13 @@
         "cudaMallocManaged",
         "kernel-launch"
       ],
-      "wallSeconds": 165.9,
+      "wallSeconds": 146.1,
       "jobs": 10,
       "tuSeconds": {
-        "sum": 1519.0,
-        "median": 4.6,
-        "p95": 26.16,
-        "max": 143.3
+        "sum": 1363.0,
+        "median": 4.02,
+        "p95": 20.2,
+        "max": 122.5
       }
     },
     "rmm": {
@@ -201,7 +201,7 @@
       "functionsAnalyzed": 233,
       "functionsOverBudget": 60,
       "wallClockTimeouts": 0,
-      "coverageGaps": 117,
+      "coverageGaps": 118,
       "unmodeledCudaFunctions": [
         "cudaMallocManaged",
         "cudaMemAdvise",
@@ -209,17 +209,15 @@
         "cudaMemPoolCreate",
         "cudaMemPoolDestroy",
         "cudaMemPoolSetAttribute",
-        "cudaMemPrefetchAsync",
-        "cudaMemcpyBatchAsync",
-        "rmm::detail::memcpy_async"
+        "cudaMemPrefetchAsync"
       ],
-      "wallSeconds": 20.3,
+      "wallSeconds": 18.1,
       "jobs": 10,
       "tuSeconds": {
-        "sum": 159.0,
-        "median": 1.94,
-        "p95": 11.84,
-        "max": 19.2
+        "sum": 137.0,
+        "median": 1.79,
+        "p95": 8.68,
+        "max": 15.6
       }
     }
   },

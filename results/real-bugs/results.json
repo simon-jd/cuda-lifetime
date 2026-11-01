@@ -6,64 +6,384 @@
       "inRuleScope": true,
       "rule": "CL2",
       "buggy": {
-        "parsed": false,
-        "returncode": 1,
-        "errorCount": 20,
-        "errors": [
-          "cudf-json-scoped-host-value@b00c19ea8b/cpp/include/cudf/utilities/type_dispatcher.hpp:151:1: error: no function template matches function template specialization 'base_type_to_id'",
-          "cudf-json-scoped-host-value@b00c19ea8b/cpp/include/cudf/utilities/type_dispatcher.hpp:152:1: error: no function template matches function template specialization 'base_type_to_id'",
-          "cudf-json-scoped-host-value@b00c19ea8b/cpp/include/cudf/utilities/type_dispatcher.hpp:153:1: error: no function template matches function template specialization 'base_type_to_id'"
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cudf-b00c19ea8b/cpp/src/io/json/column_tree_construction.cu",
+            "line": 231,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cudf-b00c19ea8b/cpp/src/io/json/column_tree_construction.cu",
+                "line": 225
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-b00c19ea8b/cpp/src/io/json/column_tree_construction.cu",
+                "line": 106
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-b00c19ea8b/cpp/src/io/json/column_tree_construction.cu",
+                "line": 106
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-b00c19ea8b/cpp/src/io/json/column_tree_construction.cu",
+                "line": 290
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-b00c19ea8b/cpp/src/io/json/column_tree_construction.cu",
+                "line": 210
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-b00c19ea8b/cpp/src/io/json/column_tree_construction.cu",
+                "line": 210
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-b00c19ea8b/cpp/src/io/json/column_tree_construction.cu",
+                "line": 225
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-b00c19ea8b/cpp/src/io/json/column_tree_construction.cu",
+                "line": 231
+              }
+            ]
+          }
+        ],
+        "functionsAnalyzed": 12,
+        "functionsOverBudget": 1,
+        "overBudgetFunctions": [
+          "cudf::io::json::experimental::detail::reduce_to_column_tree"
+        ],
+        "coverageGaps": [
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__is_maximum_minimum_noexcept_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__nothrow_distance",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__zip_iter_constraints<cuda::permutation_iterator<int *>, cuda::permutation_iterator<int *>, cuda::permutation_iterator<char *, int *>>::__all_nothrow_iter_movable",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__zip_iter_constraints<cuda::transform_output_iterator<cudf::io::json::experimental::detail::parent_nodeids_to_colids, int *>, int *, char *>::__all_nothrow_iter_movable",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::permutation_iterator<char *, int *>::__nothrow_difference",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::permutation_iterator<char *, int *>::__nothrow_equality",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::permutation_iterator<int *>::__nothrow_difference",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::permutation_iterator<int *>::__nothrow_equality",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_equality_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_less_than_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_nothrow_less_than_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__nothrow_invocable_r_imp",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__pair_select_pair_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_like_with_size",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_nothrow_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_select_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::transform_output_iterator<cudf::io::json::experimental::detail::parent_nodeids_to_colids, int *>::__noexcept_difference",
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v",
+          "CSA does not guarantee exploration of static local destruction: device_id_to_resource",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled"
+        ],
+        "unmodeledCudaCalls": [],
+        "seconds": 38.320088612,
+        "assumptions": [
+          "user model: cudf::detail::memcpy_async",
+          "user model: generated summary: rmm::device_uvector<int>::set_element_async"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::detail::memcpy_async"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
         ],
         "dependencies": {
           "rmm": "9bef8393ea1f80f7b2799a01f9035c30e3a2e6eb"
         }
       },
       "fixed": {
-        "parsed": false,
-        "returncode": 1,
-        "errorCount": 20,
-        "errors": [
-          "cudf-json-scoped-host-value@f35b5dc7ee/cpp/include/cudf/utilities/type_dispatcher.hpp:151:1: error: no function template matches function template specialization 'base_type_to_id'",
-          "cudf-json-scoped-host-value@f35b5dc7ee/cpp/include/cudf/utilities/type_dispatcher.hpp:152:1: error: no function template matches function template specialization 'base_type_to_id'",
-          "cudf-json-scoped-host-value@f35b5dc7ee/cpp/include/cudf/utilities/type_dispatcher.hpp:153:1: error: no function template matches function template specialization 'base_type_to_id'"
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "functionsAnalyzed": 12,
+        "functionsOverBudget": 1,
+        "overBudgetFunctions": [
+          "cudf::io::json::experimental::detail::reduce_to_column_tree"
+        ],
+        "coverageGaps": [
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__is_maximum_minimum_noexcept_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__nothrow_distance",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__zip_iter_constraints<cuda::permutation_iterator<int *>, cuda::permutation_iterator<int *>, cuda::permutation_iterator<char *, int *>>::__all_nothrow_iter_movable",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__zip_iter_constraints<cuda::transform_output_iterator<cudf::io::json::experimental::detail::parent_nodeids_to_colids, int *>, int *, char *>::__all_nothrow_iter_movable",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::permutation_iterator<char *, int *>::__nothrow_difference",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::permutation_iterator<char *, int *>::__nothrow_equality",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::permutation_iterator<int *>::__nothrow_difference",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::permutation_iterator<int *>::__nothrow_equality",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_equality_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_less_than_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_nothrow_less_than_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__nothrow_invocable_r_imp",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__pair_select_pair_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_like_with_size",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_nothrow_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_select_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::transform_output_iterator<cudf::io::json::experimental::detail::parent_nodeids_to_colids, int *>::__noexcept_difference",
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v",
+          "CSA does not guarantee exploration of static local destruction: device_id_to_resource",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled"
+        ],
+        "unmodeledCudaCalls": [],
+        "seconds": 40.376957303,
+        "assumptions": [
+          "user model: cudf::detail::memcpy_async"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::detail::memcpy_async"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
         ],
         "dependencies": {
           "rmm": "9bef8393ea1f80f7b2799a01f9035c30e3a2e6eb"
         }
       },
-      "result": "not-analyzable"
+      "result": "found",
+      "fixSilences": true
     },
     {
       "id": "cudf-device-view-staging",
       "inRuleScope": true,
       "rule": "CL2",
       "buggy": {
-        "parsed": false,
-        "returncode": 1,
-        "errorCount": 20,
-        "errors": [
-          "cudf-device-view-staging@a94c7d1e99/cpp/include/cudf/utilities/type_dispatcher.hpp:152:1: error: no function template matches function template specialization 'base_type_to_id'",
-          "cudf-device-view-staging@a94c7d1e99/cpp/include/cudf/utilities/type_dispatcher.hpp:153:1: error: no function template matches function template specialization 'base_type_to_id'",
-          "cudf-device-view-staging@a94c7d1e99/cpp/include/cudf/utilities/type_dispatcher.hpp:154:1: error: no function template matches function template specialization 'base_type_to_id'"
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Host container is destroyed, releasing its buffer, while asynchronous work may still use it",
+            "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/src/column/column_device_view.cu",
+            "line": 89,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 86
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/src/column/column_device_view.cu",
+                "line": 166
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/src/column/column_device_view.cu",
+                "line": 166
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/src/column/column_device_view.cu",
+                "line": 168
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/src/column/column_device_view.cu",
+                "line": 87
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 84
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 84
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 84
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 89
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 89
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 86
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/src/column/column_device_view.cu",
+                "line": 87
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a94c7d1e99/cpp/src/column/column_device_view.cu",
+                "line": 89
+              }
+            ]
+          }
+        ],
+        "functionsAnalyzed": 16,
+        "functionsOverBudget": 2,
+        "overBudgetFunctions": [
+          "cudf::column_device_view::create",
+          "cudf::mutable_column_device_view::create"
+        ],
+        "coverageGaps": [
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__is_maximum_minimum_noexcept_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_equality_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled"
+        ],
+        "unmodeledCudaCalls": [],
+        "seconds": 18.121486336,
+        "assumptions": [
+          "user model: cudf::detail::cuda_memcpy_async_impl"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "absent at this revision"
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
         ],
         "dependencies": {
           "rmm": "386f76d5f0c76d523139e7b98d30c11253a70065"
         }
       },
       "fixed": {
-        "parsed": false,
-        "returncode": 1,
-        "errorCount": 20,
-        "errors": [
-          "cudf-device-view-staging@7424b08c7a/cpp/include/cudf/utilities/type_dispatcher.hpp:152:1: error: no function template matches function template specialization 'base_type_to_id'",
-          "cudf-device-view-staging@7424b08c7a/cpp/include/cudf/utilities/type_dispatcher.hpp:153:1: error: no function template matches function template specialization 'base_type_to_id'",
-          "cudf-device-view-staging@7424b08c7a/cpp/include/cudf/utilities/type_dispatcher.hpp:154:1: error: no function template matches function template specialization 'base_type_to_id'"
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "functionsAnalyzed": 16,
+        "functionsOverBudget": 2,
+        "overBudgetFunctions": [
+          "cudf::column_device_view::create",
+          "cudf::mutable_column_device_view::create"
+        ],
+        "coverageGaps": [
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__is_maximum_minimum_noexcept_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_equality_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled"
+        ],
+        "unmodeledCudaCalls": [],
+        "seconds": 14.102794307,
+        "assumptions": [
+          "user model: cudf::detail::cuda_memcpy_async_impl",
+          "user model: rmm::cuda_stream_view::synchronize"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "absent at this revision"
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
         ],
         "dependencies": {
           "rmm": "386f76d5f0c76d523139e7b98d30c11253a70065"
         }
       },
-      "result": "not-analyzable"
+      "result": "found",
+      "fixSilences": true
     },
     {
       "id": "cudf-string-scalar-source",
@@ -74,7 +394,160 @@
         "returncode": 0,
         "errorCount": 0,
         "errors": [],
-        "diagnostics": [],
+        "diagnostics": [
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://targets/rmm/build/_deps/cccl-src/libcudacxx/include/cuda/__utility/__basic_any/basic_any_value.h",
+            "line": 213,
+            "flow": [
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 138
+              },
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 117
+              },
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 117
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 138
+              },
+              {
+                "uri": "file://targets/rmm/build/_deps/cccl-src/libcudacxx/include/cuda/__utility/__basic_any/basic_any_value.h",
+                "line": 213
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+            "line": 229,
+            "flow": [
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 228
+              },
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 228
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 229
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+            "line": 288,
+            "flow": [
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 288
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 204
+              },
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 117
+              },
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 117
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 204
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 288
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+            "line": 335,
+            "flow": [
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 439
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 335
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 204
+              },
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 117
+              },
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "rmm@631aa4df18/cpp/include/rmm/device_scalar.hpp",
+                "line": 117
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 204
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-a6bd95e24b/cpp/src/scalar/scalar.cpp",
+                "line": 335
+              }
+            ]
+          }
+        ],
         "functionsAnalyzed": 226,
         "functionsOverBudget": 107,
         "overBudgetFunctions": [
@@ -236,10 +709,69 @@
           "CSA does not guarantee exploration of a header-defined explicit template instantiation: cudf::numeric_scalar<unsigned short>::~numeric_scalar",
           "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
           "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
-          "CSA does not guarantee exploration of static local destruction: device_id_to_resource"
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v",
+          "CSA does not guarantee exploration of static local destruction: device_id_to_resource",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled"
         ],
         "unmodeledCudaCalls": [],
-        "seconds": 380.370557515,
+        "seconds": 272.82054821,
+        "assumptions": [
+          "user model: cudf::detail::cuda_memcpy_async_impl",
+          "user model: generated summary: rmm::device_uvector<__int128>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<bool>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuda::std::chrono::duration<int, cuda::std::ratio<86400>>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuda::std::chrono::duration<long, cuda::std::ratio<1, 1000000000>>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuda::std::chrono::duration<long, cuda::std::ratio<1, 1000000>>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuda::std::chrono::duration<long, cuda::std::ratio<1, 1000>>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuda::std::chrono::duration<long>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuda::std::chrono::time_point<cuda::std::chrono::system_clock, cuda::std::chrono::duration<int, cuda::std::ratio<86400>>>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuda::std::chrono::time_point<cuda::std::chrono::system_clock, cuda::std::chrono::duration<long, cuda::std::ratio<1, 1000000000>>>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuda::std::chrono::time_point<cuda::std::chrono::system_clock, cuda::std::chrono::duration<long, cuda::std::ratio<1, 1000000>>>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuda::std::chrono::time_point<cuda::std::chrono::system_clock, cuda::std::chrono::duration<long, cuda::std::ratio<1, 1000>>>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuda::std::chrono::time_point<cuda::std::chrono::system_clock, cuda::std::chrono::duration<long>>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<double>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<float>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<int>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<long>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<short>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<signed char>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<unsigned char>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<unsigned int>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<unsigned long>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<unsigned short>::set_element_async",
+          "user model: rmm::cuda_stream_view::synchronize"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::detail::memcpy_async"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
+        ],
         "dependencies": {
           "rmm": "631aa4df185985c33238155840d0d3c6bab59c3f"
         }
@@ -411,10 +943,47 @@
           "CSA does not guarantee exploration of a header-defined explicit template instantiation: cudf::numeric_scalar<unsigned short>::~numeric_scalar",
           "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
           "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
-          "CSA does not guarantee exploration of static local destruction: device_id_to_resource"
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v",
+          "CSA does not guarantee exploration of static local destruction: device_id_to_resource",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled"
         ],
         "unmodeledCudaCalls": [],
-        "seconds": 436.011170428,
+        "seconds": 298.900025567,
+        "assumptions": [
+          "user model: cudf::detail::cuda_memcpy_async_impl",
+          "user model: rmm::cuda_stream_view::synchronize"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::detail::memcpy_async"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
+        ],
         "dependencies": {
           "rmm": "631aa4df185985c33238155840d0d3c6bab59c3f"
         }
@@ -426,30 +995,132 @@
       "inRuleScope": true,
       "rule": "CL2",
       "buggy": {
-        "parsed": false,
-        "returncode": -6,
-        "errorCount": 1,
-        "errors": [
-          "cuda-lifetime-native: .deps/llvm-project-23.1.3.src/clang/lib/AST/ExprConstant.cpp:21712: bool clang::Expr::EvaluateAsInt(EvalResult&, const clang::ASTContext&, SideEffectsKind, bool) const: Assertion `!isValueDependent() && \"Expression evaluator can't be called on a dependent expression.\"' failed."
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "functionsAnalyzed": 13,
+        "functionsOverBudget": 5,
+        "overBudgetFunctions": [
+          "cudf::io::parquet::detail::read_parquet_metadata",
+          "cudf::io::parquet::detail::reader_impl::decode_page_data",
+          "cudf::io::parquet::detail::reader_impl::read",
+          "cudf::io::parquet::detail::reader_impl::read_chunk",
+          "cudf::io::parquet::detail::reader_impl::reader_impl"
         ],
-        "status": "terminated by signal 6",
+        "coverageGaps": [
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_equality_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_nothrow_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_select_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled"
+        ],
+        "unmodeledCudaCalls": [],
+        "seconds": 19.817153566,
+        "assumptions": [
+          "user model: cudf::detail::cuda_memcpy_async_impl",
+          "user model: generated summary: cudf::detail::hostdevice_vector<unsigned int>::device_to_host",
+          "user model: rmm::cuda_stream_view::synchronize"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "absent at this revision"
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
+        ],
         "dependencies": {
           "rmm": "c5d25378bfffa04f46666b0fb0e7e21e533fe00d"
         }
       },
       "fixed": {
-        "parsed": false,
-        "returncode": -6,
-        "errorCount": 1,
-        "errors": [
-          "cuda-lifetime-native: .deps/llvm-project-23.1.3.src/clang/lib/AST/ExprConstant.cpp:21712: bool clang::Expr::EvaluateAsInt(EvalResult&, const clang::ASTContext&, SideEffectsKind, bool) const: Assertion `!isValueDependent() && \"Expression evaluator can't be called on a dependent expression.\"' failed."
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "functionsAnalyzed": 13,
+        "functionsOverBudget": 5,
+        "overBudgetFunctions": [
+          "cudf::io::parquet::detail::read_parquet_metadata",
+          "cudf::io::parquet::detail::reader_impl::decode_page_data",
+          "cudf::io::parquet::detail::reader_impl::read",
+          "cudf::io::parquet::detail::reader_impl::read_chunk",
+          "cudf::io::parquet::detail::reader_impl::reader_impl"
         ],
-        "status": "terminated by signal 6",
+        "coverageGaps": [
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_equality_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_nothrow_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_select_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled"
+        ],
+        "unmodeledCudaCalls": [],
+        "seconds": 19.430930697,
+        "assumptions": [
+          "user model: cudf::detail::cuda_memcpy_async_impl",
+          "user model: generated summary: cudf::detail::hostdevice_vector<unsigned int>::device_to_host",
+          "user model: rmm::cuda_stream_view::synchronize"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "absent at this revision"
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
+        ],
         "dependencies": {
           "rmm": "c5d25378bfffa04f46666b0fb0e7e21e533fe00d"
         }
       },
-      "result": "not-analyzable"
+      "result": "missed"
     },
     {
       "id": "cudf-regex-program",
@@ -460,7 +1131,65 @@
         "returncode": 0,
         "errorCount": 0,
         "errors": [],
-        "diagnostics": [],
+        "diagnostics": [
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Host container is destroyed, releasing its buffer, while asynchronous work may still use it",
+            "uri": "file://.deps/recall/trees/cudf-4a2a303b98/cpp/src/strings/regex/regexec.cpp",
+            "line": 117,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cudf-4a2a303b98/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 86
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-4a2a303b98/cpp/src/strings/regex/regexec.cpp",
+                "line": 93
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-4a2a303b98/cpp/src/strings/regex/regexec.cpp",
+                "line": 93
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-4a2a303b98/cpp/src/strings/regex/regexec.cpp",
+                "line": 109
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-4a2a303b98/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 84
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-4a2a303b98/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 84
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-4a2a303b98/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 84
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-4a2a303b98/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 89
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-4a2a303b98/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 89
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-4a2a303b98/cpp/include/cudf/detail/utilities/cuda_memcpy.hpp",
+                "line": 86
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-4a2a303b98/cpp/src/strings/regex/regexec.cpp",
+                "line": 109
+              },
+              {
+                "uri": "file://.deps/recall/trees/cudf-4a2a303b98/cpp/src/strings/regex/regexec.cpp",
+                "line": 117
+              }
+            ]
+          }
+        ],
         "functionsAnalyzed": 6,
         "functionsOverBudget": 1,
         "overBudgetFunctions": [
@@ -469,10 +1198,43 @@
         "coverageGaps": [
           "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
           "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
-          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__pair_select_pair_like_constructible_v"
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__pair_select_pair_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled"
         ],
         "unmodeledCudaCalls": [],
-        "seconds": 5.608092977,
+        "seconds": 4.485336089,
+        "assumptions": [
+          "user model: cudf::detail::cuda_memcpy_async_impl"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "absent at this revision"
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
+        ],
         "dependencies": {
           "rmm": "c5d25378bfffa04f46666b0fb0e7e21e533fe00d"
         }
@@ -491,15 +1253,50 @@
         "coverageGaps": [
           "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
           "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
-          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__pair_select_pair_like_constructible_v"
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__pair_select_pair_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled"
         ],
         "unmodeledCudaCalls": [],
-        "seconds": 5.779287233,
+        "seconds": 4.748319432,
+        "assumptions": [
+          "user model: cudf::detail::cuda_memcpy_async_impl",
+          "user model: rmm::cuda_stream_view::synchronize"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "absent at this revision"
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
+        ],
         "dependencies": {
           "rmm": "c5d25378bfffa04f46666b0fb0e7e21e533fe00d"
         }
       },
-      "result": "missed"
+      "result": "found",
+      "fixSilences": true
     },
     {
       "id": "cudf-arrow-stream-chunk",
@@ -508,11 +1305,37 @@
       "buggy": {
         "parsed": false,
         "returncode": 1,
-        "errorCount": 20,
+        "errorCount": 1,
         "errors": [
-          "cudf-arrow-stream-chunk@7ff0ef8a93/cpp/include/cudf/utilities/type_dispatcher.hpp:152:1: error: no function template matches function template specialization 'base_type_to_id'",
-          "cudf-arrow-stream-chunk@7ff0ef8a93/cpp/include/cudf/utilities/type_dispatcher.hpp:153:1: error: no function template matches function template specialization 'base_type_to_id'",
-          "cudf-arrow-stream-chunk@7ff0ef8a93/cpp/include/cudf/utilities/type_dispatcher.hpp:154:1: error: no function template matches function template specialization 'base_type_to_id'"
+          ".deps/recall/trees/cudf-7ff0ef8a93/cpp/src/interop/arrow_utilities.hpp:11:10: fatal error: 'nanoarrow/nanoarrow.h' file not found"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "absent at this revision"
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
         ],
         "dependencies": {
           "rmm": "9319cb40bb50672f0a6beb43f387a63e1a6fb4bf"
@@ -521,11 +1344,37 @@
       "fixed": {
         "parsed": false,
         "returncode": 1,
-        "errorCount": 20,
+        "errorCount": 1,
         "errors": [
-          "cudf-arrow-stream-chunk@edc3696e97/cpp/include/cudf/utilities/type_dispatcher.hpp:152:1: error: no function template matches function template specialization 'base_type_to_id'",
-          "cudf-arrow-stream-chunk@edc3696e97/cpp/include/cudf/utilities/type_dispatcher.hpp:153:1: error: no function template matches function template specialization 'base_type_to_id'",
-          "cudf-arrow-stream-chunk@edc3696e97/cpp/include/cudf/utilities/type_dispatcher.hpp:154:1: error: no function template matches function template specialization 'base_type_to_id'"
+          ".deps/recall/trees/cudf-edc3696e97/cpp/src/interop/arrow_utilities.hpp:11:10: fatal error: 'nanoarrow/nanoarrow.h' file not found"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "absent at this revision"
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
         ],
         "dependencies": {
           "rmm": "9319cb40bb50672f0a6beb43f387a63e1a6fb4bf"
@@ -538,22 +1387,97 @@
       "inRuleScope": true,
       "rule": "CL1",
       "buggy": {
-        "parsed": false,
-        "returncode": 1,
-        "errorCount": 1,
-        "errors": [
-          "gpe-staging-slot-reuse@f9099c13eb/src/kernel_registry.h:13:10: fatal error: 'gpe_kernels.h' file not found"
-        ]
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "functionsAnalyzed": 18,
+        "functionsOverBudget": 1,
+        "overBudgetFunctions": [
+          "gpe::(anonymous namespace)::CudaDevice::dispatch"
+        ],
+        "coverageGaps": [
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v"
+        ],
+        "unmodeledCudaCalls": [
+          "cuCtxSetCurrent",
+          "cuDeviceGet",
+          "cuDeviceGetCount",
+          "cuDevicePrimaryCtxRetain",
+          "cuEventCreate",
+          "cuEventElapsedTime_v2",
+          "cuEventQuery",
+          "cuEventRecord",
+          "cuGetErrorName",
+          "cuInit",
+          "cuLaunchHostFunc",
+          "cuLaunchKernel",
+          "cuMemAllocHost_v2",
+          "cuMemAlloc_v2",
+          "cuMemFreeHost",
+          "cuMemFree_v2",
+          "cuMemcpyDtoHAsync_v2",
+          "cuMemcpyHtoDAsync_v2",
+          "cuMemcpyHtoD_v2",
+          "cuModuleGetFunction",
+          "cuModuleGetGlobal_v2",
+          "cuModuleLoadData",
+          "cuModuleUnload",
+          "cuStreamCreate",
+          "cuStreamSynchronize",
+          "cuStreamWaitEvent"
+        ],
+        "seconds": 2.049864712,
+        "assumptions": []
       },
       "fixed": {
-        "parsed": false,
-        "returncode": 1,
-        "errorCount": 1,
-        "errors": [
-          "gpe-staging-slot-reuse@2ea8d097da/src/kernel_registry.h:13:10: fatal error: 'gpe_kernels.h' file not found"
-        ]
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "functionsAnalyzed": 18,
+        "functionsOverBudget": 2,
+        "overBudgetFunctions": [
+          "gpe::(anonymous namespace)::CudaDevice::dispatch",
+          "gpe::(anonymous namespace)::CudaDevice::upload"
+        ],
+        "coverageGaps": [
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v"
+        ],
+        "unmodeledCudaCalls": [
+          "cuCtxSetCurrent",
+          "cuDeviceGet",
+          "cuDeviceGetCount",
+          "cuDevicePrimaryCtxRetain",
+          "cuEventCreate",
+          "cuEventElapsedTime_v2",
+          "cuEventQuery",
+          "cuEventRecord",
+          "cuEventSynchronize",
+          "cuGetErrorName",
+          "cuInit",
+          "cuLaunchKernel",
+          "cuMemAllocHost_v2",
+          "cuMemAlloc_v2",
+          "cuMemFreeHost",
+          "cuMemFree_v2",
+          "cuMemcpyDtoHAsync_v2",
+          "cuMemcpyHtoDAsync_v2",
+          "cuMemcpyHtoD_v2",
+          "cuModuleGetFunction",
+          "cuModuleGetGlobal_v2",
+          "cuModuleLoadData",
+          "cuModuleUnload",
+          "cuStreamCreate",
+          "cuStreamSynchronize",
+          "cuStreamWaitEvent"
+        ],
+        "seconds": 2.705170664,
+        "assumptions": []
       },
-      "result": "not-analyzable"
+      "result": "missed"
     },
     {
       "id": "rmm-merge-lists-event",
@@ -572,10 +1496,12 @@
         ],
         "coverageGaps": [
           "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
-          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl"
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v"
         ],
         "unmodeledCudaCalls": [],
-        "seconds": 2.382365032
+        "seconds": 1.551691666,
+        "assumptions": []
       },
       "fixed": {
         "parsed": true,
@@ -590,10 +1516,12 @@
         ],
         "coverageGaps": [
           "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
-          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl"
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v"
         ],
         "unmodeledCudaCalls": [],
-        "seconds": 1.533836086
+        "seconds": 1.548246109,
+        "assumptions": []
       },
       "result": "missed"
     },
@@ -687,7 +1615,8 @@
           "cudaStreamSynchronize:unknown-stream",
           "kernel-launch:unknown-pointer-operand"
         ],
-        "seconds": 88.744673856
+        "seconds": 54.409825919,
+        "assumptions": []
       },
       "fixed": {
         "parsed": true,
@@ -775,7 +1704,8 @@
           "cudaStreamSynchronize:unknown-stream",
           "kernel-launch:unknown-pointer-operand"
         ],
-        "seconds": 90.474010678
+        "seconds": 54.796572338,
+        "assumptions": []
       },
       "result": "missed"
     },
@@ -831,7 +1761,8 @@
           "cudaStreamSynchronize:unknown-stream",
           "cudaStreamWaitEvent:unknown-stream"
         ],
-        "seconds": 15.011541274
+        "seconds": 10.425537363,
+        "assumptions": []
       },
       "fixed": {
         "parsed": true,
@@ -881,7 +1812,8 @@
           "cudaStreamSynchronize:unknown-stream",
           "cudaStreamWaitEvent:unknown-stream"
         ],
-        "seconds": 13.132485003
+        "seconds": 10.179816131,
+        "assumptions": []
       },
       "result": "missed"
     },
@@ -907,7 +1839,8 @@
         "unmodeledCudaCalls": [
           "cudaMallocManaged"
         ],
-        "seconds": 3.583551165
+        "seconds": 2.278487817,
+        "assumptions": []
       },
       "fixed": {
         "parsed": true,
@@ -927,7 +1860,8 @@
         "unmodeledCudaCalls": [
           "cudaMallocManaged"
         ],
-        "seconds": 3.247394948
+        "seconds": 2.280546182,
+        "assumptions": []
       },
       "result": "missed"
     },

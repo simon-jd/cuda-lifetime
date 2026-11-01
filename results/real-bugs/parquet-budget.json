@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "case": "cudf-parquet-string-offsets (buggy revision 4a2a303b98)",
+  "version": "0.5.0",
+  "question": "Is the miss the node budget or a modeling gap?",
+  "fullTranslationUnit": {
+    "maxNodes": 2000000,
+    "wallSeconds": 132.5,
+    "functionsOverBudget": ["read_parquet_metadata", "reader_impl::read_chunk", "reader_impl::reader_impl", "reader_impl::decode_page_data"],
+    "diagnostics": 0
+  },
+  "isolatedPattern": {
+    "source": "a 10-line function in a TU with the case's flags and generated models: auto initial = rmm::device_uvector<size_t>{0, stream, mr}; if (has_strings) { auto host_offsets_vector = cudf::detail::make_pinned_vector_async<size_t>(n, stream); std::fill(...); initial = cudf::detail::make_device_uvector_async(host_offsets_vector, stream, mr); }",
+    "maxNodes": 225000,
+    "diagnostics": [{"rule": "CL2", "level": "warning", "line": "end of the if block", "message": "Host container is destroyed, releasing its buffer, while asynchronous work may still use it"}]
+  },
+  "conclusion": "The checker reports the pattern on its own; inside decode_page_data, which still has work left at nine times the default budget, no explored path reaches the end of the block with the copy pending."
+}

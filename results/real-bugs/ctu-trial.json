@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "what": "Clang Static Analyzer cross-translation-unit analysis (on-demand parsing) on the cudf-regex-program buggy revision, so that CSA could inline cudf::detail::cuda_memcpy_async_impl from cuDF's cpp/src/utilities/cuda_memcpy.cu",
+  "llvm": "23.1.3 (assertions enabled, as linked by cuda-lifetime-native 0.4.0+fac74c2)",
+  "translationUnit": "cudf@4a2a303b98/cpp/src/strings/regex/regexec.cpp (the case's flags from commands.json)",
+  "externalDefinitionMap": {
+    "tool": "clang-extdef-mapping (LLVM 23.1.3 release package)",
+    "source": "cudf@4a2a303b98/cpp/src/utilities/cuda_memcpy.cu, CUDA host-only, the same include flags",
+    "entries": ["cudf::detail::memcpy_async", "cudf::detail::memcpy_batch_async", "cudf::detail::cuda_memcpy_async_impl"]
+  },
+  "analyzerConfig": {
+    "experimental-enable-naive-ctu-analysis": "true",
+    "ctu-dir": "<directory of the map>",
+    "ctu-index-name": "externalDefMap.txt",
+    "ctu-invocation-list": "<YAML: cuda_memcpy.cu -> its clang++ command>"
+  },
+  "withoutCtu": {"exitStatus": 0, "wallSeconds": 4.6, "diagnostics": 0},
+  "withCtu": {
+    "exitStatus": "SIGABRT (134)",
+    "wallSeconds": 15.4,
+    "loadedAst": "cuda_memcpy.cu",
+    "importErrors": 19,
+    "importError": "cannot import unsupported AST node ExplicitInstantiation",
+    "importErrorSources": "libstdc++ 15 headers (bits/allocator.h, basic_string.tcc, ios_base.h, locale_classes.h, streambuf.tcc, ...): their extern template declarations",
+    "abort": "ASTImporter.cpp:11031 ASTImporter::setImportDeclError: Assertion `InsertRes.second || InsertRes.first->second.Error == Error.Error' failed"
+  },
+  "conclusion": "CTU cannot import the definition: Clang 23's ASTImporter does not support the ExplicitInstantiation node that every libstdc++ TU contains, reports each as an error (which the tool counts as a failed TU) and then aborts. Copy summaries generated from the helper's TU (cuda-lifetime-native --summarize) are used instead."
+}

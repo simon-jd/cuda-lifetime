@@ -5,7 +5,7 @@ these files are relative to the repository root; analyzed upstream sources
 appear under `.deps/<project>-<version>/`, where `scripts/prepare_targets.py`
 puts them.
 
-## `real-projects/`: the 0.4.0 scan
+## `real-projects/`: the 0.5.0 scan
 
 Produced by `scripts/analyze_parallel.py --jobs 10` per project and published
 with `scripts/summarize_scan.py`, which also checks that the triage matches
@@ -15,9 +15,10 @@ the scan's alerts one to one.
   parsed translation unit, with the analyzer's `codeFlows`. Each result's rule,
   level, memory kind and semantic ID are SARIF fields. The first run of each
   file carries the project's coverage totals in `properties.coverage`.
-- `triage.csv`: one row per alert (36), with the file relative to the project
+- `triage.csv`: one row per alert (46), with the file relative to the project
   root, line, rule, level, message, category and the reason for the category.
-  The alerts of 0.4.0 are those of 0.3.0, so the triage is the 0.3.0 one.
+  36 rows are the 0.3.0 triage (0.3.0 and 0.4.0 reported the same alerts);
+  the 10 faiss CL2 rows that 0.5.0 adds were triaged against the source.
 - `triage-0.2.0.csv`: the 76 alerts of version 0.2.0 with their judgment and
   root-cause family. `review_scope` says whether a row was triaged against the
   source and analyzer path (23 rows) or carries the judgment of an earlier
@@ -68,12 +69,24 @@ cuda-samples files and five mutated variants in `corpus/mutants/`, and
 Output of `scripts/run_real_bugs.py` for the 13 cases in `corpus/real-bugs/`:
 for the buggy and the fixed revision of each, whether the TU parsed (or the
 first errors), its diagnostics, functions analyzed and over budget, coverage
-gaps, and whether a diagnostic is on the labelled lines. Paths are relative to
-the case's checked-out revision.
+gaps, the generated summaries loaded (`summaries`: each helper TU, its
+status and the functions summarized), and whether a diagnostic is on the
+labelled lines. Paths are relative to the case's checked-out revision.
+
+## `real-bugs/ctu-trial.json`
+
+The attempt to reach cuDF's `cuda_memcpy_async_impl` with CSA's
+cross-translation-unit analysis instead: the configuration, the 19
+`ExplicitInstantiation` import errors and the importer assertion it ended in.
+
+## `real-bugs/parquet-budget.json`
+
+Why `cudf-parquet-string-offsets` is missed: the same TU at 2,000,000 nodes,
+and the bug's pattern on its own in a 10-line function.
 
 ## `regression/`
 
-Seed and holdout metrics of version 0.4.0 from `tests/run_seed.py`. The
+Seed and holdout metrics of version 0.5.0 from `tests/run_seed.py` (the same totals as 0.4.0). The
 holdout has been seen, so it was scored as a development set (`split` is
 `dev`), not as a held-out result.
 
