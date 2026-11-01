@@ -10,8 +10,29 @@ void copy_to_device_async(void *dst, const void *src, unsigned long bytes, strea
   if (bytes == 0) return;
   queue(dst, src, bytes, stream.value());
 }
+[[noreturn]] void fail(int status);
+// An error path that synchronizes and then throws does not end the copy for the caller.
+// Like cuDF's throw_cuda_error: not declared noreturn, but every path throws.
+void throw_error(int status) {
+  cudaDeviceSynchronize();
+  if (status > 1) throw status;
+  else fail(status);
+}
+void checked_copy(void *dst, const void *src, unsigned long bytes, stream_view stream) {
+  if (int status = queue(dst, src, bytes, stream.value())) throw_error(status);
+}
 // Synchronizes after copying, so it gets no summary.
 void copy_and_wait(void *dst, const void *src, unsigned long bytes, stream_view stream) {
   queue(dst, src, bytes, stream.value());
   cudaStreamSynchronize(stream.value());
+}
+// Like cuDF's memcpy_batch_async: arrays of operands.
+int copy_batch(void **dsts, const void **srcs, const unsigned long *sizes, unsigned long count, stream_view stream) {
+  if (count > 1) return cudaMemcpyBatchAsync(dsts, srcs, sizes, count, nullptr, nullptr, 0, stream.value());
+  for (unsigned long i = 0; i < count; ++i) cudaMemcpyAsync(dsts[i], srcs[i], sizes[i], 4, stream.value());
+  return 0;
+}
+// Like cuDF's memcpy_async: a single copy through the batch helper.
+void copy_one(void *dst, const void *src, unsigned long count, stream_view stream) {
+  copy_batch(&dst, &src, &count, 1, stream);
 }

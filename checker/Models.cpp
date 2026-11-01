@@ -51,6 +51,13 @@ static bool loadEntry(const llvm::json::Value &entry, std::string &error) {
       m.constants[constant.first.str()] = *value;
     }
   }
+  if (const auto *elements = obj->getArray("elements")) {
+    for (const auto &element : *elements) {
+      auto key = element.getAsString();
+      if (!key || !m.args.count(key->str())) { error = "model elements must name arguments: " + m.function; return false; }
+      m.elements.insert(key->str());
+    }
+  }
   for (const auto &key : required.at(m.effect)) if (!m.args.count(key) && !m.constants.count(key)) { error = "missing argument " + key + " for model " + m.function; return false; }
   // A copy summary needs the host side of the copy among its arguments; the
   // other side may belong to the receiver (for example a device buffer member).

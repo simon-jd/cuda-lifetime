@@ -376,6 +376,12 @@ class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eva
     if (auto it = cudalifetime::info().models.find(n); it != cudalifetime::info().models.end()) return it->second;
     cudalifetime::Model m; m.function = n;
     if (n == "cudaMemcpyAsync") { m.effect = "enqueue_copy"; m.args = {{"dst",0},{"src",1},{"size",2},{"kind",3},{"stream",4}}; }
+    else if (n == "cudaMemcpyBatchAsync") {
+      // Arrays of operands; the direction follows from the pointers, as with
+      // cudaMemcpyDefault. Only the first entry is modeled.
+      m.effect = "enqueue_copy"; m.args = {{"dst",0},{"src",1},{"size",2},{"count",3},{"stream",7}};
+      m.constants = {{"kind", 4}}; m.elements = {"dst", "src", "size"};
+    }
     else if (n == "cudaMemcpy2DAsync") { m.effect = "enqueue_copy"; m.args = {{"dst",0},{"src",2},{"kind",6},{"stream",7}}; }
     else if (n == "cudaMemcpy") { m.effect = "copy"; m.args = {{"dst",0},{"src",1},{"size",2},{"kind",3}}; }
     else if (n == "cudaMemcpy2D") { m.effect = "copy"; m.args = {{"dst",0},{"src",2},{"kind",6}}; }
@@ -414,9 +420,10 @@ public:
   // that synchronizes anything gets none, since it may complete its copies.
   struct Summary { bool done = false, synchronizes = false, copies = false; std::optional<cudalifetime::Model> copy; };
   struct Forwarded {
-    int param = -1; bool constant = false; int64_t value = 0;
+    // level -1: the address of the parameter; 0: its value; 1: an element of
+    // the array it points to.
+    int param = -1, level = 0; bool constant = false; int64_t value = 0;
     bool valid() const { return param >= 0 || constant; }
-    bool operator==(const Forwarded &o) const { return param == o.param && constant == o.constant && value == o.value; }
   };
   // Which parameter of fd an argument expression passes on, or its constant
   // value. Buffers forward as a pointer parameter or the address of a
@@ -444,8 +451,22 @@ public:
       return -1;
     };
     if (const auto *unary = dyn_cast<UnaryOperator>(e); unary && unary->getOpcode() == UO_AddrOf) {
-      if (const auto *ref = dyn_cast<DeclRefExpr>(unary->getSubExpr()->IgnoreParens()))
-        if (ref->getDecl()->getType()->isReferenceType()) out.param = index(ref->getDecl());
+      // &value of a reference parameter is the address the caller passed; &p
+      // of any other parameter is the address of the callee's copy of it.
+      if (const auto *ref = dyn_cast<DeclRefExpr>(unary->getSubExpr()->IgnoreParens())) {
+        out.param = index(ref->getDecl());
+        if (!ref->getDecl()->getType()->isReferenceType()) out.level = -1;
+      }
+      return out;
+    }
+    const Expr *array = nullptr;
+    if (const auto *subscript = dyn_cast<ArraySubscriptExpr>(e)) array = subscript->getBase();
+    else if (const auto *unary = dyn_cast<UnaryOperator>(e); unary && unary->getOpcode() == UO_Deref) array = unary->getSubExpr();
+    if (array) {
+      if (const auto *ref = dyn_cast<DeclRefExpr>(array->IgnoreParenImpCasts()); ref && ref->getDecl()->getType()->isPointerType()) {
+        out.param = index(ref->getDecl());
+        out.level = 1;
+      }
       return out;
     }
     if (const auto *ref = dyn_cast<DeclRefExpr>(e)) {
@@ -459,6 +480,29 @@ public:
       out.constant = true; out.value = result.Val.getInt().getExtValue();
     }
     return out;
+  }
+  // Declared noreturn, or every path through the body ends in a throw or a
+  // noreturn call (a syntactic check: statements in sequence, if/else).
+  static bool endsInThrow(const Stmt *statement, unsigned depth = 0) {
+    if (!statement || depth > 16) return false;
+    if (const auto *expr = dyn_cast<Expr>(statement)) {
+      expr = expr->IgnoreImplicit()->IgnoreParens();
+      if (isa<CXXThrowExpr>(expr)) return true;
+      if (const auto *call = dyn_cast<CallExpr>(expr)) return call->getDirectCallee() && call->getDirectCallee()->isNoReturn();
+      return false;
+    }
+    if (const auto *block = dyn_cast<CompoundStmt>(statement)) {
+      for (const auto *child : block->body()) if (endsInThrow(child, depth + 1)) return true;
+      return false;
+    }
+    if (const auto *branch = dyn_cast<IfStmt>(statement))
+      return endsInThrow(branch->getThen(), depth + 1) && endsInThrow(branch->getElse(), depth + 1);
+    return false;
+  }
+  static bool neverReturns(const FunctionDecl *fd) {
+    if (fd->isNoReturn()) return true;
+    const FunctionDecl *definition = fd->getDefinition();
+    return definition && definition->hasBody() && endsInThrow(definition->getBody());
   }
   static const Summary &summaryOf(const FunctionDecl *fd) {
     static std::map<const FunctionDecl *, Summary> memo;
@@ -478,7 +522,9 @@ public:
     std::vector<cudalifetime::Model> copies;
     for (const CallExpr *call : visitor.calls) {
       const FunctionDecl *callee = call->getDirectCallee();
-      if (!callee || isa<CXXOperatorCallExpr>(call)) continue;
+      // A callee that never returns (an error handler that synchronizes, then
+      // throws) ends its path: what it does is never followed by the caller's code.
+      if (!callee || isa<CXXOperatorCallExpr>(call) || neverReturns(callee)) continue;
       cudalifetime::Model m = model(declName(callee));
       if (m.effect.empty() && !cudalifetime::isCudaApi(callee)) {
         const Summary &inner = summaryOf(callee);
@@ -491,23 +537,40 @@ public:
       if (e != "enqueue_copy") continue;
       cudalifetime::Model copy; copy.function = definition->getQualifiedNameAsString(); copy.effect = e; copy.assumption = true;
       bool forwardsBuffer = false, forwardsStream = false;
-      for (const char *key : {"dst", "src", "size", "kind", "stream"}) {
+      for (const char *key : {"dst", "src", "size", "kind", "stream", "count"}) {
         Forwarded f;
         if (auto constant = m.constants.find(key); constant != m.constants.end()) { f.constant = true; f.value = constant->second; }
-        else if (auto it = m.args.find(key); it != m.args.end() && it->second < call->getNumArgs())
+        else if (auto it = m.args.find(key); it != m.args.end() && it->second < call->getNumArgs()) {
           f = forwarded(call->getArg(it->second), definition, std::string(key) == "stream");
+          if (m.elements.count(key)) {
+            // The callee's operand is the first element of this argument.
+            if (f.constant) f = Forwarded();
+            ++f.level;
+          }
+        }
+        if (f.param >= 0 && (f.level < 0 || f.level > 1)) f = Forwarded();
+        if (f.param >= 0 && f.level == 1) copy.elements.insert(key);
         if (f.param >= 0) copy.args[key] = static_cast<unsigned>(f.param);
         else if (f.constant && (std::string(key) == "kind" || std::string(key) == "stream")) copy.constants[key] = f.value;
         else if (f.constant && std::string(key) == "size" && f.value >= 0) copy.constants[key] = f.value;
         forwardsBuffer |= (std::string(key) == "dst" || std::string(key) == "src") && f.param >= 0;
         forwardsStream |= std::string(key) == "stream" && f.valid();
       }
+      // A count matters only while an operand is still an array.
+      if (copy.elements.empty()) { copy.args.erase("count"); copy.constants.erase("count"); }
       if (forwardsBuffer && forwardsStream) copies.push_back(copy);
     }
     result.copies = !copies.empty();
     bool agree = !copies.empty();
-    for (const auto &copy : copies) agree &= copy.args == copies[0].args && copy.constants == copies[0].constants;
-    if (agree && !result.synchronizes) result.copy = copies[0];
+    auto withoutCount = [](cudalifetime::Model m) { m.args.erase("count"); m.constants.erase("count"); return m; };
+    for (const auto &copy : copies) {
+      auto a = withoutCount(copy), b = withoutCount(copies[0]);
+      agree &= a.args == b.args && a.constants == b.constants && a.elements == b.elements;
+    }
+    if (agree && !result.synchronizes) {
+      result.copy = copies[0];
+      for (const auto &copy : copies) if (copy.args.count("count")) result.copy->args["count"] = copy.args.at("count");
+    }
     memo[fd] = result;
     return memo[fd];
   }
@@ -519,6 +582,17 @@ public:
     if (it == m.args.end() || it->second >= call.getNumArgs()) return UnknownVal();
     SVal value = call.getArgSVal(it->second);
     const std::string k = key;
+    if (m.elements.count(k)) {
+      // An array of operands: the first entry. A count other than one leaves
+      // the remaining entries unmodeled.
+      auto count = m.args.count("count") && m.args.at("count") < call.getNumArgs() ? call.getArgSVal(m.args.at("count")).getAs<nonloc::ConcreteInt>() : std::nullopt;
+      if (!count || count->getValue()->getZExtValue() != 1)
+        cudalifetime::info().coverageUnknown.insert("batched copy with a count other than one: entries after the first are not modeled");
+      const auto *pointee = value.getAsRegion();
+      const auto *type = call.getArgExpr(it->second) ? call.getArgExpr(it->second)->getType()->getAs<PointerType>() : nullptr;
+      if (!pointee || !type) return UnknownVal();
+      return s->getSVal(pointee, type->getPointeeType());
+    }
     if ((k == "stream" || k == "event") && call.getArgExpr(it->second))
       value = handle(s, value, call.getArgExpr(it->second)->getType());
     return value;

@@ -177,8 +177,10 @@ public:
       llvm::json::Object args, constants;
       for (const auto &[key, index] : entry.first.args) args[key] = index;
       for (const auto &[key, value] : entry.first.constants) constants[key] = value;
+      llvm::json::Array elements;
+      for (const auto &key : entry.first.elements) elements.push_back(key);
       models.push_back(llvm::json::Object{{"function", name}, {"aliases", llvm::json::Array{}}, {"effect", entry.first.effect},
-          {"args", std::move(args)}, {"constants", std::move(constants)}, {"assumption", true}, {"generated", true},
+          {"args", std::move(args)}, {"constants", std::move(constants)}, {"elements", std::move(elements)}, {"assumption", true}, {"generated", true},
           {"rationale", "Generated from the function body: every copy it queues, through the calls it makes, forwards these parameters; it calls no synchronization."},
           {"doc", llvm::json::Object{{"url", "file://" + path.str().str()}, {"anchor", "L" + std::to_string(entry.second)}, {"cudaVersion", "13.2.2"}}}});
     }

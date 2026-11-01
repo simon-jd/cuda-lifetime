@@ -42,6 +42,7 @@ public:
 // Defined in summary_helper.cc and summarized from that translation unit.
 void copy_to_device_async(void *dst, const void *src, unsigned long bytes, stream_view stream);
 void copy_and_wait(void *dst, const void *src, unsigned long bytes, stream_view stream);
+void copy_one(void *dst, const void *src, unsigned long count, stream_view stream);
 // Like cuDF's cuda_memcpy_async(device_span, host_span, stream).
 template <class T> void copy_span_async(void *dst, std::span<const T> src, stream_view stream) {
   cudaMemcpyAsync(dst, src.data(), src.size() * sizeof(T), 4, stream.value());

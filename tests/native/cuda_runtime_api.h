@@ -9,6 +9,7 @@ extern int cudaFreeHost(void *);
 extern int cudaFree(void *);
 extern int cudaFreeAsync(void *, cudaStream_t);
 extern int cudaMemcpyAsync(void *, const void *, unsigned long, int, cudaStream_t);
+extern int cudaMemcpyBatchAsync(void **, const void **, const unsigned long *, unsigned long, void *, unsigned long *, unsigned long, cudaStream_t);
 extern int cudaDeviceSynchronize();
 extern int cudaStreamSynchronize(cudaStream_t);
 extern int cudaEventSynchronize(cudaEvent_t);

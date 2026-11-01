@@ -13,6 +13,8 @@ struct Model {
   // Fixed argument values, such as the copy kind of a wrapper that always
   // passes cudaMemcpyDefault.
   std::map<std::string, int64_t> constants;
+  // Arguments that are arrays whose first element is the operand (batched copies).
+  std::set<std::string> elements;
   bool assumption = false;
 };
 // What a report is, carried from the checker to the SARIF consumer as data:
