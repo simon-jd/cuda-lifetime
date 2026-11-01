@@ -436,7 +436,11 @@ public:
     public:
       std::vector<const VarDecl *> variables;
       bool VisitDeclRefExpr(DeclRefExpr *expr) {
-        if (auto *decl = dyn_cast<VarDecl>(expr->getDecl())) variables.push_back(decl);
+        // Variables of a template pattern nested in the body (a generic
+        // lambda's locals) have no storage in any frame, and reading a
+        // constant one evaluates a value-dependent initializer.
+        if (auto *decl = dyn_cast<VarDecl>(expr->getDecl()); decl && !decl->isTemplated())
+          variables.push_back(decl);
         return true;
       }
     } references;
