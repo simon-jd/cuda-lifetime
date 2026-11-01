@@ -60,6 +60,8 @@ struct Allocation {
 }
 REGISTER_SET_WITH_PROGRAMSTATE(PendingOps, Pending)
 REGISTER_SET_WITH_PROGRAMSTATE(PreservedVariables, const MemRegion *)
+// A host container's buffer, or a view of it, to the container object that owns it.
+REGISTER_MAP_WITH_PROGRAMSTATE(ContainerOwners, const MemRegion *, const MemRegion *)
 REGISTER_MAP_WITH_PROGRAMSTATE(Memories, const MemRegion *, unsigned)
 REGISTER_MAP_WITH_PROGRAMSTATE(RegisteredExtents, const MemRegion *, uint64_t)
 REGISTER_MAP_WITH_PROGRAMSTATE(Sequences, Stream, unsigned)
@@ -564,6 +566,7 @@ public:
       if (auto symbol = s->getSVal(region).getAsSymbol()) reaper.markLive(symbol);
     }
     for (auto entry : s->get<Memories>()) reaper.markLive(entry.first);
+    for (auto entry : s->get<ContainerOwners>()) { reaper.markLive(entry.first); reaper.markLive(entry.second); }
     for (auto entry : s->get<Allocations>()) reaper.markLive(entry.first);
     for (auto entry : s->get<PendingOps>()) reaper.markLive(entry.region);
   }
@@ -619,6 +622,7 @@ public:
     s = clearReach(s);
     if (n == "malloc" || n == "calloc" || n == "realloc")
       if (auto *region = base(call.getReturnValue())) s = s->set<Memories>(region, Pageable);
+    s = trackContainers(call, s);
     // A body CSA declined to inline (a container method, or over an inlining
     // limit) still queues the copies its summary records.
     if (conservative) if (const auto *fd = dyn_cast_or_null<FunctionDecl>(call.getDecl()))
@@ -629,6 +633,49 @@ public:
           return;
         }
     if (s != c.getState()) c.addTransition(s);
+  }
+  // Host containers own their buffer: a pointer data() returns is host memory
+  // that the container's destructor releases. A view (span, string_view)
+  // constructed from a container, or from another view, refers to the same
+  // owner. Owners are std::vector, std::basic_string and thrust::host_vector,
+  // and classes derived from them.
+  static bool named(const CXXRecordDecl *record, const std::set<std::string> &names, unsigned depth = 0) {
+    if (!record || depth > 8 || !(record = record->getDefinition())) return false;
+    if (names.count(record->getQualifiedNameAsString())) return true;
+    for (const auto &b : record->bases()) if (named(b.getType()->getAsCXXRecordDecl(), names, depth + 1)) return true;
+    return false;
+  }
+  static bool hostContainer(QualType type) {
+    static const std::set<std::string> names = {"std::vector", "std::basic_string", "std::__cxx11::basic_string", "thrust::host_vector"};
+    return named(type.isNull() ? nullptr : type.getNonReferenceType()->getAsCXXRecordDecl(), names);
+  }
+  static bool hostView(QualType type) {
+    static const std::set<std::string> names = {"std::span", "std::basic_string_view", "cudf::host_span"};
+    return named(type.isNull() ? nullptr : type.getNonReferenceType()->getAsCXXRecordDecl(), names);
+  }
+  static const MemRegion *owner(ProgramStateRef s, SVal value, QualType type) {
+    const MemRegion *object = value.getAsRegion();
+    if (!object) if (auto lazy = value.getAs<nonloc::LazyCompoundVal>()) object = lazy->getRegion();
+    if (!object) return nullptr;
+    if (hostContainer(type)) return object;
+    if (hostView(type)) if (const auto *known = s->get<ContainerOwners>(object)) return *known;
+    return nullptr;
+  }
+  static ProgramStateRef trackContainers(const CallEvent &call, ProgramStateRef s) {
+    if (const auto *ctor = dyn_cast<CXXConstructorCall>(&call)) {
+      if (hostView(ctor->getDecl()->getThisType()->getPointeeType()) && call.getNumArgs() >= 1 && call.getArgExpr(0))
+        if (const auto *from = owner(s, call.getArgSVal(0), call.getArgExpr(0)->getType()))
+          if (const auto *self = ctor->getCXXThisVal().getAsRegion()) s = s->set<ContainerOwners>(self, from);
+      return s;
+    }
+    const auto *member = dyn_cast<CXXMemberCall>(&call);
+    const auto *method = member ? dyn_cast_or_null<CXXMethodDecl>(member->getDecl()) : nullptr;
+    if (!method || !method->getIdentifier() || method->getName() != "data" || !call.getResultType()->isPointerType()) return s;
+    const auto *from = owner(s, member->getCXXThisVal(), method->getThisType()->getPointeeType());
+    const auto *buffer = base(call.getReturnValue());
+    if (!from || !buffer) return s;
+    s = s->set<ContainerOwners>(buffer, from);
+    return memory(s, buffer) == Unknown ? s->set<Memories>(buffer, Pageable) : s;
   }
   static bool endsLifetime(const CallEvent &call, const std::string &n) {
     return isa<CXXDestructorCall>(call) || n == "free" || n == "operator delete" || n == "operator delete[]";
@@ -812,10 +859,16 @@ void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, P
       return;
     }
     const bool destructor = isa<CXXDestructorCall>(call);
+    const MemRegion *self = destructor ? cast<CXXDestructorCall>(call).getCXXThisVal().getAsRegion() : nullptr;
     for (auto op : s->get<PendingOps>()) {
       bool match = false;
       for (unsigned i = 0; i < call.getNumArgs(); ++i) match |= overlaps(s, base(call.getArgSVal(i)), op.region);
       if (const auto *method = dyn_cast<CXXInstanceCall>(&call)) match |= overlaps(s, base(method->getCXXThisVal()), op.region);
+      const MemRegion *const *owned = self ? s->get<ContainerOwners>(op.region->getBaseRegion()) : nullptr;
+      if (owned && *owned == self && op.access != DeviceUse) {
+        report(c, s, 2, "Host container is destroyed, releasing its buffer, while asynchronous work may still use it", op.memory, "S4", &op, true);
+        continue;
+      }
       if (match && op.access != DeviceUse)
         report(c, s, 2, destructor ? "Object lifetime ends with pending asynchronous work" : "Host buffer is released with pending asynchronous work",
                op.memory, "S4", &op, true);
