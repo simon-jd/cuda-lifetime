@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 1,
+  "description": "Compiler flags for each case's translation unit after the language selection; {tree} is the checked-out revision, {root} this repository, {cuda} and {gcc} the --cuda-path and --gcc-toolchain arguments. cuDF cases use RMM checked out at its last commit before the cuDF revision ({rmm}); cuDF and RMM cases take CCCL, NVTX and the RMM logger from the RMM 26.10 build of scripts/prepare_targets.py.",
+  "common": [
+    "--gcc-toolchain={gcc}"
+  ],
+  "cases": {
+    "cudf-json-scoped-host-value": {
+      "language": "cuda",
+      "flags": [
+        "-std=c++20",
+        "-I{tree}/cpp/include",
+        "-I{tree}/cpp/src",
+        "-I{rmm}/cpp/include",
+        "-I{root}/targets/rmm/build/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+        "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+        "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+        "-isystem",
+        "{cuda}/targets/x86_64-linux/include",
+        "-DCCCL_DISABLE_PDL",
+        "-DCUB_DISABLE_NAMESPACE_MAGIC",
+        "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+        "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+        "-DTHRUST_DISABLE_ABI_NAMESPACE",
+        "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+        "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR"
+      ],
+      "dependencies": {
+        "rmm": {
+          "repository": "https://github.com/rapidsai/rmm"
+        }
+      }
+    },
+    "cudf-device-view-staging": {
+      "language": "cuda",
+      "flags": [
+        "-std=c++20",
+        "-I{tree}/cpp/include",
+        "-I{tree}/cpp/src",
+        "-I{rmm}/cpp/include",
+        "-I{root}/targets/rmm/build/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+        "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+        "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+        "-isystem",
+        "{cuda}/targets/x86_64-linux/include",
+        "-DCCCL_DISABLE_PDL",
+        "-DCUB_DISABLE_NAMESPACE_MAGIC",
+        "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+        "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+        "-DTHRUST_DISABLE_ABI_NAMESPACE",
+        "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+        "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR"
+      ],
+      "dependencies": {
+        "rmm": {
+          "repository": "https://github.com/rapidsai/rmm"
+        }
+      }
+    },
+    "cudf-string-scalar-source": {
+      "language": "c++",
+      "flags": [
+        "-std=c++20",
+        "-I{tree}/cpp/include",
+        "-I{tree}/cpp/src",
+        "-I{rmm}/cpp/include",
+        "-I{root}/targets/rmm/build/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+        "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+        "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+        "-isystem",
+        "{cuda}/targets/x86_64-linux/include",
+        "-DCCCL_DISABLE_PDL",
+        "-DCUB_DISABLE_NAMESPACE_MAGIC",
+        "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+        "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+        "-DTHRUST_DISABLE_ABI_NAMESPACE",
+        "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+        "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR"
+      ],
+      "dependencies": {
+        "rmm": {
+          "repository": "https://github.com/rapidsai/rmm"
+        }
+      }
+    },
+    "cudf-parquet-string-offsets": {
+      "language": "c++",
+      "flags": [
+        "-std=c++20",
+        "-I{tree}/cpp/include",
+        "-I{tree}/cpp/src",
+        "-I{rmm}/cpp/include",
+        "-I{root}/targets/rmm/build/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+        "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+        "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+        "-isystem",
+        "{cuda}/targets/x86_64-linux/include",
+        "-DCCCL_DISABLE_PDL",
+        "-DCUB_DISABLE_NAMESPACE_MAGIC",
+        "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+        "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+        "-DTHRUST_DISABLE_ABI_NAMESPACE",
+        "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+        "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR"
+      ],
+      "dependencies": {
+        "rmm": {
+          "repository": "https://github.com/rapidsai/rmm"
+        }
+      }
+    },
+    "cudf-regex-program": {
+      "language": "c++",
+      "flags": [
+        "-std=c++20",
+        "-I{tree}/cpp/include",
+        "-I{tree}/cpp/src",
+        "-I{rmm}/cpp/include",
+        "-I{root}/targets/rmm/build/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+        "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+        "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+        "-isystem",
+        "{cuda}/targets/x86_64-linux/include",
+        "-DCCCL_DISABLE_PDL",
+        "-DCUB_DISABLE_NAMESPACE_MAGIC",
+        "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+        "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+        "-DTHRUST_DISABLE_ABI_NAMESPACE",
+        "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+        "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR"
+      ],
+      "dependencies": {
+        "rmm": {
+          "repository": "https://github.com/rapidsai/rmm"
+        }
+      }
+    },
+    "cudf-arrow-stream-chunk": {
+      "language": "cuda",
+      "flags": [
+        "-std=c++20",
+        "-I{tree}/cpp/include",
+        "-I{tree}/cpp/src",
+        "-I{rmm}/cpp/include",
+        "-I{root}/targets/rmm/build/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+        "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+        "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+        "-isystem",
+        "{cuda}/targets/x86_64-linux/include",
+        "-DCCCL_DISABLE_PDL",
+        "-DCUB_DISABLE_NAMESPACE_MAGIC",
+        "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+        "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+        "-DTHRUST_DISABLE_ABI_NAMESPACE",
+        "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+        "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR"
+      ],
+      "dependencies": {
+        "rmm": {
+          "repository": "https://github.com/rapidsai/rmm"
+        }
+      }
+    },
+    "gpe-staging-slot-reuse": {
+      "language": "c++",
+      "flags": [
+        "-std=c++20",
+        "-I{tree}/include",
+        "-I{tree}/src",
+        "-isystem",
+        "{cuda}/targets/x86_64-linux/include"
+      ]
+    },
+    "rmm-merge-lists-event": {
+      "language": "c++",
+      "translationUnit": "cpp/src/mr/pool_memory_resource.cpp",
+      "flags": [
+        "-std=c++20",
+        "-I{tree}/cpp/include",
+        "-I{root}/targets/rmm/build/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+        "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+        "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+        "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+        "-isystem",
+        "{cuda}/targets/x86_64-linux/include",
+        "-DCCCL_DISABLE_PDL",
+        "-DCUB_DISABLE_NAMESPACE_MAGIC",
+        "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+        "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+        "-DTHRUST_DISABLE_ABI_NAMESPACE",
+        "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+        "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR",
+        "-Drmm_EXPORTS"
+      ]
+    },
+    "llama-set-tensor-visibility": {
+      "language": "cuda",
+      "flags": [
+        "-std=c++17",
+        "-I{tree}",
+        "-DGGML_USE_CUBLAS"
+      ]
+    },
+    "llama-copy-stream": {
+      "language": "cuda",
+      "flags": [
+        "-std=c++17",
+        "-I{tree}/ggml/include",
+        "-I{tree}/ggml/src",
+        "-DGGML_USE_CUDA"
+      ]
+    },
+    "samples-system-atomics": {
+      "language": "cuda",
+      "flags": [
+        "-std=c++17",
+        "-I{tree}/Common"
+      ]
+    },
+    "csc-pingpong-mpi-send": {
+      "language": "c++",
+      "flags": [
+        "-std=c++17",
+        "-isystem",
+        "{cuda}/targets/x86_64-linux/include"
+      ]
+    },
+    "cail-staged-copy": {
+      "language": "c",
+      "flags": [
+        "-std=c11",
+        "-I{tree}/include",
+        "-I{tree}/src",
+        "-isystem",
+        "{cuda}/targets/x86_64-linux/include"
+      ]
+    }
+  }
+}
