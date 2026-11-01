@@ -40,8 +40,16 @@ void derived_container_inherited_data(void *device, stream_view stream) {
 // The view comes from the container's conversion operator, as in cuDF.
 void view_from_conversion(void *device, stream_view stream) {
   host_vector<char> buffer(64);
-  copy_host_span_async<char>(device, buffer, stream);
+  const host_vector<char> &view = buffer;
+  copy_host_span_async<char>(device, view, stream);
   return; // CL2 warning
+}
+void view_through_braces_and_copies(void *device, stream_view stream, bool copy) {
+  if (copy) {
+    host_vector<long> buffer(8);
+    copy_container_async(device, buffer, stream);
+  } // CL2 warning
+  cudaStreamSynchronize(stream.value());
 }
 void derived_container_synchronized(void *device, stream_view stream) {
   host_vector<char> buffer(64);

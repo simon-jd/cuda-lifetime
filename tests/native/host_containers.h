@@ -9,6 +9,7 @@ namespace std {
 template <class T> class vector {
   T *begin_ = nullptr;
 public:
+  using value_type = T;
   explicit vector(unsigned long count);
   vector(const vector &);
   vector(vector &&);
@@ -39,14 +40,15 @@ template <class T> struct span_base {
 };
 namespace cudf {
 template <class T> struct host_span : span_base<T> {
-  template <class C> host_span(C &values);
+  // Not viable for a const container, which converts through its operator.
+  template <class U> host_span(std::vector<U> &values);
 };
 }
 template <class T> class host_vector : public std::vector<T> {
 public:
   explicit host_vector(unsigned long count);
   ~host_vector();
-  operator cudf::host_span<const T>() const { return cudf::host_span<const T>(*this); }
+  operator cudf::host_span<const T>() const;
 };
 struct stream_view {
   cudaStream_t stream_;
@@ -80,4 +82,12 @@ template <class T> void copy_span_async(void *dst, std::span<const T> src, strea
 }
 template <class T> void copy_host_span_async(void *dst, cudf::host_span<const T> src, stream_view stream) {
   cudaMemcpyAsync(dst, src.data(), src.size() * sizeof(T), 4, stream.value());
+}
+// Like cuDF's make_device_uvector_async: the view is built in braces around
+// the container's conversion and copied again into the next call.
+template <class T> void copy_container_async(void *dst, cudf::host_span<const T> source, stream_view stream) {
+  copy_host_span_async<T>(dst, cudf::host_span<const T>{source}, stream);
+}
+template <class C> void copy_container_async(void *dst, const C &values, stream_view stream) {
+  copy_container_async<typename C::value_type>(dst, cudf::host_span<const typename C::value_type>{values}, stream);
 }

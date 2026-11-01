@@ -820,10 +820,20 @@ public:
     if (const auto *typed = dyn_cast<TypedValueRegion>(object))
       if (auto lazy = s->getSVal(typed).getAs<nonloc::LazyCompoundVal>())
         if (const auto *known = s->get<ContainerOwners>(lazy->getRegion()->StripCasts())) return *known;
-    // A parameter initialized by such a call: look the call up by its argument.
+    // A parameter initialized by such a call: look the call up by its argument,
+    // through the casts and copies around it (host_span<T const>{c}).
     if (const auto *param = dyn_cast<ParamVarRegion>(object))
-      if (const auto *origin = dyn_cast_or_null<CallExpr>(param->getOriginExpr()); origin && !isa<CXXOperatorCallExpr>(origin) && param->getIndex() < origin->getNumArgs())
-        if (const auto *known = s->get<ViewResults>(origin->getArg(param->getIndex())->IgnoreImplicit())) return *known;
+      if (const auto *origin = dyn_cast_or_null<CallExpr>(param->getOriginExpr()); origin && !isa<CXXOperatorCallExpr>(origin) && param->getIndex() < origin->getNumArgs()) {
+        const Expr *argument = origin->getArg(param->getIndex());
+        for (unsigned depth = 0; argument && depth < 8; ++depth) {
+          argument = argument->IgnoreImplicit()->IgnoreParens();
+          if (const auto *known = s->get<ViewResults>(argument)) return *known;
+          if (const auto *cast = dyn_cast<ExplicitCastExpr>(argument)) argument = cast->getSubExpr();
+          else if (const auto *list = dyn_cast<InitListExpr>(argument); list && list->getNumInits() == 1) argument = list->getInit(0);
+          else if (const auto *construct = dyn_cast<CXXConstructExpr>(argument); construct && construct->getNumArgs() == 1) argument = construct->getArg(0);
+          else break;
+        }
+      }
     return nullptr;
   }
   // Moving a container moves its buffer: the moved-to object owns it, so the
