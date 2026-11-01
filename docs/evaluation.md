@@ -232,7 +232,10 @@ allocation race when the kernel actually writes freed or unallocated memory,
 but none of the host-side races: a host read of an in-flight D2H destination,
 or a host free under a pending copy, is not a device access, and it passes
 silently even in the run where the stale value was read. The checker reports
-all five unsafe scenarios and not the safe one, from the source alone. The
+each of the five scenarios that depend on timing or on behavior CUDA does not
+promise (pageable copies being synchronous, `cudaFree` synchronizing), at the
+level the rules give it, and nothing on the ordered one, from the source
+alone. The
 seed and holdout cases cannot be run: they are functions against a
 declaration stub, without `main`.
 
