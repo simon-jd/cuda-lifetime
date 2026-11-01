@@ -210,6 +210,32 @@ abstractions real CUDA code is written in, and the checker's models stop at
 them. [corpus/real-bugs/README.md](../corpus/real-bugs/README.md) lists every
 case with its reason.
 
+## Against compute-sanitizer
+
+`probes/sanitizer.py` runs every compute-sanitizer tool (memcheck, memcheck
+with `--track-stream-ordered-races all`, racecheck, synccheck, initcheck;
+version 2026.1.1 on the RTX 4090) on each scenario of `probes/stale_read.cu`
+and `probes/lifetime.cu`, and the checker on both sources
+(`results/probes/sanitizer.json`):
+
+| Scenario | cuda-lifetime | compute-sanitizer |
+|---|---|---|
+| read a pinned D2H destination before synchronizing (`stale_read pinned`, `lifetime pinned`; the read saw the stale value) | CL1 error | nothing |
+| the same with pageable memory | CL1 warning | nothing |
+| `cudaFreeHost` while a D2H into the buffer is pending (`lifetime free-host`) | CL2 warning | nothing |
+| `cudaFree` of a buffer a running kernel writes (`lifetime free`) | CL3 note | nothing |
+| a kernel on another stream uses a `cudaMallocAsync` allocation with no dependency (`lifetime ordered-bad`) | CL3 error | memcheck: 2 errors (invalid global write), with or without `--track-stream-ordered-races all` |
+| the same with an event dependency (`lifetime ordered-good`) | nothing | nothing |
+
+compute-sanitizer checks device-side accesses, so it finds the stream-ordered
+allocation race when the kernel actually writes freed or unallocated memory,
+but none of the host-side races: a host read of an in-flight D2H destination,
+or a host free under a pending copy, is not a device access, and it passes
+silently even in the run where the stale value was read. The checker reports
+all five unsafe scenarios and not the safe one, from the source alone. The
+seed and holdout cases cannot be run: they are functions against a
+declaration stub, without `main`.
+
 ## Reproduce
 
 Build the checker and run the corpora:

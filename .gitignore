@@ -19,6 +19,7 @@ results/**/*.html
 /results/probes/*
 !/results/probes/completion.json
 !/results/probes/stale-read.json
+!/results/probes/sanitizer.json
 !/results/holdout-first/
 /results/holdout-first/*
 !/results/holdout-first/metrics.json

@@ -1,0 +1,476 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4090, 595.99.02",
+  "computeSanitizer": "Version 2026.1.1.0 (build 38000597) (public-release)",
+  "tools": {
+    "memcheck": [
+      "--tool",
+      "memcheck"
+    ],
+    "memcheck-stream-ordered": [
+      "--tool",
+      "memcheck",
+      "--track-stream-ordered-races",
+      "all"
+    ],
+    "racecheck": [
+      "--tool",
+      "racecheck"
+    ],
+    "synccheck": [
+      "--tool",
+      "synccheck"
+    ],
+    "initcheck": [
+      "--tool",
+      "initcheck"
+    ]
+  },
+  "programs": {
+    "stale_read": {
+      "source": "probes/stale_read.cu",
+      "checker": [
+        {
+          "ruleId": "CL1",
+          "level": "error",
+          "line": 48,
+          "source": "const int early = *host;  // read before the stream is synchronized",
+          "message": "Host reads the destination before asynchronous D2H completion"
+        },
+        {
+          "ruleId": "CL1",
+          "level": "warning",
+          "line": 48,
+          "source": "const int early = *host;  // read before the stream is synchronized",
+          "message": "Host reads the destination before asynchronous D2H completion"
+        }
+      ],
+      "runs": {
+        "pinned": {
+          "memcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "memory": "pinned",
+                "beforeSync": -1,
+                "afterSync": 42
+              }
+            ]
+          },
+          "memcheck-stream-ordered": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "memory": "pinned",
+                "beforeSync": -1,
+                "afterSync": 42
+              }
+            ]
+          },
+          "racecheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "memory": "pinned",
+                "beforeSync": -1,
+                "afterSync": 42
+              }
+            ]
+          },
+          "synccheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "memory": "pinned",
+                "beforeSync": -1,
+                "afterSync": 42
+              }
+            ]
+          },
+          "initcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "memory": "pinned",
+                "beforeSync": -1,
+                "afterSync": 42
+              }
+            ]
+          }
+        },
+        "pageable": {
+          "memcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "memory": "pageable",
+                "beforeSync": 42,
+                "afterSync": 42
+              }
+            ]
+          },
+          "memcheck-stream-ordered": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "memory": "pageable",
+                "beforeSync": 42,
+                "afterSync": 42
+              }
+            ]
+          },
+          "racecheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "memory": "pageable",
+                "beforeSync": 42,
+                "afterSync": 42
+              }
+            ]
+          },
+          "synccheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "memory": "pageable",
+                "beforeSync": 42,
+                "afterSync": 42
+              }
+            ]
+          },
+          "initcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "memory": "pageable",
+                "beforeSync": 42,
+                "afterSync": 42
+              }
+            ]
+          }
+        }
+      }
+    },
+    "lifetime": {
+      "source": "probes/lifetime.cu",
+      "checker": [
+        {
+          "ruleId": "CL3",
+          "level": "error",
+          "line": 42,
+          "source": "delayed_write<<<1,1,0,b>>>(device); CUDA(cudaGetLastError());",
+          "message": "Kernel launch uses a stream-ordered allocation without an allocation dependency"
+        },
+        {
+          "ruleId": "CL3",
+          "level": "note",
+          "line": 51,
+          "source": "CUDA(cudaFree(device)); device = nullptr;",
+          "message": "Ordinary cudaFree may implicitly synchronize; this path relies on that behavior"
+        },
+        {
+          "ruleId": "CL2",
+          "level": "warning",
+          "line": 62,
+          "source": "CUDA(cudaFreeHost(host)); host = nullptr;",
+          "message": "Host buffer is released or unregistered before asynchronous work is known complete"
+        },
+        {
+          "ruleId": "CL2",
+          "level": "warning",
+          "line": 62,
+          "source": "CUDA(cudaFreeHost(host)); host = nullptr;",
+          "message": "Host buffer is released or unregistered before asynchronous work is known complete"
+        },
+        {
+          "ruleId": "CL1",
+          "level": "error",
+          "line": 66,
+          "source": "int observed = *static_cast<volatile int*>(host);",
+          "message": "Host reads the destination before asynchronous D2H completion"
+        },
+        {
+          "ruleId": "CL1",
+          "level": "warning",
+          "line": 66,
+          "source": "int observed = *static_cast<volatile int*>(host);",
+          "message": "Host reads the destination before asynchronous D2H completion"
+        }
+      ],
+      "runs": {
+        "pinned": {
+          "memcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "immediate": -1,
+                "afterSynchronize": 42
+              }
+            ]
+          },
+          "memcheck-stream-ordered": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "immediate": -1,
+                "afterSynchronize": 42
+              }
+            ]
+          },
+          "racecheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "immediate": -1,
+                "afterSynchronize": 42
+              }
+            ]
+          },
+          "synccheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "immediate": -1,
+                "afterSynchronize": 42
+              }
+            ]
+          },
+          "initcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "immediate": -1,
+                "afterSynchronize": 42
+              }
+            ]
+          }
+        },
+        "pageable": {
+          "memcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "immediate": 42,
+                "afterSynchronize": 42
+              }
+            ]
+          },
+          "memcheck-stream-ordered": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "immediate": 42,
+                "afterSynchronize": 42
+              }
+            ]
+          },
+          "racecheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "immediate": 42,
+                "afterSynchronize": 42
+              }
+            ]
+          },
+          "synccheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "immediate": 42,
+                "afterSynchronize": 42
+              }
+            ]
+          },
+          "initcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": [
+              {
+                "immediate": 42,
+                "afterSynchronize": 42
+              }
+            ]
+          }
+        },
+        "free": {
+          "memcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "memcheck-stream-ordered": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "racecheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "synccheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "initcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          }
+        },
+        "free-host": {
+          "memcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "memcheck-stream-ordered": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "racecheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "synccheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "initcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          }
+        },
+        "ordered-bad": {
+          "memcheck": {
+            "returncode": 2,
+            "errors": 2,
+            "reports": [
+              "Invalid __global__ write of size 4 bytes",
+              "Saved host backtrace up to driver entry point at kernel launch time",
+              "Program hit cudaErrorLaunchFailure (error 719) due to \"unspecified launch failure\" on CUDA API call to cudaStreamSynchronize.",
+              "Saved host backtrace up to driver entry point at error"
+            ],
+            "programOutput": []
+          },
+          "memcheck-stream-ordered": {
+            "returncode": 2,
+            "errors": 2,
+            "reports": [
+              "Invalid __global__ write of size 4 bytes",
+              "Saved host backtrace up to driver entry point at kernel launch time",
+              "Program hit cudaErrorLaunchFailure (error 719) due to \"unspecified launch failure\" on CUDA API call to cudaStreamSynchronize.",
+              "Saved host backtrace up to driver entry point at error"
+            ],
+            "programOutput": []
+          },
+          "racecheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "synccheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "initcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          }
+        },
+        "ordered-good": {
+          "memcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "memcheck-stream-ordered": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "racecheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "synccheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          },
+          "initcheck": {
+            "returncode": 0,
+            "errors": 0,
+            "reports": [],
+            "programOutput": []
+          }
+        }
+      }
+    }
+  }
+}

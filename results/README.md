@@ -84,6 +84,12 @@ memory, the values `probes/stale_read.cu` read from a `cudaMemcpyAsync` D2H
 destination before and after synchronizing the stream (20 runs each), and the
 checker's reports on that source.
 
+## `probes/sanitizer.json`
+
+Output of `probes/sanitizer.py`: for each scenario of `stale_read.cu` and
+`lifetime.cu`, the error count and first reports of each compute-sanitizer
+tool and the program's own output, and the checker's reports on both sources.
+
 ## `probes/completion.json`
 
 Output of `probes/completion.py` on an RTX 4090 with driver 595.99: how long

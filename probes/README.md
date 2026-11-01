@@ -34,6 +34,15 @@ before synchronization and 42 after it; all 20 pageable runs read 42 both
 times. The checker reports the early read as CL1 error (pinned path) and CL1
 warning (pageable path).
 
+`sanitizer.py` runs every compute-sanitizer tool on each scenario of
+`stale_read.cu` and `lifetime.cu`, and the checker on both sources; see
+[docs/evaluation.md](../docs/evaluation.md#against-compute-sanitizer):
+
+```sh
+flock /var/tmp/rtx4090.lock python3 probes/sanitizer.py --ccbin g++-13 \
+  --native build/cuda-lifetime-native --out results/probes/sanitizer.json
+```
+
 `lifetime.cu` and `run.py` are deliberately unsafe microprograms for pinned and
 pageable D2H, ordinary `cudaFree`, `cudaFreeHost`, and cross-stream
 stream-ordered allocation use with and without an event edge, run directly and

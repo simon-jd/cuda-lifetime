@@ -37,6 +37,10 @@ describe; five of those could not be analyzed (four parse or tool failures, a
 generated header) and three were missed because the copy goes through a
 library helper defined in another translation unit or the buffer belongs to
 an object ([docs/evaluation.md](docs/evaluation.md#fixed-bugs-from-public-projects)).
+compute-sanitizer, run with all its tools on the same stale-read program and
+five unsafe lifetime scenarios, reports only the stream-ordered allocation
+race; it does not see host reads or frees racing an in-flight copy, which the
+checker reports ([docs/evaluation.md](docs/evaluation.md#against-compute-sanitizer)).
 On its hand-written labelled corpora it scores 10/0/0/10 (seed) and 25/1/0/23
 (holdout, first frozen run) as TP/FP/FN/TN. Large parts of the scanned code
 were only partly explored, and several CUDA idioms are not modeled; see
