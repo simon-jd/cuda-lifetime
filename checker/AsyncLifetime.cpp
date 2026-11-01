@@ -4,6 +4,7 @@
 #include "clang/AST/DeclCXX.h"
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/AST/ParentMapContext.h"
+#include "clang/Analysis/CFG.h"
 #include "clang/Lex/Preprocessor.h"
 #include "clang/StaticAnalyzer/Core/BugReporter/BugType.h"
 #include "clang/StaticAnalyzer/Core/BugReporter/BugReporter.h"
@@ -421,12 +422,12 @@ public:
   // composed from the CUDA calls, models and other bodies it calls. They are
   // flow-insensitive "may" summaries: a copy on any path counts, and a body
   // that synchronizes anything gets none, since it may complete its copies.
-  struct Summary { bool done = false, synchronizes = false, copies = false; std::optional<cudalifetime::Model> copy; };
+  struct Summary { bool done = false, synchronizes = false, copies = false; std::optional<cudalifetime::Model> copy, sync; };
   struct Forwarded {
     // level -1: the address of the parameter; 0: its value; 1: an element of
     // the array it points to.
-    int param = -1, level = 0; bool constant = false; int64_t value = 0;
-    bool valid() const { return param >= 0 || constant; }
+    int param = -1, level = 0; bool constant = false, receiver = false; int64_t value = 0;
+    bool valid() const { return param >= 0 || constant || receiver; }
   };
   // Which parameter of fd an argument expression passes on, or its constant
   // value. Buffers forward as a pointer parameter or the address of a
@@ -447,6 +448,12 @@ public:
       break;
     }
     if (!e) return out;
+    // A handle the receiver holds: this->stream_, or value() on this.
+    if (handle) {
+      const Expr *object = e;
+      if (const auto *field = dyn_cast<MemberExpr>(e)) object = field->getBase()->IgnoreParenImpCasts();
+      if (isa<CXXThisExpr>(object)) { out.receiver = true; return out; }
+    }
     auto index = [&](const ValueDecl *decl) -> int {
       const auto *param = dyn_cast_or_null<ParmVarDecl>(decl);
       if (!param) return -1;
@@ -502,6 +509,35 @@ public:
       return endsInThrow(branch->getThen(), depth + 1) && endsInThrow(branch->getElse(), depth + 1);
     return false;
   }
+  // Whether every path from the body's entry to its normal exit passes the
+  // call: paths that throw or call a function that never returns don't count.
+  static bool alwaysReached(const FunctionDecl *fd, const CallExpr *call) {
+    auto cfg = CFG::buildCFG(fd, fd->getBody(), &fd->getASTContext(), CFG::BuildOptions());
+    if (!cfg) return false;
+    llvm::SmallPtrSet<const CFGBlock *, 4> at;
+    auto deadEnd = [](const CFGBlock *block) {
+      if (block->hasNoReturnElement() || isa_and_nonnull<CXXThrowExpr>(block->getTerminatorStmt())) return true;
+      for (const auto &element : *block)
+        if (auto statement = element.getAs<CFGStmt>())
+          if (const auto *inner = dyn_cast<CallExpr>(statement->getStmt()); inner && inner->getDirectCallee() && neverReturns(inner->getDirectCallee()))
+            return true;
+      return false;
+    };
+    for (const CFGBlock *block : *cfg)
+      for (const auto &element : *block)
+        if (auto statement = element.getAs<CFGStmt>(); statement && statement->getStmt() == call) at.insert(block);
+    if (at.empty()) return false;
+    std::vector<const CFGBlock *> work{&cfg->getEntry()};
+    llvm::SmallPtrSet<const CFGBlock *, 32> seen;
+    while (!work.empty()) {
+      const CFGBlock *block = work.back(); work.pop_back();
+      if (!block || !seen.insert(block).second || at.count(block)) continue;
+      if (block == &cfg->getExit()) return false;
+      if (deadEnd(block)) continue;
+      for (const auto &next : block->succs()) work.push_back(next.getReachableBlock());
+    }
+    return true;
+  }
   static bool neverReturns(const FunctionDecl *fd) {
     if (fd->isNoReturn()) return true;
     const FunctionDecl *definition = fd->getDefinition();
@@ -533,10 +569,29 @@ public:
         const Summary &inner = summaryOf(callee);
         result.synchronizes |= inner.synchronizes;
         if (inner.copy) m = *inner.copy;
+        else if (inner.sync) m = *inner.sync;
       }
       const auto &e = m.effect;
       if (e == "sync_stream" || e == "sync_device" || e == "sync_event" || e == "event_elapsed" || e == "copy")
         result.synchronizes = true;
+      // A synchronization on every path through the body (a "must" claim,
+      // unlike copies) makes a summary of its own.
+      if ((e == "sync_stream" || e == "sync_device") && !result.sync && !neverReturns(definition) && alwaysReached(definition, call)) {
+        cudalifetime::Model sync; sync.function = definition->getQualifiedNameAsString(); sync.effect = e; sync.assumption = true;
+        Forwarded f;
+        if (e == "sync_stream") {
+          if (auto constant = m.constants.find("stream"); constant != m.constants.end()) { f.constant = true; f.value = constant->second; }
+          else if (m.receiver.count("stream")) f = Forwarded();  // the callee's receiver is not one of ours
+          else if (auto it = m.args.find("stream"); it != m.args.end() && it->second < call->getNumArgs())
+            f = forwarded(call->getArg(it->second), definition, true);
+          if (const auto *member = dyn_cast<CXXMemberCallExpr>(call); member && m.receiver.count("stream"))
+            f = forwarded(member->getImplicitObjectArgument(), definition, true);
+          if (f.param >= 0 && f.level == 0) sync.args["stream"] = static_cast<unsigned>(f.param);
+          else if (f.receiver) sync.receiver.insert("stream");
+          else if (f.constant) sync.constants["stream"] = f.value;
+        }
+        if (e == "sync_device" || f.valid()) result.sync = sync;
+      }
       if (e != "enqueue_copy") continue;
       cudalifetime::Model copy; copy.function = definition->getQualifiedNameAsString(); copy.effect = e; copy.assumption = true;
       bool forwardsBuffer = false, forwardsStream = false;
@@ -581,6 +636,14 @@ public:
     auto &manager = s->getStateManager();
     if (auto constant = m.constants.find(key); constant != m.constants.end())
       return manager.getSValBuilder().makeIntVal(constant->second, manager.getContext().IntTy);
+    if (m.receiver.count(key)) {
+      // The operand is the receiver object, such as a stream wrapper's synchronize().
+      const auto *instance = dyn_cast<CXXInstanceCall>(&call);
+      const auto *method = instance ? dyn_cast_or_null<CXXMethodDecl>(instance->getDecl()) : nullptr;
+      if (!method) return UnknownVal();
+      SVal object = instance->getCXXThisVal();
+      return handle(s, object, method->getThisType()->getPointeeType());
+    }
     auto it = m.args.find(key);
     if (it == m.args.end() || it->second >= call.getNumArgs()) return UnknownVal();
     SVal value = call.getArgSVal(it->second);
@@ -705,9 +768,10 @@ public:
     // limit) still queues the copies its summary records.
     if (conservative) if (const auto *fd = dyn_cast_or_null<FunctionDecl>(call.getDecl()))
       if (fd->hasBody() && !cudalifetime::isCudaApi(fd))
-        if (const auto &summary = summaryOf(fd); summary.copy) {
-          cudalifetime::info().assumedModels.insert("generated summary: " + summary.copy->function);
-          applyCall(call, c, s, &*summary.copy);
+        if (const auto &summary = summaryOf(fd); summary.copy || summary.sync) {
+          const auto &applied = summary.copy ? *summary.copy : *summary.sync;
+          cudalifetime::info().assumedModels.insert("generated summary: " + applied.function);
+          applyCall(call, c, s, &applied);
           return;
         }
     if (s != c.getState()) c.addTransition(s);
@@ -1329,8 +1393,8 @@ void AsyncLifetimeChecker::checkEndFunction(const ReturnStmt *, CheckerContext &
 }
 bool cudalifetime::summarize(const FunctionDecl *decl, Model &out) {
   const auto &summary = AsyncLifetimeChecker::summaryOf(decl);
-  if (!summary.copy) return false;
-  out = *summary.copy;
+  if (!summary.copy && !summary.sync) return false;
+  out = summary.copy ? *summary.copy : *summary.sync;
   return true;
 }
 bool cudalifetime::isCudaApi(const FunctionDecl *decl) {

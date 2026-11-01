@@ -58,7 +58,14 @@ static bool loadEntry(const llvm::json::Value &entry, std::string &error) {
       m.elements.insert(key->str());
     }
   }
-  for (const auto &key : required.at(m.effect)) if (!m.args.count(key) && !m.constants.count(key)) { error = "missing argument " + key + " for model " + m.function; return false; }
+  if (const auto *receiver = obj->getArray("receiver")) {
+    for (const auto &entry : *receiver) {
+      auto key = entry.getAsString();
+      if (!key || m.args.count(key->str())) { error = "model receiver keys must be strings not also arguments: " + m.function; return false; }
+      m.receiver.insert(key->str());
+    }
+  }
+  for (const auto &key : required.at(m.effect)) if (!m.args.count(key) && !m.constants.count(key) && !m.receiver.count(key)) { error = "missing argument " + key + " for model " + m.function; return false; }
   // A copy summary needs the host side of the copy among its arguments; the
   // other side may belong to the receiver (for example a device buffer member).
   if (m.effect == "enqueue_copy" && !m.args.count("dst") && !m.args.count("src")) { error = "missing argument dst or src for model " + m.function; return false; }

@@ -15,6 +15,8 @@ struct Model {
   std::map<std::string, int64_t> constants;
   // Arguments that are arrays whose first element is the operand (batched copies).
   std::set<std::string> elements;
+  // Keys whose operand is the receiver of a member call (a stream wrapper's synchronize()).
+  std::set<std::string> receiver;
   bool assumption = false;
 };
 // What a report is, carried from the checker to the SARIF consumer as data:
@@ -41,9 +43,9 @@ bool loadModels(const std::string &directory, std::string &error);
 // in one of the toolkit's API headers (by file name, so a stub header with the
 // same name also qualifies). Project functions that merely share the prefix are not.
 bool isCudaApi(const clang::FunctionDecl *decl);
-// The copy a function's body queues on its own parameters, derived from its
-// AST through the calls it makes (CUDA calls, models, other bodies): false
-// when it queues none, synchronizes, or queues copies that disagree.
+// The copy a function's body queues on its own parameters, or failing that
+// the synchronization it performs on every path, derived from its AST
+// through the calls it makes (CUDA calls, models, other bodies).
 bool summarize(const clang::FunctionDecl *decl, Model &out);
 void registerChecker(clang::ento::CheckerRegistry &registry);
 }

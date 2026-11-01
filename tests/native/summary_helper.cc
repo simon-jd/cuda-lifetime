@@ -21,7 +21,7 @@ void throw_error(int status) {
 void checked_copy(void *dst, const void *src, unsigned long bytes, stream_view stream) {
   if (int status = queue(dst, src, bytes, stream.value())) throw_error(status);
 }
-// Synchronizes after copying, so it gets no summary.
+// Synchronizes after copying: its summary is the synchronization.
 void copy_and_wait(void *dst, const void *src, unsigned long bytes, stream_view stream) {
   queue(dst, src, bytes, stream.value());
   cudaStreamSynchronize(stream.value());
@@ -35,4 +35,12 @@ int copy_batch(void **dsts, const void **srcs, const unsigned long *sizes, unsig
 // Like cuDF's memcpy_async: a single copy through the batch helper.
 void copy_one(void *dst, const void *src, unsigned long count, stream_view stream) {
   copy_batch(&dst, &src, &count, 1, stream);
+}
+// Synchronizes the receiver's stream on every path that returns.
+void stream_view::synchronize() const {
+  if (int status = cudaStreamSynchronize(stream_)) throw_error(status);
+}
+// Synchronizes on some paths only: no summary.
+void maybe_sync(stream_view stream, bool wait) {
+  if (wait) cudaStreamSynchronize(stream.value());
 }
