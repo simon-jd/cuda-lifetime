@@ -1,7 +1,7 @@
 # Design trade-offs
 
 Most of what cuda-lifetime reports, and most of what it misses, follows from
-ten choices: analyzing host code path by path inside CSA, judging copies by
+twelve choices: analyzing host code path by path inside CSA, judging copies by
 CUDA's documented contract rather than by what today's driver does, treating
 opaque calls and wrapper models with suspicion, and refusing to call a
 translation unit clean when its coverage is incomplete. The sections below
@@ -67,7 +67,7 @@ pageable memory right after the copy works today, so calling it an error
 would be wrong; calling it nothing would hide a race that appears as soon as
 the buffer is pinned.
 
-**Cost.** 22 of the 36 real-project alerts are this portability pattern, 19
+**Cost.** 32 of the 46 real-project alerts are this portability pattern, 29
 of them in faiss. Users who want only definite defects pass `--errors-only`
 and lose those warnings, which the run records as hidden.
 
@@ -147,6 +147,69 @@ a warning would hide real races; models need review and evaluation on
 independent cases before a held-out run. The shipped faiss and RMM models are
 deliberately narrow.
 
+## Helpers in other translation units: generated summaries, not CTU
+
+**Decision.** A copy helper defined in another translation unit is described
+by a summary generated from that unit (`cuda-lifetime-native --summarize`):
+the copy its body queues on its own parameters, composed through the calls it
+makes, written in the model format and loaded with `--model`. Bodies in the
+analyzed unit that CSA declines to inline get the same summary at the call.
+
+**Alternatives.** CSA's cross-translation-unit analysis, which imports the
+helper's definition on demand through an external-definition map and inlines
+it; hand-written models for each helper; path-sensitive summaries computed by
+running the checker itself on the helper.
+
+**Why.** CTU was tried first, on the cuDF regex case
+(`results/real-bugs/ctu-trial.json`). Clang 23's ASTImporter does not support
+the `ExplicitInstantiation` node that libstdc++'s `extern template`
+declarations produce, so importing `cuda_memcpy_async_impl` from its unit
+reported 19 import errors (which the tool must count as a failed TU) and then
+aborted on an importer assertion. Even when the import works, CTU only helps
+where CSA inlines the call, which it does not do for container methods or in
+functions that already exhaust their node budget, and the imported body still
+passes `cudaMemcpyDefault` on pointers whose memory kind is unknown inside it.
+A summary is cheap (one parse of the helper's unit, no path exploration),
+survives those cases, and is a reviewable claim in the same format as a
+hand-written model. Path-sensitive summaries would be more precise but need
+the checker to treat parameters' unknown memory symbolically, which its state
+model does not do.
+
+**Cost.** Summaries are flow-insensitive "may" claims: a copy on any path
+counts, so a helper that copies only on some paths makes every call look
+pending. A body that synchronizes anything gets no summary, and one whose
+paths copy different parameters gets none either. Only copies are
+summarized, not frees, events or synchronization, and a summary carries no
+memory kind: it creates a pending operation only when the caller knows the
+operand is host memory. Which helper units to summarize must be named
+(`summarize` in `corpus/real-bugs/commands.json`); the whole-project scans do
+not run a summary pass.
+
+## Host containers own their buffer
+
+**Decision.** A pointer that `data()` returns from `std::vector`,
+`std::basic_string`, `thrust::host_vector` or a class derived from one is
+host memory owned by that object, and so is the buffer of a view
+(`std::span`, `string_view`, cuDF's `host_span`) built from it. When the
+owner's destructor runs while an asynchronous operation still uses the
+buffer, that is a CL2 warning.
+
+**Alternatives.** Let CSA inline container methods
+(`c++-container-inlining`) and follow the allocator's `new`/`delete`;
+annotate container types in models.
+
+**Why.** CSA does not inline methods of classes with `begin()` defined in
+headers, so `v.data()` is a fresh symbol unrelated to `v`, and a vector going
+out of scope released nothing the checker could see. Inlining every
+container would push the large functions that already exhaust their budget
+further over it, and cuDF's pinned vectors allocate through an RMM resource
+whose body is elsewhere. Naming the owner types is a small, checkable claim.
+
+**Cost.** The owner list is by name; other containers are not covered. The
+memory kind is taken as pageable, so these reports are warnings even for
+cuDF's pinned vectors. Only destruction ends the buffer: `clear`,
+`resize` or move assignment, which can also release it, are not modeled.
+
 ## Coverage gaps are reported, never counted as clean
 
 **Decision.** Each translation unit gets a coverage record: parse failures,
@@ -194,6 +257,6 @@ holdout exposed a real checker bug, and the fixed version's 25/0/0/24 is
 reported as a regression result, since the set had been seen.
 
 **Cost.** The corpora are small (20 seed cases, 49 holdout labels), and triage
-is manual. Of the previous version's 76 real-project alerts none was a
-confirmed defect, and of the current 36, 22 are portability findings, 3
+is manual. Of version 0.2.0's 76 real-project alerts none was a
+confirmed defect, and of the current 46, 32 are portability findings, 3
 informational and 11 false positives.

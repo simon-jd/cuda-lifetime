@@ -83,11 +83,11 @@ The scan covers every configured command of cuda-samples and RMM and the
 dependencies (graphics, MPI, FreeImage, NvSCI) are missing on the build host,
 so those samples are not among its 233 commands.
 
-| Project | TUs | Parsed | Alerts, 0.2.0 | Alerts, 0.3.0 | Alerts, 0.4.0 |
-|---|---:|---:|---:|---:|---:|
-| cuda-samples 13.2 | 233 | 223 | 32 | 7 | 7 |
-| faiss 1.15.1, `faiss/gpu/` | 190 | 189 | 42 | 29 | 29 |
-| RMM 26.10 | 54 | 54 | 2 | 0 | 0 |
+| Project | TUs | Parsed | Alerts, 0.2.0 | Alerts, 0.3.0 | Alerts, 0.4.0 | Alerts, 0.5.0 |
+|---|---:|---:|---:|---:|---:|---:|
+| cuda-samples 13.2 | 233 | 223 | 32 | 7 | 7 | 7 |
+| faiss 1.15.1, `faiss/gpu/` | 190 | 189 | 42 | 29 | 29 | 39 |
+| RMM 26.10 | 54 | 54 | 2 | 0 | 0 | 0 |
 
 The ten cuda-samples parse failures are nine `min`/`max` overload errors (for
 example in `simpleMultiCopy.cu` and `transpose.cu`) and one unsupported
@@ -95,19 +95,22 @@ initialization of a `__shared__` variable (`globalToShmemAsyncCopy.cu`);
 faiss's one is a `min` overload error in `GpuDistance.cu`.
 
 Parsed is not the same as fully explored. `scripts/summarize_scan.py` writes
-the per-project totals of the 0.4.0 scan to `results/real-projects/summary.json`
+the per-project totals of the 0.5.0 scan to `results/real-projects/summary.json`
 and the per-TU figures to `results/real-projects/timings.csv`:
 
-| Project | Top-level functions analyzed | Exhausted the node budget | Hit the 180 s limit | Wall time, 10 processes | Per-TU time, median / max |
+| Project | Top-level functions analyzed | Exhausted the node budget | Hit the 180 s limit | Wall time, 10 processes (0.4.0) | Per-TU time, median / max |
 |---|---:|---:|---:|---:|---:|
-| cuda-samples 13.2 | 837 | 385 (46%) | 0 | 97 s | 2.4 s / 74 s |
-| faiss 1.15.1, `faiss/gpu/` | 720 | 232 (32%) | 0 | 166 s | 4.6 s / 143 s |
-| RMM 26.10 | 233 | 60 (26%) | 0 | 20 s | 1.9 s / 19 s |
+| cuda-samples 13.2 | 837 | 385 (46%) | 0 | 81 s (97 s) | 2.4 s / 58 s |
+| faiss 1.15.1, `faiss/gpu/` | 720 | 232 (32%) | 0 | 146 s (166 s) | 4.0 s / 122 s |
+| RMM 26.10 | 233 | 60 (26%) | 0 | 18 s (20 s) | 1.8 s / 16 s |
 
 A function that exhausts the budget was explored only partly, so a TU with one
 is never counted as clean. The wall times are for one run with ten TUs
-analyzed at a time on a 32-thread machine; the per-TU times include that
-concurrency. `unmodeledCudaFunctions` lists the CUDA Runtime and Driver API
+analyzed at a time on a 32-thread machine (the 0.5.0 run shared it with one
+more analyzer process, the real-bug runner); the per-TU times include that
+concurrency. The differences from 0.4.0 are run-to-run variation, not a
+speed-up: the 0.5.0 checker does strictly more work per call. The scans use
+the shipped models only, without a summary pass over each project's TUs. `unmodeledCudaFunctions` lists the CUDA Runtime and Driver API
 functions the analysis met but does not model (122 in cuda-samples, mostly
 driver API calls); a function counts as a CUDA API call only if it is declared
 in one of the toolkit's API headers.
@@ -157,16 +160,34 @@ unchanged. Its changes show in the coverage records instead:
 - Rule, level, memory kind and semantic ID are SARIF fields written by the
   native consumer; they used to be parsed out of the message text.
 
-### The 36 alerts
+### From 0.4.0 to 0.5.0
 
-None of the 36 is a confirmed defect, and all are warnings or notes, so
+Version 0.5.0 reports the 36 alerts of 0.4.0 unchanged and 10 more, all in
+faiss and all from the new host-container rule: a `std::vector` destroyed
+while a `cudaMemcpyAsync` from or into its buffer is still queued, with no
+synchronization in between. Six are H2D copies from temporaries in `IVFBase`
+and `IVFFlat` (`copyFrom`, `toDeviceTemporary`, `DeviceVector::append`)
+destroyed at the end of their scope; four are vectors filled by a D2H in
+`copyToHost` or `copyToVector`, returned by value and destroyed by the
+caller. All ten are portability findings, like the 22 below: correct only
+while copies to and from pageable memory are synchronous. CSA does not elide
+the named return value of `copyToHost` and `copyToVector`, so the rule
+passes a moved vector's buffer on to the vector it moves into; otherwise the
+local would be reported at their `return`. cuda-samples' 7 alerts are unchanged, and RMM
+still has none: modeling `cudaMemcpyBatchAsync` and RMM's `memcpy_async`
+direction drops RMM's unmodeled-call visits from 273 to 33, but their
+operands inside RMM are of unknown memory kind.
+
+### The 46 alerts
+
+None of the 46 is a confirmed defect, and all are warnings or notes, so
 `--errors-only` reports nothing on these projects.
 `results/real-projects/triage.csv` has each alert with its reason; the SARIF
 files with full paths are beside it.
 
 | Category | Count | What it is |
 |---|---:|---|
-| Portability | 22 | Host code reads, writes or frees ordinary `new[]`/`malloc` memory right after `cudaMemcpyAsync` with no synchronization in between: 19 in faiss (`HostTensor` copies used by CPU training and index remapping, H2D copies from temporaries in `IVFBase`), 3 in cuda-samples (an error path that frees copy sources). |
+| Portability | 32 | Host code reads, writes or frees ordinary `new[]`/`malloc`/`std::vector` memory right after `cudaMemcpyAsync` with no synchronization in between: 29 in faiss (`HostTensor` copies used by CPU training and index remapping, H2D copies from temporaries in `IVFBase`, the 10 vectors above), 3 in cuda-samples (an error path that frees copy sources). |
 | Informational | 3 | `cudaFree` on that same error path relies on its implicit synchronization (CL3 note). |
 | False positive | 11 | 8 from faiss's `getDeviceForAddress`, whose result the analyzer cannot relate to the pointer, so it explores copy directions that cannot happen; 1 double buffer whose halves do not overlap but have symbolic offsets; 1 wrapper CSA evaluated without inlining; 1 event wait for work whose buffers the waiter never touches. |
 
@@ -185,30 +206,54 @@ if the buffers were pinned or registered.
 
 ## Fixed bugs from public projects
 
-`corpus/real-bugs/` has 13 stream-ordering and lifetime bugs that cuDF, RMM,
-llama.cpp, cuda-samples and three smaller projects fixed in host code, each
+`corpus/real-bugs/` has 13 stream-ordering and lifetime bugs that cuDF,
+RMM, llama.cpp, cuda-samples and three smaller projects fixed in host code, each
 labelled from its fix's diff before the checker ran: eight are bugs the rules
 describe (six CL2, one CL1, one CL4), five are of kinds the checker does not
 claim to find. `scripts/run_real_bugs.py` analyzed the buggy and the fixed
-revision of each affected TU (`results/real-bugs/results.json`).
+revision of each affected TU (`results/real-bugs/results.json`); the labels
+did not change between versions.
 
-| | Cases | Found | Missed | Not analyzable |
-|---|---:|---:|---:|---:|
-| Within the rules | 8 | 0 | 3 | 5 |
-| Outside the rules | 5 | 0 | 3 | 2 |
+| | Cases | 0.4.0 found | 0.5.0 found | Missed | Not analyzable |
+|---|---:|---:|---:|---:|---:|
+| Within the rules | 8 | 0 | 3 | 4 | 1 |
+| Outside the rules | 5 | 0 | 0 | 3 | 2 |
 
-Recall on these real bugs is zero. Five in-scope cases could not be analyzed:
-Clang rejects cuDF's type-dispatch specializations in CUDA mode (three TUs), a
-generated header is missing (one), and on one cuDF TU the native tool aborts
-on a Clang assertion that stock `clang++ --analyze` does not hit, a defect in
-this tool. The three analyzed in-scope cases were missed because the copy is
-queued inside a helper defined in another translation unit (RMM's
-`device_buffer` constructor, cuDF's `cuda_memcpy_async_impl`), because a host
-container's buffer is not related to the container's lifetime, and because an
-event held in an object has unknown history. These are the library
-abstractions real CUDA code is written in, and the checker's models stop at
-them. [corpus/real-bugs/README.md](../corpus/real-bugs/README.md) lists every
-case with its reason.
+Version 0.5.0 finds 3 of the 8 in-scope bugs (3 of 13 overall), and each
+fix silences its report: cuDF's scoped `single_node` passed to
+`set_element_async`, and the staging and regex-program `host_vector`s
+destroyed with a copy pending. Four changes made that possible:
+
+- **The crash.** The native tool aborted on cuDF's parquet `reader_impl.cpp`
+  where `clang++ --analyze` did not because the checker, not CSA, read the
+  store for every variable a function body names, including the constant
+  locals of a generic lambda's pattern, whose initializers are
+  value-dependent; stock CSA never evaluates template patterns. Those
+  variables are now skipped (`tests/native/dependent_locals.cpp`).
+- **Helpers in other TUs.** The copies are queued in RMM's and cuDF's
+  libraries (`rmm::detail::memcpy_async`, `cuda_memcpy_async_impl`), and the
+  fixes wait in RMM's `cuda_stream_view::synchronize`. CSA's CTU analysis
+  could not import them (`results/real-bugs/ctu-trial.json`); summaries
+  generated from those TUs could ([models.md](models.md#generated-summaries)).
+- **Containers.** The buffers belong to `host_vector`s reached through
+  `host_span` conversions; the owner's destruction is now a CL2 warning.
+- **Headers.** A patched copy of cuDF's `type_dispatcher.hpp` (Clang rejects
+  its specializations in CUDA mode) makes the three cuDF `.cu` TUs parse, and
+  a stand-in for gpe's generated `gpe_kernels.h` makes its TU parse.
+
+What still misses, in scope: the parquet bug, whose pattern is reported in
+isolation but whose function exhausts its budget even at 2,000,000 nodes
+(`results/real-bugs/parquet-budget.json`); cuDF's `string_scalar` copy (through RMM's
+`device_buffer`) from the caller's string, which no lifetime in the TU ends; gpe's staging ring,
+copied with driver API calls across calls to `dispatch`; and RMM's
+`merge_lists`, whose defect (an event not re-recorded after a wait) only
+matters to waits in later calls, which a per-path checker cannot relate. The
+Arrow case now parses past the dispatcher but needs `nanoarrow.h`, which
+cuDF's build downloads and was not fetched. The string-scalar TU also gets
+four CL2 warnings off its labelled line, copies from by-value parameters and
+a temporary that end while queued (portability findings, pageable memory).
+[corpus/real-bugs/README.md](../corpus/real-bugs/README.md) lists every case
+with its reason.
 
 ## Against compute-sanitizer
 

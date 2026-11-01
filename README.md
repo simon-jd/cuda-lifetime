@@ -17,26 +17,30 @@ one analyzer process per translation unit and reports coverage gaps instead of
 counting them as clean.
 
 **What it found: 0 confirmed defects.** On 477 host translation units of
-cuda-samples 13.2, faiss 1.15.1's GPU module and RMM 26.10, version 0.4.0
-reports 36 alerts, all warnings or notes:
+cuda-samples 13.2, faiss 1.15.1's GPU module and RMM 26.10, version 0.5.0
+reports 46 alerts, all warnings or notes:
 
-- **22 portability findings**, 19 of them in faiss: host code that reads or
-  frees ordinary `malloc`/`new[]` memory right after `cudaMemcpyAsync`, with
-  no synchronization in between. It works only because current drivers make
-  pageable copies synchronous, which CUDA permits but does not promise. Pin the
-  same buffers, a common optimization, and the copy no longer waits: reading a
-  pinned D2H destination early, [`probes/stale_read.cu`](probes/stale_read.cu)
-  got the stale value in 20 of 20 runs on an RTX 4090, against 0 of 20 with
-  pageable memory.
+- **32 portability findings**, 29 of them in faiss: host code that reads or
+  frees ordinary `malloc`/`new[]`/`std::vector` memory right after
+  `cudaMemcpyAsync`, with no synchronization in between. It works only
+  because current drivers make pageable copies synchronous, which CUDA
+  permits but does not promise. Pin the same buffers, a common optimization,
+  and the copy no longer waits: reading a pinned D2H destination early,
+  [`probes/stale_read.cu`](probes/stale_read.cu) got the stale value in 20 of
+  20 runs on an RTX 4090, against 0 of 20 with pageable memory.
 - 3 informational notes and 11 false positives, 8 of them from one faiss
   helper whose result the analyzer cannot relate to the pointer.
 
-**On real fixed bugs it found none.** Of 13 stream-ordering bugs that cuDF,
+**On 13 real fixed bugs it finds 3.** Of 13 stream-ordering bugs that cuDF,
 RMM, llama.cpp and other projects fixed, eight are of the kinds the rules
-describe; five of those could not be analyzed (four parse or tool failures, a
-generated header) and three were missed because the copy goes through a
-library helper defined in another translation unit or the buffer belongs to
-an object ([docs/evaluation.md](docs/evaluation.md#fixed-bugs-from-public-projects)).
+describe. Version 0.5.0 finds three of them (0.4.0 found none), and each fix
+silences the report: they needed copy and synchronization summaries
+generated from RMM's and cuDF's own translation units, ownership of a host
+container's buffer, a fix for a crash in the tool, and a patched cuDF
+header. Of the other five, one does not parse (a missing dependency), one
+exhausts the node budget, and three need what a per-TU, per-path checker
+does not see: the caller's storage, driver API copies across calls, an
+event's role across calls ([docs/evaluation.md](docs/evaluation.md#fixed-bugs-from-public-projects)).
 compute-sanitizer, run with all its tools on the same stale-read program and
 five timing-dependent lifetime scenarios, reports only the stream-ordered allocation
 race; it does not see host reads or frees racing an in-flight copy, which the
@@ -102,6 +106,18 @@ Warnings are shown by default; `--errors-only` hides them.
 - **Wrappers.** Project functions that wrap CUDA calls can be summarized in a
   JSON model with a source reference ([docs/models.md](docs/models.md));
   `models/` has the faiss and RMM ones used below.
+- **Helpers in other translation units.** `cuda-lifetime-native --summarize`
+  writes such models from a helper's own TU: the copy a function's body
+  queues on its parameters, or the synchronization every path through it
+  performs, composed through the calls it makes. Bodies CSA declines to
+  inline in the analyzed TU (container methods) get the same summary at the
+  call. CSA's own cross-TU analysis was tried and fails on libstdc++ code
+  ([docs/design-tradeoffs.md](docs/design-tradeoffs.md#helpers-in-other-translation-units-generated-summaries-not-ctu)).
+- **Host containers.** The buffer `data()` returns from `std::vector`,
+  `std::basic_string` or `thrust::host_vector` (and classes derived from
+  them, like cuDF's `host_vector`), or from a view of one, belongs to the
+  container: destroying it with a copy pending is CL2. Moving the container
+  moves the buffer.
 
 SARIF output carries the analyzer's own path (`codeFlows`), including the
 "queued here" event for the pending operation. A per-TU coverage report lists
@@ -138,15 +154,18 @@ confirmed defect either (45 false positives, 31 with insufficient evidence);
 23 of those were triaged against the source and 53 carry over the judgment of
 an earlier triage of the same sites, matched by fingerprint:
 
-| Project | TUs (parsed) | Alerts, 0.2.0 | Alerts, 0.4.0 | Portability | Informational | False positive |
-|---|---:|---:|---:|---:|---:|---:|
-| cuda-samples 13.2 | 233 (223) | 32 | 7 | 3 | 3 | 1 |
-| faiss 1.15.1, GPU module | 190 (189) | 42 | 29 | 19 | 0 | 10 |
-| RMM 26.10 | 54 (54) | 2 | 0 | 0 | 0 | 0 |
-| Total | 477 | 76 | 36 | 22 | 3 | 11 |
+| Project | TUs (parsed) | Alerts, 0.2.0 | Alerts, 0.4.0 | Alerts, 0.5.0 | Portability | Informational | False positive |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| cuda-samples 13.2 | 233 (223) | 32 | 7 | 7 | 3 | 3 | 1 |
+| faiss 1.15.1, GPU module | 190 (189) | 42 | 29 | 39 | 29 | 0 | 10 |
+| RMM 26.10 | 54 (54) | 2 | 0 | 0 | 0 | 0 | 0 |
+| Total | 477 | 76 | 36 | 46 | 32 | 3 | 11 |
 
-Version 0.3.0 already reported these same 36 alerts. With ten analyzer
-processes the scan takes 97 s, 166 s and 20 s of wall time, and 385 of 837,
+Versions 0.3.0 and 0.4.0 reported the same 36 alerts; 0.5.0 adds 10 faiss
+CL2 warnings from the host-container rule, `std::vector`s destroyed with a
+copy from or into them still queued, all portability findings. With ten analyzer
+processes the 0.5.0 scan takes 81 s, 146 s and 18 s of wall time (0.4.0: 97 s,
+166 s, 20 s), and 385 of 837,
 232 of 720 and 60 of 233 top-level functions exhaust the node budget, so
 these projects are only partly explored ([docs/evaluation.md](docs/evaluation.md#real-projects);
 per-TU times in `results/real-projects/timings.csv`).
@@ -159,8 +178,8 @@ treated as running (6), and waits were reported for work already ordered (4).
 Four more were repeat reports of the pageable pattern below at calls CSA now
 inlines. [docs/evaluation.md](docs/evaluation.md) has the per-family table.
 
-**What remains is mostly one pattern.** 19 faiss reports and 3 cuda-samples
-reports are host code that reads or frees ordinary `new[]`/`malloc` memory right
+**What remains is mostly one pattern.** 29 faiss reports and 3 cuda-samples
+reports are host code that reads or frees ordinary `new[]`/`malloc`/`std::vector` memory right
 after a `cudaMemcpyAsync`, with no synchronization in between. That is correct
 only because copies to and from pageable memory are synchronous on current
 drivers, which the CUDA documentation allows but does not promise ("might be
@@ -226,7 +245,10 @@ results above.
 ## Limitations
 
 - One host thread, one device and one translation unit at a time; no driver
-  API (`cu*`), no inter-TU or device-code analysis, no CUDA Graph contents.
+  API (`cu*`), no device-code analysis, no CUDA Graph contents. Other
+  translation units are seen only through generated summaries of the helper
+  TUs named for a run (copies and synchronizations only, not frees or
+  events); the whole-project scans below use none.
 - CSA explores bounded paths: loops and large functions exhaust budgets
   (reported per function), and calls it does not inline lose their effects.
 - Accesses through global variables inside opaque callees are not reported;
@@ -239,9 +261,13 @@ results above.
   coverage gap, so code that passes UVA pointers around is mostly unchecked.
 - RMM copies only through `rmm::detail::memcpy_async`, which calls
   `cudaMemcpyAsync` with `cudaMemcpyDefault` on its parameters, or
-  `cudaMemcpyBatchAsync`; `models/rmm.json` gives that wrapper no copy
-  direction. Every RMM copy is therefore unmodeled or a coverage gap, and
-  RMM's 0 alerts follow from that, not from verified code.
+  `cudaMemcpyBatchAsync`. `models/rmm.json` now passes it as a
+  `cudaMemcpyDefault` copy, but inside RMM its operands are mostly pointers
+  of unknown memory kind (device buffers, caller memory), so most RMM copies
+  are still coverage gaps, and RMM's 0 alerts do not mean verified code.
+- Host containers are recognized by name, their memory is taken as pageable
+  (so these reports are warnings even for pinned vectors), and only
+  destruction or a move ends a buffer, not `clear` or `resize`.
 - The labelled corpora were written from the same semantics document as the
   rules; they test conformance to it, not recall on code written by others.
 

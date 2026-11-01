@@ -29,10 +29,13 @@ explored programs. Headers and external calls can contain behavior beyond the
 supported scope even when the TU itself has no modeled CUDA operations.
 
 The initial faiss model covers `faiss::gpu::synchronizeAllDevices` under the
-single-device assumption. The initial RMM model describes
-`rmm::detail::memcpy_async`; a `cuda::stream_ref` that cannot be reduced to a
-supported stream handle remains unmodeled. These files are not comprehensive
-models of either library.
+single-device assumption. The RMM model describes
+`rmm::detail::memcpy_async` as a `cudaMemcpyDefault` copy. A stream passed as
+a wrapper whose only member is the handle (`rmm::cuda_stream_view`,
+`cuda::stream_ref`) is decoded to that handle; any other stream object remains
+unmodeled. These files are not comprehensive models of either library;
+generated summaries ([models.md](models.md#generated-summaries)) cover
+helpers whose bodies are available.
 
 The Ubuntu 24.04 container is the reference platform. The local Ubuntu 26.04.1
 host is outside the archived CUDA 13.2.2 Linux guide's support list; host results

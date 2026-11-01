@@ -33,7 +33,7 @@ counts produce an unmodeled call rather than inventing an argument value.
 
 | Effect | Required argument keys | Optional keys used by the checker |
 | --- | --- | --- |
-| `enqueue_copy` | `dst`, `src`, `stream` | `size` (bytes), `kind` (CUDA memcpy kind); absence means the direction/extent may be unknown. |
+| `enqueue_copy` | `stream`, and `dst` or `src` | `size` (bytes), `kind` (CUDA memcpy kind), `count` (entries of a batched copy); absence means the direction/extent may be unknown. A side that is not an argument (a receiver's member buffer) is left out. |
 | `launch` | `stream` | Other call arguments are inspected as possible device operands. |
 | `malloc_host`, `malloc_device` | `ptr` (output pointer) | None. |
 | `host_register` | `ptr` | `size` (bytes); an unknown span does not certify unrelated storage. |
@@ -55,6 +55,13 @@ counts produce an unmodeled call rather than inventing an argument value.
 | `graph_launch` | `stream` | Queues work with unknown buffers. |
 | `address_only` | None | The function inspects a pointer value (for example its attributes) and never dereferences it; it is not reported as an opaque access. |
 
+Two optional fields cover wrappers whose arguments are not the operands
+themselves. `constants` fixes `kind`, `size` or `stream` to an integer, for a
+wrapper that always passes `cudaMemcpyDefault` (4) or a fixed size.
+`elements` lists arguments that are arrays whose first element is the
+operand, as for `cudaMemcpyBatchAsync`; only that entry is modeled, and a
+`count` other than one is recorded as a coverage gap.
+
 The loader requires `aliases`, `args`, and a `doc` object with nonempty `url` and
 `anchor` plus `cudaVersion: "13.2.2"`. It rejects unknown effects, missing
 required arguments, non-integer/negative indices, duplicate names, malformed
@@ -71,3 +78,26 @@ Adding a model changes analysis semantics. Include all model files in a frozen
 evaluation manifest, review its source rationale, and evaluate it on independent
 development cases before a held-out run. Do not add a synchronization effect
 merely to suppress a warning.
+
+## Generated summaries
+
+`cuda-lifetime-native FILE --summarize OUT.json -- FLAGS` parses one
+translation unit and writes, in this format, a summary for each externally
+visible function it defines whose body queues a copy on its own parameters.
+The summary is composed from the AST: CUDA calls, loaded models (pass
+`--model` to build on summaries of other TUs) and the bodies of other
+functions in the TU, following a parameter through casts, wrapper accessors
+(`stream.value()`), its address and array elements. It is a "may" summary:
+a copy on any path counts. A body that synchronizes anything, or whose copies
+forward different parameters, gets none; a call that never returns (declared
+`noreturn`, or every path throws) is ignored, since its effects never precede
+the caller's code. Functions already modeled, and names defined more than
+once in the TU (overloads), are left out. Each entry carries
+`"generated": true`, the definition's file and line as its `doc`, and is
+recorded as a user assumption like any other model.
+
+Inside the analyzed TU, a body CSA declines to inline (a method of a
+container class in a header, or a call over an inlining limit) is summarized
+the same way at the call, and the summary is applied after CSA's
+conservative evaluation; `assumptions` in the coverage report lists it as
+`generated summary: NAME`.
