@@ -14,6 +14,7 @@ results/**/*.html
 !/results/real-projects/
 !/results/regression/
 !/results/mutants/
+!/results/real-bugs/
 !/results/probes/
 /results/probes/*
 !/results/probes/completion.json

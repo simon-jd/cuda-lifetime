@@ -31,6 +31,12 @@ reports 36 alerts, all warnings or notes:
 - 3 informational notes and 11 false positives, 8 of them from one faiss
   helper whose result the analyzer cannot relate to the pointer.
 
+**On real fixed bugs it found none.** Of 13 stream-ordering bugs that cuDF,
+RMM, llama.cpp and other projects fixed, eight are of the kinds the rules
+describe; five of those could not be analyzed (four parse or tool failures, a
+generated header) and three were missed because the copy goes through a
+library helper defined in another translation unit or the buffer belongs to
+an object ([docs/evaluation.md](docs/evaluation.md#fixed-bugs-from-public-projects)).
 On its hand-written labelled corpora it scores 10/0/0/10 (seed) and 25/1/0/23
 (holdout, first frozen run) as TP/FP/FN/TN. Large parts of the scanned code
 were only partly explored, and several CUDA idioms are not modeled; see

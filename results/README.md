@@ -63,6 +63,14 @@ cuda-samples files and five mutated variants in `corpus/mutants/`, and
 (`eval.mutation_report`). Paths were made relative to the repository root;
 `corpus/mutants/README.md` explains the results.
 
+## `real-bugs/results.json`
+
+Output of `scripts/run_real_bugs.py` for the 13 cases in `corpus/real-bugs/`:
+for the buggy and the fixed revision of each, whether the TU parsed (or the
+first errors), its diagnostics, functions analyzed and over budget, coverage
+gaps, and whether a diagnostic is on the labelled lines. Paths are relative to
+the case's checked-out revision.
+
 ## `regression/`
 
 Seed and holdout metrics of version 0.4.0 from `tests/run_seed.py`. The

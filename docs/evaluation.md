@@ -183,6 +183,33 @@ free the source of a host-to-device copy. Most faiss alerts carry
 source, not something the analyzer established. The same faiss code would race
 if the buffers were pinned or registered.
 
+## Fixed bugs from public projects
+
+`corpus/real-bugs/` has 13 stream-ordering and lifetime bugs that cuDF, RMM,
+llama.cpp, cuda-samples and three smaller projects fixed in host code, each
+labelled from its fix's diff before the checker ran: eight are bugs the rules
+describe (six CL2, one CL1, one CL4), five are of kinds the checker does not
+claim to find. `scripts/run_real_bugs.py` analyzed the buggy and the fixed
+revision of each affected TU (`results/real-bugs/results.json`).
+
+| | Cases | Found | Missed | Not analyzable |
+|---|---:|---:|---:|---:|
+| Within the rules | 8 | 0 | 3 | 5 |
+| Outside the rules | 5 | 0 | 3 | 2 |
+
+Recall on these real bugs is zero. Five in-scope cases could not be analyzed:
+Clang rejects cuDF's type-dispatch specializations in CUDA mode (three TUs), a
+generated header is missing (one), and on one cuDF TU the native tool aborts
+on a Clang assertion that stock `clang++ --analyze` does not hit, a defect in
+this tool. The three analyzed in-scope cases were missed because the copy is
+queued inside a helper defined in another translation unit (RMM's
+`device_buffer` constructor, cuDF's `cuda_memcpy_async_impl`), because a host
+container's buffer is not related to the container's lifetime, and because an
+event held in an object has unknown history. These are the library
+abstractions real CUDA code is written in, and the checker's models stop at
+them. [corpus/real-bugs/README.md](../corpus/real-bugs/README.md) lists every
+case with its reason.
+
 ## Reproduce
 
 Build the checker and run the corpora:
