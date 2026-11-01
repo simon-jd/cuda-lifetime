@@ -62,6 +62,9 @@ REGISTER_SET_WITH_PROGRAMSTATE(PendingOps, Pending)
 REGISTER_SET_WITH_PROGRAMSTATE(PreservedVariables, const MemRegion *)
 // A host container's buffer, or a view of it, to the container object that owns it.
 REGISTER_MAP_WITH_PROGRAMSTATE(ContainerOwners, const MemRegion *, const MemRegion *)
+// A view returned by value (a conversion operator) whose object CSA does not
+// expose, by the call expression that returned it, to its owner.
+REGISTER_MAP_WITH_PROGRAMSTATE(ViewResults, const Expr *, const MemRegion *)
 REGISTER_MAP_WITH_PROGRAMSTATE(Memories, const MemRegion *, unsigned)
 REGISTER_MAP_WITH_PROGRAMSTATE(RegisteredExtents, const MemRegion *, uint64_t)
 REGISTER_MAP_WITH_PROGRAMSTATE(Sequences, Stream, unsigned)
@@ -641,6 +644,7 @@ public:
     }
     for (auto entry : s->get<Memories>()) reaper.markLive(entry.first);
     for (auto entry : s->get<ContainerOwners>()) { reaper.markLive(entry.first); reaper.markLive(entry.second); }
+    for (auto entry : s->get<ViewResults>()) reaper.markLive(entry.second);
     for (auto entry : s->get<Allocations>()) reaper.markLive(entry.first);
     for (auto entry : s->get<PendingOps>()) reaper.markLive(entry.region);
   }
@@ -731,21 +735,50 @@ public:
     const MemRegion *object = value.getAsRegion();
     if (!object) if (auto lazy = value.getAs<nonloc::LazyCompoundVal>()) object = lazy->getRegion();
     if (!object) return nullptr;
+    object = object->StripCasts();  // a base-class subobject is the object itself
     if (hostContainer(type)) return object;
-    if (hostView(type)) if (const auto *known = s->get<ContainerOwners>(object)) return *known;
+    if (!hostView(type)) return nullptr;
+    if (const auto *known = s->get<ContainerOwners>(object)) return *known;
+    // A view copied without a constructor call (a trivial copy into a
+    // parameter) is bound to the original's value.
+    if (const auto *typed = dyn_cast<TypedValueRegion>(object))
+      if (auto lazy = s->getSVal(typed).getAs<nonloc::LazyCompoundVal>())
+        if (const auto *known = s->get<ContainerOwners>(lazy->getRegion()->StripCasts())) return *known;
+    // A parameter initialized by such a call: look the call up by its argument.
+    if (const auto *param = dyn_cast<ParamVarRegion>(object))
+      if (const auto *origin = dyn_cast_or_null<CallExpr>(param->getOriginExpr()); origin && !isa<CXXOperatorCallExpr>(origin) && param->getIndex() < origin->getNumArgs())
+        if (const auto *known = s->get<ViewResults>(origin->getArg(param->getIndex())->IgnoreImplicit())) return *known;
     return nullptr;
   }
   static ProgramStateRef trackContainers(const CallEvent &call, ProgramStateRef s) {
     if (const auto *ctor = dyn_cast<CXXConstructorCall>(&call)) {
       if (hostView(ctor->getDecl()->getThisType()->getPointeeType()) && call.getNumArgs() >= 1 && call.getArgExpr(0))
         if (const auto *from = owner(s, call.getArgSVal(0), call.getArgExpr(0)->getType()))
-          if (const auto *self = ctor->getCXXThisVal().getAsRegion()) s = s->set<ContainerOwners>(self, from);
+          if (const auto *self = ctor->getCXXThisVal().getAsRegion()) s = s->set<ContainerOwners>(self->StripCasts(), from);
       return s;
     }
     const auto *member = dyn_cast<CXXMemberCall>(&call);
     const auto *method = member ? dyn_cast_or_null<CXXMethodDecl>(member->getDecl()) : nullptr;
-    if (!method || !method->getIdentifier() || method->getName() != "data" || !call.getResultType()->isPointerType()) return s;
-    const auto *from = owner(s, member->getCXXThisVal(), method->getThisType()->getPointeeType());
+    if (!method) return s;
+    const bool returnsView = hostView(call.getResultType());  // a conversion such as host_vector::operator host_span
+    if (!returnsView && (!method->getIdentifier() || method->getName() != "data" || !call.getResultType()->isPointerType())) return s;
+    // data() is often inherited (span_base, vector_base): the receiver's own
+    // type says whether it is a container or a view.
+    QualType receiver = method->getThisType()->getPointeeType();
+    if (const auto *expr = dyn_cast_or_null<CXXMemberCallExpr>(call.getOriginExpr()))
+      if (const auto *object = expr->getImplicitObjectArgument()) {
+        object = object->IgnoreParenBaseCasts();
+        receiver = object->getType()->isPointerType() ? object->getType()->getPointeeType() : object->getType();
+      }
+    const auto *from = owner(s, member->getCXXThisVal(), receiver);
+    if (returnsView) {
+      const MemRegion *view = nullptr;
+      if (auto constructed = call.getReturnValueUnderConstruction()) view = constructed->getAsRegion();
+      if (!view) if (auto lazy = call.getReturnValue().getAs<nonloc::LazyCompoundVal>()) view = lazy->getRegion();
+      if (!from) return s;
+      if (view) return s->set<ContainerOwners>(view->StripCasts(), from);
+      return call.getOriginExpr() ? s->set<ViewResults>(call.getOriginExpr(), from) : s;
+    }
     const auto *buffer = base(call.getReturnValue());
     if (!from || !buffer) return s;
     s = s->set<ContainerOwners>(buffer, from);
@@ -934,6 +967,7 @@ void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, P
     }
     const bool destructor = isa<CXXDestructorCall>(call);
     const MemRegion *self = destructor ? cast<CXXDestructorCall>(call).getCXXThisVal().getAsRegion() : nullptr;
+    if (self) self = self->StripCasts();
     for (auto op : s->get<PendingOps>()) {
       bool match = false;
       for (unsigned i = 0; i < call.getNumArgs(); ++i) match |= overlaps(s, base(call.getArgSVal(i)), op.region);

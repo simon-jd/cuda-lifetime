@@ -31,6 +31,23 @@ void through_view_synchronized(void *device, stream_view stream) {
   copy_span_async<int>(device, std::span<const int>(host), stream);
   cudaStreamSynchronize(stream.value());
 }
+// A derived container through a view whose data() is inherited.
+void derived_container_inherited_data(void *device, stream_view stream) {
+  host_vector<char> buffer(64);
+  copy_host_span_async<char>(device, cudf::host_span<const char>(buffer), stream);
+  return; // CL2 warning
+}
+// The view comes from the container's conversion operator, as in cuDF.
+void view_from_conversion(void *device, stream_view stream) {
+  host_vector<char> buffer(64);
+  copy_host_span_async<char>(device, buffer, stream);
+  return; // CL2 warning
+}
+void derived_container_synchronized(void *device, stream_view stream) {
+  host_vector<char> buffer(64);
+  copy_host_span_async<char>(device, cudf::host_span<const char>(buffer), stream);
+  cudaStreamSynchronize(stream.value());
+}
 // A view of memory the caller owns ends nothing.
 void view_of_caller_memory(void *device, int *values, stream_view stream) {
   copy_span_async<int>(device, std::span<const int>(values, 4), stream);

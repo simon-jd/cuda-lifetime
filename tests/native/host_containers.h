@@ -27,6 +27,25 @@ public:
   unsigned long size() const;
 };
 }
+// Like cuDF's host_vector and host_span: a derived container, and a view
+// whose data() is inherited from a base class.
+template <class T> struct span_base {
+  T *data_;
+  T *data() const;
+  T *begin() const;
+  unsigned long size() const;
+};
+namespace cudf {
+template <class T> struct host_span : span_base<T> {
+  template <class C> host_span(C &values);
+};
+}
+template <class T> class host_vector : public std::vector<T> {
+public:
+  explicit host_vector(unsigned long count);
+  ~host_vector();
+  operator cudf::host_span<const T>() const { return cudf::host_span<const T>(*this); }
+};
 struct stream_view {
   cudaStream_t stream_;
   cudaStream_t value() const { return stream_; }
@@ -45,5 +64,8 @@ void copy_and_wait(void *dst, const void *src, unsigned long bytes, stream_view 
 void copy_one(void *dst, const void *src, unsigned long count, stream_view stream);
 // Like cuDF's cuda_memcpy_async(device_span, host_span, stream).
 template <class T> void copy_span_async(void *dst, std::span<const T> src, stream_view stream) {
+  cudaMemcpyAsync(dst, src.data(), src.size() * sizeof(T), 4, stream.value());
+}
+template <class T> void copy_host_span_async(void *dst, cudf::host_span<const T> src, stream_view stream) {
   cudaMemcpyAsync(dst, src.data(), src.size() * sizeof(T), 4, stream.value());
 }
