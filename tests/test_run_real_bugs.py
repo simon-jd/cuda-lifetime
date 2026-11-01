@@ -1,9 +1,10 @@
 """Matching and path handling of scripts/run_real_bugs.py; no analyzer is run."""
 import json
 from pathlib import Path
+import tempfile
 import unittest
 
-from scripts.run_real_bugs import ROOT, expand, on_lines, relative
+from scripts.run_real_bugs import ROOT, expand, on_lines, overlay, relative
 
 
 class RealBugMatchingTests(unittest.TestCase):
@@ -37,6 +38,38 @@ class RealBugMatchingTests(unittest.TestCase):
         for case in cases:
             self.assertTrue(case["siteLines"] and all(type(n) is int for n in case["siteLines"]), case["id"])
             self.assertEqual(case["inRuleScope"], case["rule"] is not None, case["id"])
+
+
+class HeaderPatchTests(unittest.TestCase):
+    PATCH = {"header": "cpp/include/lib/a.hpp", "includeRoot": "cpp/include",
+             "pattern": "^(\\s*)constexpr int f<", "replacement": "\\1HD constexpr int f<"}
+
+    def test_patched_copy_is_searched_first(self):
+        with tempfile.TemporaryDirectory() as tree, tempfile.TemporaryDirectory() as temp:
+            header = Path(tree) / "cpp/include/lib/a.hpp"
+            header.parent.mkdir(parents=True)
+            header.write_text("template <> constexpr int f<int>();\n  constexpr int f<char>();\n")
+            flags = overlay(temp, Path(tree), [self.PATCH])
+            self.assertEqual(flags, [f"-I{temp}/overlay0"])
+            self.assertEqual((Path(temp) / "overlay0/lib/a.hpp").read_text(),
+                             "template <> constexpr int f<int>();\n  HD constexpr int f<char>();\n")
+            self.assertIn("f<char>", header.read_text())  # the project tree is unchanged
+
+    def test_a_patch_that_matches_nothing_stops_the_run(self):
+        with tempfile.TemporaryDirectory() as tree, tempfile.TemporaryDirectory() as temp:
+            header = Path(tree) / "cpp/include/lib/a.hpp"
+            header.parent.mkdir(parents=True)
+            header.write_text("int g();\n")
+            with self.assertRaises(SystemExit):
+                overlay(temp, Path(tree), [self.PATCH])
+
+    def test_commands_name_known_patches_and_existing_generated_headers(self):
+        commands = json.loads((ROOT / "corpus/real-bugs/commands.json").read_text())
+        for case in commands["cases"].values():
+            for name in case.get("headerPatches", []):
+                self.assertIn(name, commands["headerPatches"])
+            for name in case.get("generatedHeaders", []):
+                self.assertTrue((ROOT / "corpus/real-bugs/generated" / name).is_dir(), name)
 
 
 if __name__ == "__main__":

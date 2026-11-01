@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "description": "Compiler flags for each case's translation unit after the language selection; {tree} is the checked-out revision, {root} this repository, {cuda} and {gcc} the --cuda-path and --gcc-toolchain arguments. cuDF cases use RMM checked out at its last commit before the cuDF revision ({rmm}); cuDF and RMM cases take CCCL, NVTX and the RMM logger from the RMM 26.10 build of scripts/prepare_targets.py.",
+  "description": "Compiler flags for each case's translation unit after the language selection; {tree} is the checked-out revision, {root} this repository, {cuda} and {gcc} the --cuda-path and --gcc-toolchain arguments. cuDF cases use RMM checked out at its last commit before the cuDF revision ({rmm}); cuDF and RMM cases take CCCL, NVTX and the RMM logger from the RMM 26.10 build of scripts/prepare_targets.py. headerPatches are textual fixes applied to a copy of a project header searched first; generatedHeaders are directories under corpus/real-bugs/generated searched first; summarize lists helper translation units summarized, in order, with cuda-lifetime-native --summarize at the same revision, whose models are loaded for the analysis.",
   "common": [
     "--gcc-toolchain={gcc}"
   ],
@@ -32,7 +32,24 @@
         "rmm": {
           "repository": "https://github.com/rapidsai/rmm"
         }
-      }
+      },
+      "headerPatches": [
+        "cudf-base-type-to-id"
+      ],
+      "summarize": [
+        {
+          "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+          "language": "c++"
+        },
+        {
+          "file": "{rmm}/cpp/src/device_buffer.cpp",
+          "language": "c++"
+        },
+        {
+          "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+          "language": "cuda"
+        }
+      ]
     },
     "cudf-device-view-staging": {
       "language": "cuda",
@@ -61,7 +78,24 @@
         "rmm": {
           "repository": "https://github.com/rapidsai/rmm"
         }
-      }
+      },
+      "headerPatches": [
+        "cudf-base-type-to-id"
+      ],
+      "summarize": [
+        {
+          "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+          "language": "c++"
+        },
+        {
+          "file": "{rmm}/cpp/src/device_buffer.cpp",
+          "language": "c++"
+        },
+        {
+          "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+          "language": "cuda"
+        }
+      ]
     },
     "cudf-string-scalar-source": {
       "language": "c++",
@@ -90,7 +124,24 @@
         "rmm": {
           "repository": "https://github.com/rapidsai/rmm"
         }
-      }
+      },
+      "headerPatches": [
+        "cudf-base-type-to-id"
+      ],
+      "summarize": [
+        {
+          "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+          "language": "c++"
+        },
+        {
+          "file": "{rmm}/cpp/src/device_buffer.cpp",
+          "language": "c++"
+        },
+        {
+          "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+          "language": "cuda"
+        }
+      ]
     },
     "cudf-parquet-string-offsets": {
       "language": "c++",
@@ -119,7 +170,24 @@
         "rmm": {
           "repository": "https://github.com/rapidsai/rmm"
         }
-      }
+      },
+      "headerPatches": [
+        "cudf-base-type-to-id"
+      ],
+      "summarize": [
+        {
+          "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+          "language": "c++"
+        },
+        {
+          "file": "{rmm}/cpp/src/device_buffer.cpp",
+          "language": "c++"
+        },
+        {
+          "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+          "language": "cuda"
+        }
+      ]
     },
     "cudf-regex-program": {
       "language": "c++",
@@ -148,7 +216,24 @@
         "rmm": {
           "repository": "https://github.com/rapidsai/rmm"
         }
-      }
+      },
+      "headerPatches": [
+        "cudf-base-type-to-id"
+      ],
+      "summarize": [
+        {
+          "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+          "language": "c++"
+        },
+        {
+          "file": "{rmm}/cpp/src/device_buffer.cpp",
+          "language": "c++"
+        },
+        {
+          "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+          "language": "cuda"
+        }
+      ]
     },
     "cudf-arrow-stream-chunk": {
       "language": "cuda",
@@ -177,7 +262,24 @@
         "rmm": {
           "repository": "https://github.com/rapidsai/rmm"
         }
-      }
+      },
+      "headerPatches": [
+        "cudf-base-type-to-id"
+      ],
+      "summarize": [
+        {
+          "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+          "language": "c++"
+        },
+        {
+          "file": "{rmm}/cpp/src/device_buffer.cpp",
+          "language": "c++"
+        },
+        {
+          "file": "{tree}/cpp/src/utilities/cuda_memcpy.cu",
+          "language": "cuda"
+        }
+      ]
     },
     "gpe-staging-slot-reuse": {
       "language": "c++",
@@ -187,6 +289,9 @@
         "-I{tree}/src",
         "-isystem",
         "{cuda}/targets/x86_64-linux/include"
+      ],
+      "generatedHeaders": [
+        "gpe"
       ]
     },
     "rmm-merge-lists-event": {
@@ -254,6 +359,15 @@
         "-isystem",
         "{cuda}/targets/x86_64-linux/include"
       ]
+    }
+  },
+  "headerPatches": {
+    "cudf-base-type-to-id": {
+      "header": "cpp/include/cudf/utilities/type_dispatcher.hpp",
+      "includeRoot": "cpp/include",
+      "pattern": "^(\\s*)constexpr inline type_id base_type_to_id<",
+      "replacement": "\\1CUDF_HOST_DEVICE constexpr inline type_id base_type_to_id<",
+      "reason": "The primary template base_type_to_id is __host__ __device__ and its explicit specializations are plain constexpr. nvcc accepts that; Clang ignores the implicit __host__ __device__ of constexpr when matching a specialization's CUDA target to its template (SemaTemplate.cpp, CUDATargetMismatch) and rejects all of them. The patch gives the specializations the template's attributes; CUDF_HOST_DEVICE is empty outside CUDA mode."
     }
   }
 }

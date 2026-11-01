@@ -14,10 +14,18 @@ lines (found), and whether the fix silences it.
 revisions are checked out as worktrees under --clones/trees. A case may name
 dependencies (for example RMM for cuDF), checked out at their last commit
 before the case revision and substituted as {name} in its flags.
+
+A case may also name header patches (commands.json "headerPatches": a
+project header copied with a textual fix into an overlay directory searched
+first), generated headers (a file under corpus/real-bugs/generated searched
+first), and helper translation units ("summarize"): each is summarized with
+cuda-lifetime-native --summarize at the same revision, in order, and the
+resulting models are loaded when the case's TU is analyzed.
 """
 import argparse
 import json
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 
@@ -48,11 +56,52 @@ def expand(values, names):
     return [value.format(**names) for value in values]
 
 
-def analyze(native, source, flags, timeout):
+def overlay(temp, tree, patches):
+    """Copy each patched header into an overlay directory; return -I flags for them."""
+    flags = []
+    for index, patch in enumerate(patches):
+        root = Path(temp) / f"overlay{index}"
+        target = root / Path(patch["header"]).relative_to(patch["includeRoot"])
+        target.parent.mkdir(parents=True, exist_ok=True)
+        text, count = re.subn(patch["pattern"], patch["replacement"], (tree / patch["header"]).read_text(), flags=re.M)
+        if not count:
+            raise SystemExit(f"header patch {patch['header']} matched nothing in {tree}")
+        target.write_text(text)
+        flags.append(f"-I{root}")
+    return flags
+
+
+def summarize(native, helpers, names, temp, prefix, timeout):
+    """Summarize helper TUs in order into one model directory; return it and a record per helper."""
+    models = Path(temp) / "models"
+    models.mkdir()
+    records = []
+    for index, helper in enumerate(helpers):
+        source = Path(helper["file"].format(**names))
+        record = {"file": helper["file"]}
+        if not source.exists():
+            records.append({**record, "status": "absent at this revision"})
+            continue
+        out = Path(temp) / f"summary{index}.json"
+        language = CUDA if helper["language"] == "cuda" else ["-x", helper["language"]]
+        done = subprocess.run([native, str(source), "--summarize", str(out), "--model", str(models), "--",
+                               *expand(language, names), *prefix], capture_output=True, text=True, timeout=timeout)
+        if done.returncode or not out.exists():
+            errors = [line for line in done.stderr.splitlines() if "error:" in line]
+            records.append({**record, "status": "not parsed", "errors": errors[:3]})
+            continue
+        generated = json.loads(out.read_text())
+        (models / out.name).write_text(out.read_text())
+        records.append({**record, "status": "summarized", "models": sorted(m["function"] for m in generated["models"])})
+    return models, records
+
+
+def analyze(native, source, flags, timeout, models=None):
     with tempfile.TemporaryDirectory() as temp:
         sarif, coverage = Path(temp) / "out.sarif", Path(temp) / "coverage.json"
         try:
-            done = subprocess.run([native, str(source), "--sarif", str(sarif), "--coverage", str(coverage), "--", *flags],
+            done = subprocess.run([native, str(source), "--sarif", str(sarif), "--coverage", str(coverage),
+                                   *(["--model", str(models)] if models else []), "--", *flags],
                                   capture_output=True, text=True, timeout=timeout)
         except subprocess.TimeoutExpired:
             return {"parsed": False, "status": "timeout", "errors": [f"no result within {timeout} s"]}
@@ -80,7 +129,8 @@ def analyze(native, source, flags, timeout):
                       functionsOverBudget=len(cov.get("budgetExhausted", [])),
                       overBudgetFunctions=sorted(entry.get("function", "") for entry in cov.get("budgetExhausted", [])),
                       coverageGaps=sorted({entry["reason"] for entry in cov.get("coverageUnknown", [])}),
-                      unmodeledCudaCalls=sorted(cov.get("unmodeledCudaCalls", {})), seconds=cov.get("seconds"))
+                      unmodeledCudaCalls=sorted(cov.get("unmodeledCudaCalls", {})), seconds=cov.get("seconds"),
+                      assumptions=[a for a in cov.get("assumptions", []) if a.startswith("user model: ")])
         return record
 
 
@@ -104,8 +154,9 @@ def main():
     parser.add_argument("--gcc-toolchain", default="/usr")
     parser.add_argument("--timeout", type=float, default=900)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--only", action="append", default=[], help="analyze only this case (repeatable)")
     args = parser.parse_args()
-    cases = json.loads(args.cases.read_text())["cases"]
+    cases = [case for case in json.loads(args.cases.read_text())["cases"] if not args.only or case["id"] in args.only]
     commands = json.loads(args.commands.read_text())
     records = []
     for case in cases:
@@ -119,9 +170,16 @@ def main():
             for key, spec in command.get("dependencies", {}).items():
                 dep_tree, pinned[key] = dependency(args.clones, spec, args.clones / case["repository"].split("/")[-1], revision)
                 names[key] = str(dep_tree)
-            flags = expand([*(CUDA if command["language"] == "cuda" else ["-x", command["language"]]),
-                            *commands["common"], *command["flags"]], names)
-            record = analyze(args.native, tree / source, flags, args.timeout)
+            with tempfile.TemporaryDirectory() as temp:
+                prefix = overlay(temp, tree, [commands["headerPatches"][name] for name in command.get("headerPatches", [])])
+                prefix += [f"-I{ROOT / 'corpus/real-bugs/generated' / name}" for name in command.get("generatedHeaders", [])]
+                prefix += expand([*commands["common"], *command["flags"]], names)
+                models, helpers = summarize(args.native, command.get("summarize", []), names, temp, prefix, args.timeout) \
+                    if command.get("summarize") else (None, [])
+                flags = [*expand(CUDA if command["language"] == "cuda" else ["-x", command["language"]], names), *prefix]
+                record = analyze(args.native, tree / source, flags, args.timeout, models)
+            if helpers:
+                record["summaries"] = helpers
             if pinned:
                 record["dependencies"] = pinned
             for key, path in names.items():
