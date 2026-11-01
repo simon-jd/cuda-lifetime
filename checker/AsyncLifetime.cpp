@@ -422,6 +422,13 @@ public:
   // composed from the CUDA calls, models and other bodies it calls. They are
   // flow-insensitive "may" summaries: a copy on any path counts, and a body
   // that synchronizes anything gets none, since it may complete its copies.
+  // A wrapper whose only data member is a handle (cuda_stream_view, stream_ref).
+  static bool handleRecord(QualType type) {
+    if (!type.isNull() && type->isPointerType()) type = type->getPointeeType();
+    const auto *record = type.isNull() ? nullptr : type.getNonReferenceType()->getAsCXXRecordDecl();
+    if (!record || !(record = record->getDefinition()) || record->getNumBases() || record->isPolymorphic()) return false;
+    return std::distance(record->field_begin(), record->field_end()) == 1;
+  }
   struct Summary { bool done = false, synchronizes = false, copies = false; std::optional<cudalifetime::Model> copy, sync; };
   struct Forwarded {
     // level -1: the address of the parameter; 0: its value; 1: an element of
@@ -441,7 +448,8 @@ public:
       if (const auto *temp = dyn_cast<MaterializeTemporaryExpr>(e)) { e = temp->getSubExpr(); continue; }
       if (handle) {
         if (const auto *construct = dyn_cast<CXXConstructExpr>(e); construct && construct->getNumArgs() == 1) { e = construct->getArg(0); continue; }
-        if (const auto *member = dyn_cast<CXXMemberCallExpr>(e); member && !member->getNumArgs() && member->getImplicitObjectArgument()) {
+        if (const auto *member = dyn_cast<CXXMemberCallExpr>(e); member && !member->getNumArgs() && member->getImplicitObjectArgument() &&
+            handleRecord(member->getImplicitObjectArgument()->getType())) {
           e = member->getImplicitObjectArgument(); continue;
         }
       }
@@ -452,7 +460,7 @@ public:
     if (handle) {
       const Expr *object = e;
       if (const auto *field = dyn_cast<MemberExpr>(e)) object = field->getBase()->IgnoreParenImpCasts();
-      if (isa<CXXThisExpr>(object)) { out.receiver = true; return out; }
+      if (isa<CXXThisExpr>(object)) { out.receiver = handleRecord(object->getType()); return out; }
     }
     auto index = [&](const ValueDecl *decl) -> int {
       const auto *param = dyn_cast_or_null<ParmVarDecl>(decl);
@@ -581,11 +589,11 @@ public:
         Forwarded f;
         if (e == "sync_stream") {
           if (auto constant = m.constants.find("stream"); constant != m.constants.end()) { f.constant = true; f.value = constant->second; }
-          else if (m.receiver.count("stream")) f = Forwarded();  // the callee's receiver is not one of ours
-          else if (auto it = m.args.find("stream"); it != m.args.end() && it->second < call->getNumArgs())
+          else if (m.receiver.count("stream")) {
+            if (const auto *member = dyn_cast<CXXMemberCallExpr>(call); member && member->getImplicitObjectArgument())
+              f = forwarded(member->getImplicitObjectArgument(), definition, true);
+          } else if (auto it = m.args.find("stream"); it != m.args.end() && it->second < call->getNumArgs())
             f = forwarded(call->getArg(it->second), definition, true);
-          if (const auto *member = dyn_cast<CXXMemberCallExpr>(call); member && m.receiver.count("stream"))
-            f = forwarded(member->getImplicitObjectArgument(), definition, true);
           if (f.param >= 0 && f.level == 0) sync.args["stream"] = static_cast<unsigned>(f.param);
           else if (f.receiver) sync.receiver.insert("stream");
           else if (f.constant) sync.constants["stream"] = f.value;
@@ -598,7 +606,10 @@ public:
       for (const char *key : {"dst", "src", "size", "kind", "stream", "count"}) {
         Forwarded f;
         if (auto constant = m.constants.find(key); constant != m.constants.end()) { f.constant = true; f.value = constant->second; }
-        else if (auto it = m.args.find(key); it != m.args.end() && it->second < call->getNumArgs()) {
+        else if (m.receiver.count(key)) {
+          if (const auto *member = dyn_cast<CXXMemberCallExpr>(call); member && member->getImplicitObjectArgument())
+            f = forwarded(member->getImplicitObjectArgument(), definition, true);
+        } else if (auto it = m.args.find(key); it != m.args.end() && it->second < call->getNumArgs()) {
           f = forwarded(call->getArg(it->second), definition, std::string(key) == "stream");
           if (m.elements.count(key)) {
             // The callee's operand is the first element of this argument.
@@ -609,6 +620,7 @@ public:
         if (f.param >= 0 && (f.level < 0 || f.level > 1)) f = Forwarded();
         if (f.param >= 0 && f.level == 1) copy.elements.insert(key);
         if (f.param >= 0) copy.args[key] = static_cast<unsigned>(f.param);
+        else if (f.receiver && std::string(key) == "stream") copy.receiver.insert(key);
         else if (f.constant && (std::string(key) == "kind" || std::string(key) == "stream")) copy.constants[key] = f.value;
         else if (f.constant && std::string(key) == "size" && f.value >= 0) copy.constants[key] = f.value;
         forwardsBuffer |= (std::string(key) == "dst" || std::string(key) == "src") && f.param >= 0;
@@ -623,7 +635,7 @@ public:
     auto withoutCount = [](cudalifetime::Model m) { m.args.erase("count"); m.constants.erase("count"); return m; };
     for (const auto &copy : copies) {
       auto a = withoutCount(copy), b = withoutCount(copies[0]);
-      agree &= a.args == b.args && a.constants == b.constants && a.elements == b.elements;
+      agree &= a.args == b.args && a.constants == b.constants && a.elements == b.elements && a.receiver == b.receiver;
     }
     if (agree && !result.synchronizes) {
       result.copy = copies[0];

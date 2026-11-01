@@ -44,3 +44,6 @@ void stream_view::synchronize() const {
 void maybe_sync(stream_view stream, bool wait) {
   if (wait) cudaStreamSynchronize(stream.value());
 }
+void device_buffer::copy_async(const void *src, unsigned long bytes) {
+  cudaMemcpyAsync(data_, src, bytes, 4, stream().value());
+}
