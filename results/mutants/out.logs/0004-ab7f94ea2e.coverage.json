@@ -29,13 +29,13 @@
   "llvmVersion": "23.1.3",
   "maxNodes": 225000,
   "modeledCallVisits": 169,
-  "peakRssKiB": 183944,
+  "peakRssKiB": 187640,
   "pendingArgumentUses": 0,
   "pendingMemberCallUses": 0,
   "pendingPointerEscapes": 0,
   "pointerEscapes": 22944,
   "schemaVersion": 1,
-  "seconds": 2.281210368,
+  "seconds": 2.173402286,
   "tus": {
     "analyzed": [
       "corpus/mutants/generated/launch_on_legacy_stream.cu"

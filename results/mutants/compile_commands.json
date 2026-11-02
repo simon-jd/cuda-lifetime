@@ -11,6 +11,8 @@
       "--cuda-path=/usr/local/cuda-13.2",
       "--offload-arch=sm_89",
       "-I.deps/cuda-samples-13.2/Common",
+      "-include",
+      "corpus/mutants/include/host_max.h",
       "-c",
       "corpus/mutants/originals/asyncAPI.cu"
     ]
@@ -27,6 +29,8 @@
       "--cuda-path=/usr/local/cuda-13.2",
       "--offload-arch=sm_89",
       "-I.deps/cuda-samples-13.2/Common",
+      "-include",
+      "corpus/mutants/include/host_max.h",
       "-c",
       "corpus/mutants/originals/simpleMultiCopy.cu"
     ]
@@ -43,6 +47,8 @@
       "--cuda-path=/usr/local/cuda-13.2",
       "--offload-arch=sm_89",
       "-I.deps/cuda-samples-13.2/Common",
+      "-include",
+      "corpus/mutants/include/host_max.h",
       "-c",
       "corpus/mutants/originals/streamOrderedAllocation.cu"
     ]
@@ -59,6 +65,8 @@
       "--cuda-path=/usr/local/cuda-13.2",
       "--offload-arch=sm_89",
       "-I.deps/cuda-samples-13.2/Common",
+      "-include",
+      "corpus/mutants/include/host_max.h",
       "-c",
       "corpus/mutants/generated/delete_final_sync.cu"
     ]
@@ -75,6 +83,8 @@
       "--cuda-path=/usr/local/cuda-13.2",
       "--offload-arch=sm_89",
       "-I.deps/cuda-samples-13.2/Common",
+      "-include",
+      "corpus/mutants/include/host_max.h",
       "-c",
       "corpus/mutants/generated/launch_on_legacy_stream.cu"
     ]
@@ -91,6 +101,8 @@
       "--cuda-path=/usr/local/cuda-13.2",
       "--offload-arch=sm_89",
       "-I.deps/cuda-samples-13.2/Common",
+      "-include",
+      "corpus/mutants/include/host_max.h",
       "-c",
       "corpus/mutants/generated/pageable_synchronized_control.cu"
     ]
@@ -107,6 +119,8 @@
       "--cuda-path=/usr/local/cuda-13.2",
       "--offload-arch=sm_89",
       "-I.deps/cuda-samples-13.2/Common",
+      "-include",
+      "corpus/mutants/include/host_max.h",
       "-c",
       "corpus/mutants/generated/record_before_launch.cu"
     ]
@@ -123,6 +137,8 @@
       "--cuda-path=/usr/local/cuda-13.2",
       "--offload-arch=sm_89",
       "-I.deps/cuda-samples-13.2/Common",
+      "-include",
+      "corpus/mutants/include/host_max.h",
       "-c",
       "corpus/mutants/generated/sync_after_host_read.cu"
     ]

@@ -56,7 +56,7 @@ published `out.sarif` and `coverage.json` against the labels again with
 and the freeze's rule hashes describe the 0.1.0 code, so this check needs a
 copy of the labels with another `split` value.)
 
-## `mutants/`: the cuda-samples mutants with version 0.4.0
+## `mutants/`: the cuda-samples mutants with version 0.5.0
 
 The commands, SARIF, coverage and per-TU logs of analyzing the three original
 cuda-samples files and five mutated variants in `corpus/mutants/`, and

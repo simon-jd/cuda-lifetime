@@ -57,11 +57,13 @@ remains the holdout result.
 
 **Mutants** (`corpus/mutants/`): five variants of three whole cuda-samples
 files, each with a predetermined expectation (four seeded defects and one
-negative control). With version 0.4.0 the seeded CL3 defect in
-`launch_on_legacy_stream` is found; the three variants of `simpleMultiCopy.cu`
-do not parse under host-only Clang (`max` overload errors), so their defects
-are unverified misses; and the control has no CL1 but cannot be credited
-because `main` exhausted the node budget (`results/mutants/`,
+negative control). With version 0.5.0, and a forced header that gives host
+code the `max(float, float)` overload nvcc's headers have, all eight files
+parse. The seeded CL3 defect in `launch_on_legacy_stream` is found; the three
+variants of `simpleMultiCopy.cu` are missed because their copies are queued on
+elements of a global stream array, which the checker cannot identify, and
+three functions exhaust the node budget; the control has no CL1 but cannot be
+credited because `main` exhausted the node budget (`results/mutants/`,
 [corpus/mutants/README.md](../corpus/mutants/README.md)). No mutation score is
 claimed.
 

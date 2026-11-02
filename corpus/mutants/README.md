@@ -57,32 +57,40 @@ The hashes in `manifest.json` cover the files as published here; they were
 recomputed when the marker comments were renamed for publication, which
 changed no code and no line numbers.
 
-## Results of version 0.4.0
+## Results of version 0.5.0
 
 `results/mutants/` has the analysis of the three originals and five variants
-with version 0.4.0 (SARIF, coverage, per-TU logs) and the oracle comparison:
+with version 0.5.0 (SARIF, coverage, per-TU logs) and the oracle comparison.
+Version 0.4.0's run failed to parse `simpleMultiCopy.cu` and its three
+variants: Clang's CUDA headers declare `max(float, float)` for the device
+only, where nvcc's `crt/math_functions.hpp` declares it for host and device,
+and the sample calls it from host code (lines 148, 243 and 245).
+`include/host_max.h` adds the host overloads nvcc has; every command,
+originals and variants alike, force-includes it
+(`results/mutants/compile_commands.json`). All eight files now parse:
 
 | Variant | Expected | Result | Why |
 |---|---|---|---|
-| `delete_final_sync` | CL1 error, line 361 | unverified miss | the file does not parse |
-| `sync_after_host_read` | CL1 error, line 362 | unverified miss | the file does not parse |
-| `record_before_launch` | CL4 warning, line 214 | unverified miss | the file does not parse |
+| `delete_final_sync` | CL1 error, line 361 | unverified miss | the copies are queued on `stream[i]`, a global array the checker cannot resolve to a stream, so they are not modeled (the coverage report counts 3 `cudaMemcpyAsync` and 2 launch visits with an unknown stream); `main`, `test` and `init` exhaust the node budget |
+| `sync_after_host_read` | CL1 error, line 362 | unverified miss | as above |
+| `record_before_launch` | CL4 warning, line 214 | unverified miss | as above; the `cudaEventRecord` is also on an unknown stream |
 | `launch_on_legacy_stream` | CL3 error, line 83 | found | coverage incomplete: two functions exhausted the node budget |
 | `pageable_synchronized_control` | no CL1 | none reported, unverified | coverage incomplete: `main` exhausted the node budget |
 
-The three misses are parse failures, not checker misses: `simpleMultiCopy.cu`
-and the three variants made from it fail under host-only Clang with the same
-`no matching function for call to 'max'` errors at lines 148, 243 and 245
-(`results/mutants/out.logs/`), the error that also fails `simpleMultiCopy.cu`
-in the cuda-samples scan. For `launch_on_legacy_stream` the checker also
-reports the three `cudaFreeAsync` calls that follow the misplaced launch (lines
-85, 86 and 88), which the oracle lists as possible additional findings. The
-two other originals produce no findings. Because no variant has complete
-coverage, none of this is a passing mutation score, and none is claimed.
+The three simpleMultiCopy misses are now analyzed misses rather than parse
+failures: the checker identifies a stream from a handle value it has seen
+created or passed, and an element of a global array indexed by a loop
+variable is neither. For `launch_on_legacy_stream` the checker also reports
+the three `cudaFreeAsync` calls that follow the misplaced launch (lines 85, 86
+and 88), which the oracle lists as possible additional findings. The
+originals produce no findings. No variant has complete coverage, so none of
+this is a passing mutation score, and none is claimed.
 
-The first run of these variants, with an earlier version of the checker, had
-the same three parse failures; its fourth miss was a crash of the native tool
-on `launch_on_legacy_stream`, and it reported CL1 on the pageable control. Its
-outputs are not included. The predetermined oracle was not changed after that
-run; the only later change to the variants is the marker-comment rename noted
-above.
+Version 0.4.0 gave the same results for `launch_on_legacy_stream` and the
+control, with the three simpleMultiCopy files failing to parse. The first
+run of these variants, with an earlier version of the checker, had the same
+three parse failures; its fourth miss was a crash of the native tool on
+`launch_on_legacy_stream`, and it reported CL1 on the pageable control. Its
+outputs are not included. The predetermined oracle was not changed after
+any run; the only later changes are the marker-comment rename noted above
+and the forced host header.

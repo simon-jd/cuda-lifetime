@@ -8,8 +8,8 @@
     "timeoutSeconds": 180
   },
   "native": {
-    "path": "build-publish/cuda-lifetime-native",
-    "sha256": "841564c7aca475583f72db6a16613bc7cd7a3c2e2c1c0414245ed51b9b59b9f4"
+    "path": "build/cuda-lifetime-native",
+    "sha256": "e669ed4bfb251dd453c1e5ed302113cb880e062fd5570e5cbe2d5a7b5e41ffc6"
   },
   "mutants": [
     {
@@ -19,10 +19,18 @@
       "coverageLimitations": [
         "TU not analyzed",
         "aggregate coverage incomplete",
-        "analysis failed",
-        "missing per-TU telemetry"
+        "budget exhausted",
+        "coverage unknown",
+        "native budget exhausted",
+        "native coverage unknown",
+        "unmodeled CUDA calls"
       ],
-      "unmodeledCudaCalls": {},
+      "unmodeledCudaCalls": {
+        "cudaEventRecord:unknown-stream": 1,
+        "cudaMemcpyAsync:unknown-stream": 3,
+        "kernel-launch:unknown-pointer-operand": 2,
+        "kernel-launch:unknown-stream": 2
+      },
       "sites": [
         {
           "ruleId": "CL1",
@@ -40,10 +48,18 @@
       "baselineCoverageLimitations": [
         "TU not analyzed",
         "aggregate coverage incomplete",
-        "analysis failed",
-        "missing per-TU telemetry"
+        "budget exhausted",
+        "coverage unknown",
+        "native budget exhausted",
+        "native coverage unknown",
+        "unmodeled CUDA calls"
       ],
-      "baselineUnmodeledCudaCalls": {},
+      "baselineUnmodeledCudaCalls": {
+        "cudaEventRecord:unknown-stream": 1,
+        "cudaMemcpyAsync:unknown-stream": 3,
+        "kernel-launch:unknown-pointer-operand": 2,
+        "kernel-launch:unknown-stream": 2
+      },
       "oracleLimitations": [
         "Pinned allocation evidence is stored in global arrays initialized in main; CSA may not retain it through calls and loops.",
         "processWithStreams executes a loop and is called twice; bounded analysis may miss the final outstanding transfer.",
@@ -57,10 +73,18 @@
       "coverageLimitations": [
         "TU not analyzed",
         "aggregate coverage incomplete",
-        "analysis failed",
-        "missing per-TU telemetry"
+        "budget exhausted",
+        "coverage unknown",
+        "native budget exhausted",
+        "native coverage unknown",
+        "unmodeled CUDA calls"
       ],
-      "unmodeledCudaCalls": {},
+      "unmodeledCudaCalls": {
+        "cudaEventRecord:unknown-stream": 1,
+        "cudaMemcpyAsync:unknown-stream": 3,
+        "kernel-launch:unknown-pointer-operand": 2,
+        "kernel-launch:unknown-stream": 2
+      },
       "sites": [
         {
           "ruleId": "CL1",
@@ -78,10 +102,18 @@
       "baselineCoverageLimitations": [
         "TU not analyzed",
         "aggregate coverage incomplete",
-        "analysis failed",
-        "missing per-TU telemetry"
+        "budget exhausted",
+        "coverage unknown",
+        "native budget exhausted",
+        "native coverage unknown",
+        "unmodeled CUDA calls"
       ],
-      "baselineUnmodeledCudaCalls": {},
+      "baselineUnmodeledCudaCalls": {
+        "cudaEventRecord:unknown-stream": 1,
+        "cudaMemcpyAsync:unknown-stream": 3,
+        "kernel-launch:unknown-pointer-operand": 2,
+        "kernel-launch:unknown-stream": 2
+      },
       "oracleLimitations": [
         "Pinned allocation evidence is stored in global arrays initialized in main; CSA may not retain it through calls and loops.",
         "processWithStreams executes a loop and is called twice; bounded analysis may miss the final outstanding transfer.",
@@ -95,10 +127,18 @@
       "coverageLimitations": [
         "TU not analyzed",
         "aggregate coverage incomplete",
-        "analysis failed",
-        "missing per-TU telemetry"
+        "budget exhausted",
+        "coverage unknown",
+        "native budget exhausted",
+        "native coverage unknown",
+        "unmodeled CUDA calls"
       ],
-      "unmodeledCudaCalls": {},
+      "unmodeledCudaCalls": {
+        "cudaEventRecord:unknown-stream": 1,
+        "cudaMemcpyAsync:unknown-stream": 3,
+        "kernel-launch:unknown-pointer-operand": 2,
+        "kernel-launch:unknown-stream": 2
+      },
       "sites": [
         {
           "ruleId": "CL4",
@@ -116,10 +156,18 @@
       "baselineCoverageLimitations": [
         "TU not analyzed",
         "aggregate coverage incomplete",
-        "analysis failed",
-        "missing per-TU telemetry"
+        "budget exhausted",
+        "coverage unknown",
+        "native budget exhausted",
+        "native coverage unknown",
+        "unmodeled CUDA calls"
       ],
-      "baselineUnmodeledCudaCalls": {},
+      "baselineUnmodeledCudaCalls": {
+        "cudaEventRecord:unknown-stream": 1,
+        "cudaMemcpyAsync:unknown-stream": 3,
+        "kernel-launch:unknown-pointer-operand": 2,
+        "kernel-launch:unknown-stream": 2
+      },
       "oracleLimitations": [
         "A standalone stale event wait is a legal API call and only a contract warning.",
         "Earlier setup and loops may exceed the analyzer budget before this site."
