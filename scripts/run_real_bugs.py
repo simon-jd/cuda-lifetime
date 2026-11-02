@@ -16,8 +16,9 @@ dependencies (for example RMM for cuDF), checked out at their last commit
 before the case revision and substituted as {name} in its flags.
 
 A case may also name header patches (commands.json "headerPatches": a
-project header copied with a textual fix into an overlay directory searched
-first), generated headers (a directory under the generated/ directory next
+project header copied with textual fixes, one "pattern"/"replacement" or a
+list of "edits", into an overlay directory searched first, at "output" if
+given), generated headers (a directory under the generated/ directory next
 to the commands file, searched
 first), and helper translation units ("summarize"): each is summarized with
 cuda-lifetime-native --summarize at the same revision, in order, and the
@@ -28,6 +29,8 @@ the same translation units with the same flags (no summaries): Clang's stock
 static analyzer (clang++ --analyze, SARIF output) or clang-tidy with the
 clang-analyzer-* and bugprone-* checks (headers included). A baseline finds a case when any of
 its diagnostics, whatever the check, is on a site line, as for cuda-lifetime.
+--tool syntax only checks that each translation unit compiles (clang++
+-fsyntax-only), for writing a case's flags without running an analyzer.
 """
 import argparse
 import json
@@ -49,12 +52,21 @@ def worktree(clones, repository, revision):
     return tree.resolve()
 
 
-def dependency(clones, spec, clone_of, revision):
-    """A dependency's worktree at its last commit before the case revision's commit date."""
+def dependency(clones, spec, clone_of, revision, tree):
+    """A dependency's worktree at its last commit before the case revision's commit date.
+
+    The commit is taken from the clone's HEAD, or from origin/<branch> when
+    the spec names a "branchFile" in the case tree (RAPIDS_BRANCH: a release
+    branch builds against the dependencies' same release branch). A spec's
+    "commit" pins the dependency instead.
+    """
+    clone = clones / spec["repository"].rstrip("/").split("/")[-1]
+    if spec.get("commit"):
+        return worktree(clones, spec["repository"], spec["commit"]), spec["commit"]
     date = subprocess.run(["git", "-C", str(clone_of), "show", "-s", "--format=%cI", revision],
                           check=True, capture_output=True, text=True).stdout.strip()
-    clone = clones / spec["repository"].rstrip("/").split("/")[-1]
-    commit = subprocess.run(["git", "-C", str(clone), "rev-list", "-1", "--before=" + date, "HEAD"],
+    ref = "origin/" + (tree / spec["branchFile"]).read_text().strip() if spec.get("branchFile") else "HEAD"
+    commit = subprocess.run(["git", "-C", str(clone), "rev-list", "-1", "--before=" + date, ref],
                             check=True, capture_output=True, text=True).stdout.strip()
     return worktree(clones, spec["repository"], commit), commit
 
@@ -63,16 +75,25 @@ def expand(values, names):
     return [value.format(**names) for value in values]
 
 
-def overlay(temp, tree, patches):
-    """Copy each patched header into an overlay directory; return -I flags for them."""
+def overlay(temp, tree, patches, names=None):
+    """Copy each patched header into an overlay directory; return -I flags for them.
+
+    A patch with "in" takes its header from that dependency's tree (a key of names).
+    """
     flags = []
     for index, patch in enumerate(patches):
         root = Path(temp) / f"overlay{index}"
-        target = root / Path(patch["header"]).relative_to(patch["includeRoot"])
+        # "output" names the copy when it differs from the header's own path
+        # (a header the build generates from a template, such as nccl.h.in).
+        target = root / patch.get("output", Path(patch["header"]).relative_to(patch["includeRoot"]))
         target.parent.mkdir(parents=True, exist_ok=True)
-        text, count = re.subn(patch["pattern"], patch["replacement"], (tree / patch["header"]).read_text(), flags=re.M)
-        if not count:
-            raise SystemExit(f"header patch {patch['header']} matched nothing in {tree}")
+        source = Path(names[patch["in"]]) if patch.get("in") else tree
+        text = (source / patch["header"]).read_text()
+        edits = patch.get("edits", [{"pattern": patch.get("pattern"), "replacement": patch.get("replacement")}])
+        for edit in edits:
+            text, count = re.subn(edit["pattern"], edit["replacement"], text, flags=re.M)
+            if not count:
+                raise SystemExit(f"header patch {patch['header']} matched nothing in {source}")
         target.write_text(text)
         flags.append(f"-I{root}")
     return flags
@@ -143,7 +164,8 @@ def baseline(tool, executable, source, flags, timeout):
     """Run Clang's stock analyzer or clang-tidy on one TU; the record has the same fields as analyze's."""
     with tempfile.TemporaryDirectory() as temp:
         sarif = Path(temp) / "out.sarif"
-        command = ([executable, "--analyze", "--analyzer-output", "sarif", "-o", str(sarif), *flags, str(source)]
+        command = ([executable, "-fsyntax-only", *flags, str(source)] if tool == "syntax" else
+                   [executable, "--analyze", "--analyzer-output", "sarif", "-o", str(sarif), *flags, str(source)]
                    if tool == "csa" else
                    [executable, str(source), "--checks=-*,clang-analyzer-*,bugprone-*", "--header-filter=.*", "--quiet", "--", *flags])
         try:
@@ -151,13 +173,13 @@ def baseline(tool, executable, source, flags, timeout):
         except subprocess.TimeoutExpired:
             return {"parsed": False, "status": "timeout", "errors": [f"no result within {timeout} s"]}
         output = done.stdout + done.stderr
-        errors = [line for line in output.splitlines() if ": error:" in line or "Assertion" in line]
+        errors = [line for line in output.splitlines() if "error:" in line or "Assertion" in line]
         parsed = done.returncode == 0 and not errors and (tool != "csa" or sarif.exists())
         record = {"parsed": parsed, "returncode": done.returncode, "errorCount": len(errors), "errors": errors[:3]}
         if done.returncode < 0:
             record["status"] = f"terminated by signal {-done.returncode}"
         if parsed:
-            record["diagnostics"] = sarif_results(sarif) if tool == "csa" else text_results(done.stdout)
+            record["diagnostics"] = sarif_results(sarif) if tool == "csa" else text_results(done.stdout + done.stderr)
         return record
 
 
@@ -204,8 +226,8 @@ def main():
     parser.add_argument("--commands", type=Path, default=ROOT / "corpus/real-bugs/commands.json")
     parser.add_argument("--clones", type=Path, required=True)
     parser.add_argument("--native", help="cuda-lifetime-native, required with --tool cuda-lifetime")
-    parser.add_argument("--tool", choices=("cuda-lifetime", "csa", "clang-tidy"), default="cuda-lifetime")
-    parser.add_argument("--clang", default="clang++", help="the clang++ for --tool csa")
+    parser.add_argument("--tool", choices=("cuda-lifetime", "csa", "clang-tidy", "syntax"), default="cuda-lifetime")
+    parser.add_argument("--clang", default="clang++", help="the clang++ for --tool csa and --tool syntax")
     parser.add_argument("--tidy", default="clang-tidy", help="the clang-tidy for --tool clang-tidy")
     parser.add_argument("--cuda-path", default="/usr/local/cuda-13.2")
     parser.add_argument("--gcc-toolchain", default="/usr")
@@ -215,7 +237,7 @@ def main():
     args = parser.parse_args()
     if args.tool == "cuda-lifetime" and not args.native:
         parser.error("--native is required with --tool cuda-lifetime")
-    executable = {"csa": args.clang, "clang-tidy": args.tidy}.get(args.tool, args.native)
+    executable = {"csa": args.clang, "syntax": args.clang, "clang-tidy": args.tidy}.get(args.tool, args.native)
     version = subprocess.run([executable, "--version"], capture_output=True, text=True).stdout.strip()
     cases = [case for case in json.loads(args.cases.read_text())["cases"] if not args.only or case["id"] in args.only]
     commands = json.loads(args.commands.read_text())
@@ -229,10 +251,10 @@ def main():
             names = {"tree": str(tree), "root": str(ROOT), "cuda": args.cuda_path, "gcc": args.gcc_toolchain}
             pinned = {}
             for key, spec in command.get("dependencies", {}).items():
-                dep_tree, pinned[key] = dependency(args.clones, spec, args.clones / case["repository"].split("/")[-1], revision)
+                dep_tree, pinned[key] = dependency(args.clones, spec, args.clones / case["repository"].split("/")[-1], revision, tree)
                 names[key] = str(dep_tree)
             with tempfile.TemporaryDirectory() as temp:
-                prefix = overlay(temp, tree, [commands["headerPatches"][name] for name in command.get("headerPatches", [])])
+                prefix = overlay(temp, tree, [commands["headerPatches"][name] for name in command.get("headerPatches", [])], names)
                 prefix += [f"-I{args.commands.resolve().parent / 'generated' / name}" for name in command.get("generatedHeaders", [])]
                 prefix += expand([*commands["common"], *command["flags"]], names)
                 models, helpers = summarize(args.native, command.get("summarize", []), names, temp, prefix, args.timeout) \

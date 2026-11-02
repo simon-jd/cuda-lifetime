@@ -68,6 +68,16 @@ class HeaderPatchTests(unittest.TestCase):
                              "template <> constexpr int f<int>();\n  HD constexpr int f<char>();\n")
             self.assertIn("f<char>", header.read_text())  # the project tree is unchanged
 
+    def test_a_template_is_generated_under_its_output_name(self):
+        patch = {"header": "src/lib.h.in", "includeRoot": "src", "output": "lib.h",
+                 "edits": [{"pattern": "\\$\\{lib:Major\\}", "replacement": "2"},
+                           {"pattern": "\\$\\{lib:Minor\\}", "replacement": "28"}]}
+        with tempfile.TemporaryDirectory() as tree, tempfile.TemporaryDirectory() as temp:
+            (Path(tree) / "src").mkdir()
+            (Path(tree) / "src/lib.h.in").write_text("#define MAJOR ${lib:Major}\n#define MINOR ${lib:Minor}\n")
+            self.assertEqual(overlay(temp, Path(tree), [patch]), [f"-I{temp}/overlay0"])
+            self.assertEqual((Path(temp) / "overlay0/lib.h").read_text(), "#define MAJOR 2\n#define MINOR 28\n")
+
     def test_a_patch_that_matches_nothing_stops_the_run(self):
         with tempfile.TemporaryDirectory() as tree, tempfile.TemporaryDirectory() as temp:
             header = Path(tree) / "cpp/include/lib/a.hpp"
