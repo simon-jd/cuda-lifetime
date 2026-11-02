@@ -56,9 +56,12 @@ class BaselineOutputTests(unittest.TestCase):
     def test_source_excerpts_are_not_errors(self):
         output = ("/t/a.cu:3:10: fatal error: 'mpi.h' file not found\n"
                   "   88 | // error: expected\n"
+                  "   79 |   if (const ::testing::AssertionResult gtest_ar = (expression))\n"
+                  "clang++: Sema.cpp:10: void f(): Assertion `x' failed.\n"
                   "error: unable to handle compilation\n"
                   "/t/b.h:9:1: warning: x [bugprone-y]\n")
         self.assertEqual(compiler_errors(output), ["/t/a.cu:3:10: fatal error: 'mpi.h' file not found",
+                                                   "clang++: Sema.cpp:10: void f(): Assertion `x' failed.",
                                                    "error: unable to handle compilation"])
 
 

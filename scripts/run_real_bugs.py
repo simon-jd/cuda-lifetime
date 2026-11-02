@@ -161,13 +161,14 @@ def text_results(output):
 
 
 ERROR = re.compile(r"^(?:\S.*?:\d+:\d+: )?(?:fatal )?error: ")
+ASSERTION = re.compile(r"Assertion `.*' failed")
 # Overrides the projects' own .clang-tidy files (some turn warnings into errors).
 TIDY_CONFIG = '{"Checks": "-*,clang-analyzer-*,bugprone-*", "WarningsAsErrors": ""}'
 
 
 def compiler_errors(output):
     """Compiler error lines, not source excerpts that happen to contain "error:"."""
-    return [line for line in output.splitlines() if ERROR.match(line) or "Assertion" in line]
+    return [line for line in output.splitlines() if ERROR.match(line) or ASSERTION.search(line)]
 
 
 def baseline(tool, executable, source, flags, timeout):
