@@ -79,6 +79,13 @@ The attempt to reach cuDF's `cuda_memcpy_async_impl` with CSA's
 cross-translation-unit analysis instead: the configuration, the 19
 `ExplicitInstantiation` import errors and the importer assertion it ended in.
 
+## `real-bugs/determinism.json`
+
+Three reruns of `cudf-string-scalar-source` with the 0.5.0 build: per run,
+the buggy revision's diagnostic lines and the fixed revision's diagnostic
+count, and whether the runs match each other and `results.json` (they do,
+apart from timings).
+
 ## `real-bugs-heldout/results.json`
 
 The same runner and 0.5.0 build on the held-out cases in

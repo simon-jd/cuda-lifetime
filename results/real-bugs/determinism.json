@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "case": "cudf-string-scalar-source",
+  "purpose": "Rerun the case three times with the 0.5.0 build to check whether the fixed revision's silence is deterministic.",
+  "native": "build/cuda-lifetime-native",
+  "nativeSha256": "e669ed4bfb251dd453c1e5ed302113cb880e062fd5570e5cbe2d5a7b5e41ffc6",
+  "runs": [
+    {
+      "buggyDiagnosticLines": [
+        213,
+        229,
+        288,
+        335
+      ],
+      "fixedDiagnostics": 0,
+      "functionsAnalyzed": [
+        226,
+        226
+      ],
+      "functionsOverBudget": [
+        107,
+        107
+      ],
+      "seconds": [
+        292.814533628,
+        344.113031057
+      ]
+    },
+    {
+      "buggyDiagnosticLines": [
+        213,
+        229,
+        288,
+        335
+      ],
+      "fixedDiagnostics": 0,
+      "functionsAnalyzed": [
+        226,
+        226
+      ],
+      "functionsOverBudget": [
+        107,
+        107
+      ],
+      "seconds": [
+        294.683034208,
+        339.1981901
+      ]
+    },
+    {
+      "buggyDiagnosticLines": [
+        213,
+        229,
+        288,
+        335
+      ],
+      "fixedDiagnostics": 0,
+      "functionsAnalyzed": [
+        226,
+        226
+      ],
+      "functionsOverBudget": [
+        107,
+        107
+      ],
+      "seconds": [
+        299.403893096,
+        341.257293513
+      ]
+    }
+  ],
+  "identicalApartFromSeconds": true,
+  "identicalToResultsJson": true
+}
