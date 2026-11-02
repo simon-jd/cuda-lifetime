@@ -44,6 +44,18 @@ in-scope cases, one does not parse (a missing dependency), one
 exhausts the node budget, and three need what a per-TU, per-path checker
 does not see: the caller's storage, driver API copies across calls, an
 event's role across calls ([docs/evaluation.md](docs/evaluation.md#fixed-bugs-from-public-projects)).
+
+**On 10 held-out fixed bugs it finds 4, and recognizes 2 of the fixes.**
+Ten more bugs of the kinds the rules describe, fixed in NCCL, cuVS, cuML,
+RAFT, cuGraph and Warp, were labelled and committed before 0.5.0 ran on
+them. It reports 4 on a labelled line. Two fixes remove the report; the
+other two synchronize through RAFT's interruptible wait, which calls
+`cudaStreamQuery` through a function pointer the checker does not resolve,
+so the fixed revisions are reported again. Of the six misses, five are in
+functions that exhaust the node budget, several with `cudaMemcpyDefault`
+copies whose direction is unknown, and one does not parse
+([corpus/real-bugs-heldout/README.md](corpus/real-bugs-heldout/README.md)).
+
 compute-sanitizer is a dynamic, device-side tool, so it complements the
 checker rather than serving as a baseline for it: on the same stale-read
 program and five timing-dependent lifetime scenarios it reports the one

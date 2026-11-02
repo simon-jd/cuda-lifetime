@@ -79,6 +79,13 @@ The attempt to reach cuDF's `cuda_memcpy_async_impl` with CSA's
 cross-translation-unit analysis instead: the configuration, the 19
 `ExplicitInstantiation` import errors and the importer assertion it ended in.
 
+## `real-bugs-heldout/results.json`
+
+The same runner and 0.5.0 build on the held-out cases in
+`corpus/real-bugs-heldout/` (`--cases` and `--commands` pointing there):
+one record per case with both revisions' diagnostics, coverage and loaded
+summaries, and the dependency commits used.
+
 ## `real-bugs/parquet-budget.json`
 
 Why `cudf-parquet-string-offsets` is missed: the same TU at 2,000,000 nodes,

@@ -264,6 +264,32 @@ a temporary that end while queued (portability findings, pageable memory).
 [corpus/real-bugs/README.md](../corpus/real-bugs/README.md) lists every case
 with its reason.
 
+### Held-out fixed bugs
+
+`corpus/real-bugs-heldout/` has ten bugs mined after 0.5.0 was released,
+from fix commits not used in its development, all of kinds the rules
+describe (five CL1, four CL2, one CL3; NCCL, cuVS, cuML, RAFT, cuGraph,
+Warp). The labels were committed before any run, then the compile commands
+(from compiler-only syntax checks), then the results of the same 0.5.0
+build (`results/real-bugs-heldout/results.json`):
+
+| | Cases | Found | Fix removes the report | Missed | Not analyzable |
+|---|---:|---:|---:|---:|---:|
+| Held out, within the rules | 10 | 4 | 2 | 5 | 1 |
+| Development set, within the rules | 8 | 3 | 3 | 4 | 1 |
+
+The two found bugs whose fixes are not recognized synchronize through
+`raft::interruptible::synchronize`, which passes `cudaStreamQuery` to a
+helper as a function pointer; the checker does not resolve the indirect
+call, so the fixed revisions are reported again, false positives. The five
+misses are in functions that exhaust the node budget (cuVS's `serialize`
+and test bodies, cuML's `TSNE_fit`, RAFT's MST test, Warp's
+`wp_memtile_device`), and the RAPIDS copies go through `cudaMemcpyDefault`
+with operands of unknown memory kind, whose direction the checker leaves
+unmodeled. One TU does not parse (CCCL 3.1 under Clang 23). The per-case
+reasons are in
+[corpus/real-bugs-heldout/README.md](../corpus/real-bugs-heldout/README.md).
+
 ## What compute-sanitizer sees
 
 compute-sanitizer is not a baseline for these rules. It checks the device

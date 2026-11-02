@@ -15,6 +15,7 @@ results/**/*.html
 !/results/regression/
 !/results/mutants/
 !/results/real-bugs/
+!/results/real-bugs-heldout/
 !/results/probes/
 /results/probes/*
 !/results/probes/completion.json
