@@ -49,7 +49,7 @@ five timing-dependent lifetime scenarios, reports only the stream-ordered alloca
 race; it does not see host reads or frees racing an in-flight copy, which the
 checker reports ([docs/evaluation.md](docs/evaluation.md#against-compute-sanitizer)).
 On its hand-written labelled corpora it scores 10/0/0/10 (seed) and 25/1/0/23
-(holdout, first frozen run) as TP/FP/FN/TN. Large parts of the scanned code
+(holdout, first run after its freeze) as TP/FP/FN/TN. Large parts of the scanned code
 were only partly explored, and several CUDA idioms are not modeled; see
 [Limitations](#limitations) before reading the zero as "no races".
 
@@ -135,9 +135,14 @@ declarations, labelled from the CUDA semantics before the checker ran on it.
 | Corpus | Cases | TP | FP | FN | TN |
 |---|---:|---:|---:|---:|---:|
 | seed (development pairs) | 20 | 10 | 0 | 0 | 10 |
-| holdout (48 TUs, 49 labels, frozen before its first run) | 49 | 25 | 1 | 0 | 23 |
+| holdout (48 TUs, 49 labels, first run; freeze not verifiable from git, see below) | 49 | 25 | 1 | 0 | 23 |
 
-The holdout numbers are those of the first, frozen run. Its one false positive
+The holdout numbers are those of the first run after the freeze. The freeze
+cannot be checked against this repository's history: the corpus,
+`corpus/holdout/freeze.json` (frozen at 2026-10-14T06:57Z) and the first-run
+record (started 28 s later) all arrived in the single initial commit of
+2026-10-30, so the order rests on the timestamps and hashes in those files,
+not on commits. Its one false positive
 exposed a checker bug: in `if (finish) cudaStreamSynchronize(s); if (!finish)
 cudaDeviceSynchronize();` the calls in the `if` bodies were treated as having
 their status checked, so their failure paths, which synchronize nothing,
