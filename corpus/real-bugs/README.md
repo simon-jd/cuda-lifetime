@@ -38,6 +38,11 @@ generated summaries are loaded (RMM's `cuda_memcpy.cpp`,
 The labels are those written before the first run. Three bugs are found,
 and their fixes silence the reports.
 
+This is a development set: version 0.4.0 ran on these cases first, and the
+summaries, container ownership, crash fix and header patches of 0.5.0 were
+written to analyze them. The three finds show those changes working on the
+cases they were made for; they are not a held-out result.
+
 | Case | Rule | Result | Why |
 |---|---|---|---|
 | `cudf-json-scoped-host-value` | CL2 | found, fix silences | `set_element_async`, a `device_uvector` method CSA does not inline, is summarized from its body as a copy from its `value` argument (through `rmm::detail::memcpy_async`, summarized from RMM's `cuda_memcpy.cpp`); the block-scoped `single_node` is reported when the function returns, with the call on line 225 on the path |

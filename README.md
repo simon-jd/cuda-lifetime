@@ -31,13 +31,16 @@ reports 46 alerts, all warnings or notes:
 - 3 informational notes and 11 false positives, 8 of them from one faiss
   helper whose result the analyzer cannot relate to the pointer.
 
-**On 13 real fixed bugs it finds 3.** Of 13 stream-ordering bugs that cuDF,
-RMM, llama.cpp and other projects fixed, eight are of the kinds the rules
-describe. Version 0.5.0 finds three of them (0.4.0 found none), and each fix
-silences the report: they needed copy and synchronization summaries
-generated from RMM's and cuDF's own translation units, ownership of a host
-container's buffer, a fix for a crash in the tool, and a patched cuDF
-header. Of the other five, one does not parse (a missing dependency), one
+**On 13 real fixed bugs it finds 3, but these 13 are a development set.**
+Of 13 stream-ordering bugs that cuDF, RMM, llama.cpp and other projects
+fixed, eight are of the kinds the rules describe. Version 0.4.0 found none
+of them; version 0.5.0 was built to analyze these cases, and it finds three,
+each silenced by its fix. The 0.5.0 features came from these 13: copy and
+synchronization summaries generated from RMM's and cuDF's own translation
+units, ownership of a host container's buffer, a fix for a crash in the
+tool, and a patched cuDF header. So 3 of 13 is a development result, not a
+measure of how the checker does on bugs it has not seen. Of the other five
+in-scope cases, one does not parse (a missing dependency), one
 exhausts the node budget, and three need what a per-TU, per-path checker
 does not see: the caller's storage, driver API copies across calls, an
 event's role across calls ([docs/evaluation.md](docs/evaluation.md#fixed-bugs-from-public-projects)).

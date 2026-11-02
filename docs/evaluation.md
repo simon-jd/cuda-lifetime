@@ -214,6 +214,12 @@ claim to find. `scripts/run_real_bugs.py` analyzed the buggy and the fixed
 revision of each affected TU (`results/real-bugs/results.json`); the labels
 did not change between versions.
 
+These 13 cases are a development set. Version 0.4.0 was run on them first,
+and the changes listed below were made to analyze them; version 0.5.0 was
+then scored on the same cases. Its 3 of 13 therefore shows what the new
+features do on the bugs they were built for, not how the checker does on
+bugs it has not seen.
+
 | | Cases | 0.4.0 found | 0.5.0 found | Missed | Not analyzable |
 |---|---:|---:|---:|---:|---:|
 | Within the rules | 8 | 0 | 3 | 4 | 1 |
@@ -222,7 +228,8 @@ did not change between versions.
 Version 0.5.0 finds 3 of the 8 in-scope bugs (3 of 13 overall), and each
 fix silences its report: cuDF's scoped `single_node` passed to
 `set_element_async`, and the staging and regex-program `host_vector`s
-destroyed with a copy pending. Four changes made that possible:
+destroyed with a copy pending. Four changes, each made for these cases,
+made that possible:
 
 - **The crash.** The native tool aborted on cuDF's parquet `reader_impl.cpp`
   where `clang++ --analyze` did not because the checker, not CSA, read the
