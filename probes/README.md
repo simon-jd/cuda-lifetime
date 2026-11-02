@@ -36,7 +36,7 @@ warning (pageable path).
 
 `sanitizer.py` runs every compute-sanitizer tool on each scenario of
 `stale_read.cu` and `lifetime.cu`, and the checker on both sources; see
-[docs/evaluation.md](../docs/evaluation.md#against-compute-sanitizer):
+[docs/evaluation.md](../docs/evaluation.md#what-compute-sanitizer-sees):
 
 ```sh
 flock /var/tmp/rtx4090.lock python3 probes/sanitizer.py --ccbin g++-13 \

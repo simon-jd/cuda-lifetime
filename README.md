@@ -44,10 +44,13 @@ in-scope cases, one does not parse (a missing dependency), one
 exhausts the node budget, and three need what a per-TU, per-path checker
 does not see: the caller's storage, driver API copies across calls, an
 event's role across calls ([docs/evaluation.md](docs/evaluation.md#fixed-bugs-from-public-projects)).
-compute-sanitizer, run with all its tools on the same stale-read program and
-five timing-dependent lifetime scenarios, reports only the stream-ordered allocation
-race; it does not see host reads or frees racing an in-flight copy, which the
-checker reports ([docs/evaluation.md](docs/evaluation.md#against-compute-sanitizer)).
+compute-sanitizer is a dynamic, device-side tool, so it complements the
+checker rather than serving as a baseline for it: on the same stale-read
+program and five timing-dependent lifetime scenarios it reports the one
+device-side fault, a kernel using a stream-ordered allocation before it is
+ordered, and none of the host reads or frees racing an in-flight copy,
+which are not device accesses
+([docs/evaluation.md](docs/evaluation.md#what-compute-sanitizer-sees)).
 On its hand-written labelled corpora it scores 10/0/0/10 (seed) and 25/1/0/23
 (holdout, first run after its freeze) as TP/FP/FN/TN. Large parts of the scanned code
 were only partly explored, and several CUDA idioms are not modeled; see

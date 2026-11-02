@@ -262,7 +262,15 @@ a temporary that end while queued (portability findings, pageable memory).
 [corpus/real-bugs/README.md](../corpus/real-bugs/README.md) lists every case
 with its reason.
 
-## Against compute-sanitizer
+## What compute-sanitizer sees
+
+compute-sanitizer is not a baseline for these rules. It checks the device
+side of the executions it observes: kernel and copy accesses to memory that
+is out of bounds, freed or not yet allocated, races in shared and global
+memory between device threads, and misuse of device synchronization. The
+rules are about host code racing work that is still in flight, which is not
+a device access. The comparison shows what each tool sees in the same
+programs, not which is better; neither covers the other's ground.
 
 `probes/sanitizer.py` runs every compute-sanitizer tool (memcheck, memcheck
 with `--track-stream-ordered-races all`, racecheck, synccheck, initcheck;
@@ -279,15 +287,17 @@ and `probes/lifetime.cu`, and the checker on both sources
 | a kernel on another stream uses a `cudaMallocAsync` allocation with no dependency (`lifetime ordered-bad`) | CL3 error | memcheck: 2 errors (invalid global write), with or without `--track-stream-ordered-races all` |
 | the same with an event dependency (`lifetime ordered-good`) | nothing | nothing |
 
-compute-sanitizer checks device-side accesses, so it finds the stream-ordered
-allocation race when the kernel actually writes freed or unallocated memory,
-but none of the host-side races: a host read of an in-flight D2H destination,
-or a host free under a pending copy, is not a device access, and it passes
-silently even in the run where the stale value was read. The checker reports
-each of the five scenarios that depend on timing or on behavior CUDA does not
-promise (pageable copies being synchronous, `cudaFree` synchronizing), at the
-level the rules give it, and nothing on the ordered one, from the source
-alone. The
+compute-sanitizer reports the one scenario with a device-side fault, where
+the kernel writes memory its stream is not ordered after the allocation of.
+The host-side races are outside what it instruments: a host read of an
+in-flight D2H destination, or a host free under a pending copy, is not a
+device access, so it passes silently even in the run where the stale value
+was read. The checker reports the five scenarios that depend on timing or
+on behavior CUDA does not promise (pageable copies being synchronous,
+`cudaFree` synchronizing), at the level the rules give them, and nothing on
+the ordered one, from the source alone. It sees nothing of what
+compute-sanitizer checks inside kernels: out-of-bounds or uninitialized
+accesses and data races between device threads are outside its rules. The
 seed and holdout cases cannot be run: they are functions against a
 declaration stub, without `main`.
 
