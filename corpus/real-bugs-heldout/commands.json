@@ -1,6 +1,6 @@
 {
  "schemaVersion": 1,
- "description": "Compiler flags for each held-out case's translation unit, written from what the unit needs to parse (clang++ -fsyntax-only through scripts/run_real_bugs.py --tool syntax), before the checker ran on it. Placeholders and fields are those of corpus/real-bugs/commands.json. RAPIDS cases take CCCL, NVTX and the RMM logger from the RMM 26.10 build of scripts/prepare_targets.py and RMM, RAFT and cuVS checked out at their last commit before the case revision. generatedHeaders rapids-logger holds RAFT's and cuML's logger_macros.hpp, which their builds generate with rapids_logger's create_logger_macros; they were made the same way, substituting the macro prefix and default logger each project's CMakeLists.txt passes into logger_macros.hpp.in of the RMM 26.10 build's rapids_logger.",
+ "description": "Compiler flags for each held-out case's translation unit, written from what the unit needs to parse (clang++ -fsyntax-only through scripts/run_real_bugs.py --tool syntax), before the checker ran on it. Placeholders and fields are those of corpus/real-bugs/commands.json. RAPIDS cases take CCCL, NVTX and the RMM logger from the RMM 26.10 build of scripts/prepare_targets.py and RMM, RAFT and cuVS checked out at their last commit before the case revision. generatedHeaders rapids-logger holds RAFT's and cuML's logger_macros.hpp, which their builds generate with rapids_logger's create_logger_macros; they were made the same way, substituting the macro prefix and default logger each project's CMakeLists.txt passes into logger_macros.hpp.in of the RMM 26.10 build's rapids_logger. RAPIDS cases load summaries of RMM's cuda_memcpy.cpp, cuda_stream_view.cpp and device_buffer.cpp, as the cuDF development cases do (a file absent at a revision is skipped).",
  "common": [
   "--gcc-toolchain={gcc}"
  ],
@@ -59,6 +59,20 @@
    },
    "generatedHeaders": [
     "rapids-logger"
+   ],
+   "summarize": [
+    {
+     "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/device_buffer.cpp",
+     "language": "c++"
+    }
    ]
   },
   "cuvs-binary-quantizer-threshold": {
@@ -104,6 +118,20 @@
    },
    "generatedHeaders": [
     "rapids-logger"
+   ],
+   "summarize": [
+    {
+     "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/device_buffer.cpp",
+     "language": "c++"
+    }
    ]
   },
   "cuvs-all-neighbors-host-dataset": {
@@ -144,6 +172,20 @@
    },
    "generatedHeaders": [
     "rapids-logger"
+   ],
+   "summarize": [
+    {
+     "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/device_buffer.cpp",
+     "language": "c++"
+    }
    ]
   },
   "cuml-tsne-min-max-source": {
@@ -189,6 +231,20 @@
    },
    "generatedHeaders": [
     "rapids-logger"
+   ],
+   "summarize": [
+    {
+     "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/device_buffer.cpp",
+     "language": "c++"
+    }
    ]
   },
   "cuml-cd-alpha-temporary": {
@@ -234,6 +290,20 @@
    },
    "generatedHeaders": [
     "rapids-logger"
+   ],
+   "summarize": [
+    {
+     "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/device_buffer.cpp",
+     "language": "c++"
+    }
    ]
   },
   "raft-mst-edge-count": {
@@ -267,6 +337,20 @@
    },
    "generatedHeaders": [
     "rapids-logger"
+   ],
+   "summarize": [
+    {
+     "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/device_buffer.cpp",
+     "language": "c++"
+    }
    ]
   },
   "raft-device-reference-read": {
@@ -300,6 +384,20 @@
    },
    "generatedHeaders": [
     "rapids-logger"
+   ],
+   "summarize": [
+    {
+     "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/device_buffer.cpp",
+     "language": "c++"
+    }
    ]
   },
   "cugraph-bfs-source-temporary": {
@@ -344,6 +442,20 @@
    ],
    "headerPatches": [
     "raft-span-enable-if"
+   ],
+   "summarize": [
+    {
+     "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+     "language": "c++"
+    },
+    {
+     "file": "{rmm}/cpp/src/device_buffer.cpp",
+     "language": "c++"
+    }
    ]
   },
   "warp-memtile-scratch-free": {
