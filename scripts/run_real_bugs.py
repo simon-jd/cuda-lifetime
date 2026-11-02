@@ -160,6 +160,16 @@ def text_results(output):
     return results
 
 
+ERROR = re.compile(r"^(?:\S.*?:\d+:\d+: )?(?:fatal )?error: ")
+# Overrides the projects' own .clang-tidy files (some turn warnings into errors).
+TIDY_CONFIG = '{"Checks": "-*,clang-analyzer-*,bugprone-*", "WarningsAsErrors": ""}'
+
+
+def compiler_errors(output):
+    """Compiler error lines, not source excerpts that happen to contain "error:"."""
+    return [line for line in output.splitlines() if ERROR.match(line) or "Assertion" in line]
+
+
 def baseline(tool, executable, source, flags, timeout):
     """Run Clang's stock analyzer or clang-tidy on one TU; the record has the same fields as analyze's."""
     with tempfile.TemporaryDirectory() as temp:
@@ -167,13 +177,13 @@ def baseline(tool, executable, source, flags, timeout):
         command = ([executable, "-fsyntax-only", *flags, str(source)] if tool == "syntax" else
                    [executable, "--analyze", "--analyzer-output", "sarif", "-o", str(sarif), *flags, str(source)]
                    if tool == "csa" else
-                   [executable, str(source), "--checks=-*,clang-analyzer-*,bugprone-*", "--header-filter=.*", "--quiet", "--", *flags])
+                   [executable, str(source), "--config=" + TIDY_CONFIG, "--header-filter=.*", "--quiet", "--", *flags])
         try:
             done = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
         except subprocess.TimeoutExpired:
             return {"parsed": False, "status": "timeout", "errors": [f"no result within {timeout} s"]}
         output = done.stdout + done.stderr
-        errors = [line for line in output.splitlines() if "error:" in line or "Assertion" in line]
+        errors = compiler_errors(output)
         parsed = done.returncode == 0 and not errors and (tool != "csa" or sarif.exists())
         record = {"parsed": parsed, "returncode": done.returncode, "errorCount": len(errors), "errors": errors[:3]}
         if done.returncode < 0:

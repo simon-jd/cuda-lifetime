@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from scripts.run_real_bugs import ROOT, expand, on_lines, overlay, relative, text_results
+from scripts.run_real_bugs import ROOT, compiler_errors, expand, on_lines, overlay, relative, text_results
 
 
 class RealBugMatchingTests(unittest.TestCase):
@@ -51,6 +51,15 @@ class BaselineOutputTests(unittest.TestCase):
              "uri": "/t/a.cu", "line": 5, "flow": [{"uri": "/t/a.cu", "line": 3}]},
             {"ruleId": "", "level": "warning", "message": "dead store", "uri": "/t/a.cu", "line": 7, "flow": []}])
         self.assertTrue(on_lines(text_results(output)[0], "a.cu", [3]))
+
+
+    def test_source_excerpts_are_not_errors(self):
+        output = ("/t/a.cu:3:10: fatal error: 'mpi.h' file not found\n"
+                  "   88 | // error: expected\n"
+                  "error: unable to handle compilation\n"
+                  "/t/b.h:9:1: warning: x [bugprone-y]\n")
+        self.assertEqual(compiler_errors(output), ["/t/a.cu:3:10: fatal error: 'mpi.h' file not found",
+                                                   "error: unable to handle compilation"])
 
 
 class HeaderPatchTests(unittest.TestCase):

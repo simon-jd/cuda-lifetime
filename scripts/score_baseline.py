@@ -46,7 +46,10 @@ def score(labels, report):
         hit = (case["file"], case["line"]) in at
         outcome = ("tp" if hit else "fn") if case["expect"] != "none" else ("fp" if hit else "tn")
         totals[outcome] += 1
-        cases.append({"id": case["id"], "expect": case["expect"], "outcome": outcome})
+        entry = {"id": case["id"], "expect": case["expect"], "outcome": outcome}
+        if hit:
+            entry["warnings"] = sorted({text for path, line, text in found if (path, line) == (case["file"], case["line"])})
+        cases.append(entry)
     labelled = {(case["file"], case["line"]) for case in labels["cases"]}
     files = {case["file"] for case in labels["cases"]}
     return {"schemaVersion": 1, "mode": report["mode"], "tool": report["toolVersion"].get("stdout", "").splitlines()[:1],
