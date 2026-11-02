@@ -51,7 +51,7 @@ not a fully labelled precision benchmark; separately report other diagnostics.
 The pageable variant is a negative control. Removing only asyncAPI's polling
 loop would leave its checked `cudaEventElapsedTime` result as completion evidence
 on successful continuation, so that would not justify inventing a CL1 defect.
-None of this workflow executes GPU code or changes the withheld holdout corpus.
+None of this workflow executes GPU code or changes the holdout corpus.
 
 The hashes in `manifest.json` cover the files as published here; they were
 recomputed when the marker comments were renamed for publication, which
