@@ -5,7 +5,12 @@
 #include <set>
 #include <string>
 #include <vector>
-namespace clang { class FunctionDecl; namespace ento { class CheckerRegistry; } }
+namespace clang {
+class FunctionDecl;
+namespace ento {
+class CheckerRegistry;
+}
+} // namespace clang
 namespace cudalifetime {
 struct Model {
   std::string function, effect;
@@ -48,5 +53,5 @@ bool isCudaApi(const clang::FunctionDecl *decl);
 // through the calls it makes (CUDA calls, models, other bodies).
 bool summarize(const clang::FunctionDecl *decl, Model &out);
 void registerChecker(clang::ento::CheckerRegistry &registry);
-}
+} // namespace cudalifetime
 #endif
