@@ -1,0 +1,399 @@
+{
+ "schemaVersion": 1,
+ "description": "Compiler flags for each held-out case's translation unit, written from what the unit needs to parse (clang++ -fsyntax-only through scripts/run_real_bugs.py --tool syntax), before the checker ran on it. Placeholders and fields are those of corpus/real-bugs/commands.json. RAPIDS cases take CCCL, NVTX and the RMM logger from the RMM 26.10 build of scripts/prepare_targets.py and RMM, RAFT and cuVS checked out at their last commit before the case revision. generatedHeaders rapids-logger holds RAFT's and cuML's logger_macros.hpp, which their builds generate with rapids_logger's create_logger_macros; they were made the same way, substituting the macro prefix and default logger each project's CMakeLists.txt passes into logger_macros.hpp.in of the RMM 26.10 build's rapids_logger.",
+ "common": [
+  "--gcc-toolchain={gcc}"
+ ],
+ "cases": {
+  "nccl-ep-mask-clean": {
+   "language": "c++",
+   "flags": [
+    "-std=c++17",
+    "-I{tree}/contrib/nccl_ep",
+    "-I{tree}/contrib/nccl_ep/include",
+    "-I{tree}/contrib/nccl_ep/device",
+    "-I{tree}/src/include/nccl_device",
+    "-I{tree}/src/include",
+    "-I{cuda}/targets/x86_64-linux/include",
+    "-I{cuda}/targets/x86_64-linux/include/cccl"
+   ],
+   "headerPatches": [
+    "nccl-generated-header"
+   ]
+  },
+  "cuvs-vamana-serialize-dataset": {
+   "language": "cuda",
+   "translationUnit": "cpp/src/neighbors/vamana_serialize_float.cu",
+   "flags": [
+    "-std=c++20",
+    "-I{tree}/cpp/include",
+    "-I{tree}/cpp/src",
+    "-I{raft}/cpp/include",
+    "-I{rmm}/cpp/include",
+    "-I{root}/targets/rmm/build/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+    "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+    "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+    "-isystem",
+    "{cuda}/targets/x86_64-linux/include",
+    "-DCCCL_DISABLE_PDL",
+    "-DCUB_DISABLE_NAMESPACE_MAGIC",
+    "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+    "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+    "-DTHRUST_DISABLE_ABI_NAMESPACE",
+    "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+    "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR",
+    "-DRAFT_SYSTEM_LITTLE_ENDIAN=1"
+   ],
+   "dependencies": {
+    "raft": {
+     "repository": "https://github.com/NVIDIA/raft",
+     "branchFile": "RAPIDS_BRANCH"
+    },
+    "rmm": {
+     "repository": "https://github.com/rapidsai/rmm",
+     "branchFile": "RAPIDS_BRANCH"
+    }
+   },
+   "generatedHeaders": [
+    "rapids-logger"
+   ]
+  },
+  "cuvs-binary-quantizer-threshold": {
+   "language": "cuda",
+   "translationUnit": "cpp/src/preprocessing/quantize/binary.cu",
+   "flags": [
+    "-std=c++20",
+    "-I{tree}/cpp/include",
+    "-I{tree}/cpp/src",
+    "-I{raft}/cpp/include",
+    "-I{rmm}/cpp/include",
+    "-I{root}/targets/rmm/build/include",
+    "-I{cccl}/thrust",
+    "-I{cccl}/libcudacxx/include",
+    "-I{cccl}/cub",
+    "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+    "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+    "-isystem",
+    "{cuda}/targets/x86_64-linux/include",
+    "-DCCCL_DISABLE_PDL",
+    "-DCUB_DISABLE_NAMESPACE_MAGIC",
+    "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+    "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+    "-DTHRUST_DISABLE_ABI_NAMESPACE",
+    "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+    "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR",
+    "-include",
+    "memory",
+    "-DLIBCUDACXX_ENABLE_EXPERIMENTAL_MEMORY_RESOURCE"
+   ],
+   "dependencies": {
+    "raft": {
+     "repository": "https://github.com/NVIDIA/raft"
+    },
+    "rmm": {
+     "repository": "https://github.com/rapidsai/rmm"
+    },
+    "cccl": {
+     "repository": "https://github.com/NVIDIA/cccl",
+     "commit": "ecfd3adfaa7ebcb81d80d5b297ab3551619fda02",
+     "reason": "CCCL v3.1.0, the release before the case revision; RMM 25.12's resource adaptors do not compile against the RMM 26.10 build's CCCL"
+    }
+   },
+   "generatedHeaders": [
+    "rapids-logger"
+   ]
+  },
+  "cuvs-all-neighbors-host-dataset": {
+   "language": "cuda",
+   "translationUnit": "cpp/tests/neighbors/all_neighbors/test_float.cu",
+   "flags": [
+    "-std=c++20",
+    "-I{tree}/cpp/include",
+    "-I{tree}/cpp/src",
+    "-I{tree}/cpp/tests",
+    "-I{raft}/cpp/include",
+    "-I{rmm}/cpp/include",
+    "-I{root}/targets/rmm/build/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+    "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+    "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+    "-isystem",
+    "{cuda}/targets/x86_64-linux/include",
+    "-DCCCL_DISABLE_PDL",
+    "-DCUB_DISABLE_NAMESPACE_MAGIC",
+    "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+    "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+    "-DTHRUST_DISABLE_ABI_NAMESPACE",
+    "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+    "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR",
+    "-idirafter",
+    "{gcc}/lib/gcc/x86_64-linux-gnu/15/include"
+   ],
+   "dependencies": {
+    "raft": {
+     "repository": "https://github.com/NVIDIA/raft"
+    },
+    "rmm": {
+     "repository": "https://github.com/rapidsai/rmm"
+    }
+   },
+   "generatedHeaders": [
+    "rapids-logger"
+   ]
+  },
+  "cuml-tsne-min-max-source": {
+   "language": "cuda",
+   "translationUnit": "cpp/src/tsne/tsne.cu",
+   "flags": [
+    "-std=c++20",
+    "-I{tree}/cpp/include",
+    "-I{tree}/cpp/src",
+    "-I{tree}/cpp/src_prims",
+    "-I{raft}/cpp/include",
+    "-I{cuvs}/cpp/include",
+    "-I{rmm}/cpp/include",
+    "-I{root}/targets/rmm/build/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+    "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+    "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+    "-isystem",
+    "{cuda}/targets/x86_64-linux/include",
+    "-DCCCL_DISABLE_PDL",
+    "-DCUB_DISABLE_NAMESPACE_MAGIC",
+    "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+    "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+    "-DTHRUST_DISABLE_ABI_NAMESPACE",
+    "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+    "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR",
+    "-Wno-register"
+   ],
+   "dependencies": {
+    "raft": {
+     "repository": "https://github.com/NVIDIA/raft"
+    },
+    "cuvs": {
+     "repository": "https://github.com/rapidsai/cuvs"
+    },
+    "rmm": {
+     "repository": "https://github.com/rapidsai/rmm",
+     "commit": "c65202f52766e12c73e293b16d6a520a069d4afc",
+     "reason": "the parent of RMM 6646d158 (#2527), which deleted the device_scalar constructor taking an rvalue that the buggy revision calls; the buggy code was written against RMM before it and does not compile after it"
+    }
+   },
+   "generatedHeaders": [
+    "rapids-logger"
+   ]
+  },
+  "cuml-cd-alpha-temporary": {
+   "language": "cuda",
+   "translationUnit": "cpp/src/solver/solver.cu",
+   "flags": [
+    "-std=c++20",
+    "-I{tree}/cpp/include",
+    "-I{tree}/cpp/src",
+    "-I{tree}/cpp/src_prims",
+    "-I{raft}/cpp/include",
+    "-I{cuvs}/cpp/include",
+    "-I{rmm}/cpp/include",
+    "-I{root}/targets/rmm/build/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+    "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+    "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+    "-isystem",
+    "{cuda}/targets/x86_64-linux/include",
+    "-DCCCL_DISABLE_PDL",
+    "-DCUB_DISABLE_NAMESPACE_MAGIC",
+    "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+    "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+    "-DTHRUST_DISABLE_ABI_NAMESPACE",
+    "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+    "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR",
+    "-Wno-register"
+   ],
+   "dependencies": {
+    "raft": {
+     "repository": "https://github.com/NVIDIA/raft"
+    },
+    "cuvs": {
+     "repository": "https://github.com/rapidsai/cuvs"
+    },
+    "rmm": {
+     "repository": "https://github.com/rapidsai/rmm",
+     "commit": "c65202f52766e12c73e293b16d6a520a069d4afc",
+     "reason": "the parent of RMM 6646d158 (#2527), which deleted the device_scalar constructor taking an rvalue that the buggy revision calls; the buggy code was written against RMM before it and does not compile after it"
+    }
+   },
+   "generatedHeaders": [
+    "rapids-logger"
+   ]
+  },
+  "raft-mst-edge-count": {
+   "language": "cuda",
+   "translationUnit": "cpp/tests/sparse/mst.cu",
+   "flags": [
+    "-std=c++20",
+    "-I{tree}/cpp/include",
+    "-I{tree}/cpp/tests",
+    "-I{rmm}/cpp/include",
+    "-I{root}/targets/rmm/build/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+    "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+    "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+    "-isystem",
+    "{cuda}/targets/x86_64-linux/include",
+    "-DCCCL_DISABLE_PDL",
+    "-DCUB_DISABLE_NAMESPACE_MAGIC",
+    "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+    "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+    "-DTHRUST_DISABLE_ABI_NAMESPACE",
+    "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+    "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR"
+   ],
+   "dependencies": {
+    "rmm": {
+     "repository": "https://github.com/rapidsai/rmm"
+    }
+   },
+   "generatedHeaders": [
+    "rapids-logger"
+   ]
+  },
+  "raft-device-reference-read": {
+   "language": "cuda",
+   "translationUnit": "cpp/tests/core/mdarray.cu",
+   "flags": [
+    "-std=c++20",
+    "-I{tree}/cpp/include",
+    "-I{tree}/cpp/tests",
+    "-I{rmm}/cpp/include",
+    "-I{root}/targets/rmm/build/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+    "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+    "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+    "-isystem",
+    "{cuda}/targets/x86_64-linux/include",
+    "-DCCCL_DISABLE_PDL",
+    "-DCUB_DISABLE_NAMESPACE_MAGIC",
+    "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+    "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+    "-DTHRUST_DISABLE_ABI_NAMESPACE",
+    "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+    "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR"
+   ],
+   "dependencies": {
+    "rmm": {
+     "repository": "https://github.com/rapidsai/rmm"
+    }
+   },
+   "generatedHeaders": [
+    "rapids-logger"
+   ]
+  },
+  "cugraph-bfs-source-temporary": {
+   "language": "cuda",
+   "flags": [
+    "-std=c++20",
+    "-I{tree}/cpp/include",
+    "-I{tree}/cpp/src",
+    "-I{tree}/cpp/tests",
+    "-I{raft}/cpp/include",
+    "-I{rmm}/cpp/include",
+    "-I{root}/targets/rmm/build/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/thrust",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/libcudacxx/include",
+    "-I{root}/targets/rmm/build/_deps/cccl-src/cub",
+    "-I{root}/targets/rmm/build/_deps/nvtx3-src/c/include",
+    "-I{root}/targets/rmm/build/_deps/rapids_logger-src/include",
+    "-isystem",
+    "{cuda}/targets/x86_64-linux/include",
+    "-DCCCL_DISABLE_PDL",
+    "-DCUB_DISABLE_NAMESPACE_MAGIC",
+    "-DCUB_IGNORE_NAMESPACE_MAGIC_ERROR",
+    "-DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA",
+    "-DTHRUST_DISABLE_ABI_NAMESPACE",
+    "-DTHRUST_HOST_SYSTEM=THRUST_HOST_SYSTEM_CPP",
+    "-DTHRUST_IGNORE_ABI_NAMESPACE_ERROR",
+    "-I{root}/.deps/cuCollections-e348af6e42c5c4e3c2f8a214393bb90e811387f8/include",
+    "-I{tree}/thirdparty/mmio"
+   ],
+   "dependencies": {
+    "raft": {
+     "repository": "https://github.com/NVIDIA/raft"
+    },
+    "rmm": {
+     "repository": "https://github.com/rapidsai/rmm",
+     "commit": "c65202f52766e12c73e293b16d6a520a069d4afc",
+     "reason": "the parent of RMM 6646d158 (#2527), which deleted the device_scalar constructor taking an rvalue that the buggy revision calls; the buggy code was written against RMM before it and does not compile after it"
+    }
+   },
+   "generatedHeaders": [
+    "rapids-logger"
+   ],
+   "headerPatches": [
+    "raft-span-enable-if"
+   ]
+  },
+  "warp-memtile-scratch-free": {
+   "language": "cuda",
+   "flags": [
+    "-std=c++17",
+    "-I{tree}/warp/native",
+    "-DWP_ENABLE_CUDA=1",
+    "-DWP_ENABLE_MATHDX=0",
+    "-DWP_ENABLE_CUDA_COMPATIBILITY=0",
+    "-DWP_BUILD_DLL"
+   ]
+  }
+ },
+ "headerPatches": {
+  "nccl-generated-header": {
+   "header": "src/nccl.h.in",
+   "includeRoot": "src",
+   "output": "nccl.h",
+   "edits": [
+    {
+     "pattern": "\\$\\{nccl:Major\\}",
+     "replacement": "2"
+    },
+    {
+     "pattern": "\\$\\{nccl:Minor\\}",
+     "replacement": "30"
+    },
+    {
+     "pattern": "\\$\\{nccl:Patch\\}",
+     "replacement": "6"
+    },
+    {
+     "pattern": "\\$\\{nccl:Suffix\\}",
+     "replacement": "a0"
+    },
+    {
+     "pattern": "\\$\\{nccl:Version\\}",
+     "replacement": "23006"
+    }
+   ],
+   "reason": "NCCL's build generates nccl.h from src/nccl.h.in with sed, substituting the version in makefiles/version.mk (2.30.6a0 at the case revision); this does the same."
+  },
+  "raft-span-enable-if": {
+   "in": "raft",
+   "header": "cpp/include/raft/core/span.hpp",
+   "includeRoot": "cpp/include",
+   "pattern": "class = typename std::enable_if<(\\s*detail::is_allowed_element_type_conversion_t)",
+   "replacement": "class = std::enable_if_t<\\1",
+   "reason": "raft::span's converting constructor defaults its last template parameter to std::enable_if<...> without ::type, so it never drops out of overload resolution. GCC does not instantiate the constexpr body while libstdc++'s std::variant checks a conversion; Clang does, and fails on every span<float> to span<double> conversion it considers. The patch uses std::enable_if_t, which removes the constructor when the conversion is not allowed."
+  }
+ }
+}
