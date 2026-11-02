@@ -100,9 +100,14 @@ and the bug's pattern on its own in a 10-line function.
 
 ## `regression/`
 
-Seed and holdout metrics of version 0.5.0 from `tests/run_seed.py` (the same totals as 0.4.0). The
-holdout has been seen, so it was scored as a development set (`split` is
-`dev`), not as a held-out result.
+Seed and holdout metrics from `tests/run_seed.py`. The holdout has been
+seen, so it was scored as a development set (`split` is `dev`), not as a
+held-out result. The files were written by 0.4.0; `reruns.json` records
+rerunning both corpora with the 0.5.0 build and with the two refactored
+builds after it (effects dispatched through an enum, clang-format): for each,
+the native binary's hash, the totals, the metrics file's hash and a digest
+of every SARIF result. All three builds produce byte-identical metrics,
+equal to these files, and identical results.
 
 ## `probes/stale-read.json`
 

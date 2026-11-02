@@ -17,8 +17,9 @@ fares on code written by others; that is what the real-project scan below is
 for.
 
 **Seed** (`corpus/seed/`): ten positive/negative pairs, one per rule family,
-used during development. 10 TP, 0 FP, 0 FN, 10 TN with version 0.4.0
-(`results/regression/seed-metrics.json`).
+used during development. 10 TP, 0 FP, 0 FN, 10 TN with versions 0.4.0 and
+0.5.0, whose metrics files are byte-identical
+(`results/regression/seed-metrics.json`, `results/regression/reruns.json`).
 
 **Holdout** (`corpus/holdout/`): 48 translation units and 49 labels covering
 host accesses and lifetimes, aliases and byte ranges, synchronization branches,
@@ -49,9 +50,9 @@ the read. Artifacts: `results/holdout-first/` (see
 
 Version 0.3.0 fixed that (a call in statement position, including an `if` or
 loop body, discards its status; `tests/native/checked_return_helpers.cpp`
-covers both forms) and changed other rules after the holdout was seen. Version
-0.4.0 scores 25 TP, 0 FP, 0 FN, 24 TN on the holdout, as 0.3.0 did
-(`results/regression/holdout-metrics.json`); because the set has been seen,
+covers both forms) and changed other rules after the holdout was seen.
+Versions 0.4.0 and 0.5.0 score 25 TP, 0 FP, 0 FN, 24 TN on the holdout, as
+0.3.0 did (`results/regression/holdout-metrics.json`); because the set has been seen,
 that is a regression result, not a held-out score. The first, frozen run above
 remains the holdout result.
 
