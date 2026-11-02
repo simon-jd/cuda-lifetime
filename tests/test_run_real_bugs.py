@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from scripts.run_real_bugs import ROOT, expand, on_lines, overlay, relative
+from scripts.run_real_bugs import ROOT, expand, on_lines, overlay, relative, text_results
 
 
 class RealBugMatchingTests(unittest.TestCase):
@@ -40,6 +40,19 @@ class RealBugMatchingTests(unittest.TestCase):
             self.assertEqual(case["inRuleScope"], case["rule"] is not None, case["id"])
 
 
+class BaselineOutputTests(unittest.TestCase):
+    def test_notes_after_a_warning_are_its_flow(self):
+        output = ("/t/a.cu:5:3: warning: Use of memory after it is freed [clang-analyzer-unix.Malloc]\n"
+                  "/t/a.cu:3:3: note: Memory is released\n"
+                  "/t/b.h:9:1: error: unknown type name 'x'\n"
+                  "/t/a.cu:7:1: warning: dead store\n")
+        self.assertEqual(text_results(output), [
+            {"ruleId": "clang-analyzer-unix.Malloc", "level": "warning", "message": "Use of memory after it is freed",
+             "uri": "/t/a.cu", "line": 5, "flow": [{"uri": "/t/a.cu", "line": 3}]},
+            {"ruleId": "", "level": "warning", "message": "dead store", "uri": "/t/a.cu", "line": 7, "flow": []}])
+        self.assertTrue(on_lines(text_results(output)[0], "a.cu", [3]))
+
+
 class HeaderPatchTests(unittest.TestCase):
     PATCH = {"header": "cpp/include/lib/a.hpp", "includeRoot": "cpp/include",
              "pattern": "^(\\s*)constexpr int f<", "replacement": "\\1HD constexpr int f<"}
@@ -64,12 +77,16 @@ class HeaderPatchTests(unittest.TestCase):
                 overlay(temp, Path(tree), [self.PATCH])
 
     def test_commands_name_known_patches_and_existing_generated_headers(self):
-        commands = json.loads((ROOT / "corpus/real-bugs/commands.json").read_text())
-        for case in commands["cases"].values():
-            for name in case.get("headerPatches", []):
-                self.assertIn(name, commands["headerPatches"])
-            for name in case.get("generatedHeaders", []):
-                self.assertTrue((ROOT / "corpus/real-bugs/generated" / name).is_dir(), name)
+        for corpus in ("real-bugs", "real-bugs-heldout"):
+            path = ROOT / "corpus" / corpus / "commands.json"
+            if not path.exists():
+                continue
+            commands = json.loads(path.read_text())
+            for case in commands["cases"].values():
+                for name in case.get("headerPatches", []):
+                    self.assertIn(name, commands["headerPatches"])
+                for name in case.get("generatedHeaders", []):
+                    self.assertTrue((path.parent / "generated" / name).is_dir(), name)
 
 
 if __name__ == "__main__":

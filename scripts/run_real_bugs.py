@@ -17,10 +17,17 @@ before the case revision and substituted as {name} in its flags.
 
 A case may also name header patches (commands.json "headerPatches": a
 project header copied with a textual fix into an overlay directory searched
-first), generated headers (a file under corpus/real-bugs/generated searched
+first), generated headers (a directory under the generated/ directory next
+to the commands file, searched
 first), and helper translation units ("summarize"): each is summarized with
 cuda-lifetime-native --summarize at the same revision, in order, and the
 resulting models are loaded when the case's TU is analyzed.
+
+--tool csa or --tool clang-tidy runs a baseline instead of cuda-lifetime on
+the same translation units with the same flags (no summaries): Clang's stock
+static analyzer (clang++ --analyze, SARIF output) or clang-tidy with the
+clang-analyzer-* and bugprone-* checks (headers included). A baseline finds a case when any of
+its diagnostics, whatever the check, is on a site line, as for cuda-lifetime.
 """
 import argparse
 import json
@@ -96,6 +103,64 @@ def summarize(native, helpers, names, temp, prefix, timeout):
     return models, records
 
 
+DIAGNOSTIC = re.compile(r"^(.+?):(\d+):\d+: (warning|error|note): (.*?)(?: \[([^\]]+)\])?$")
+
+
+def sarif_results(sarif):
+    """Rule, level, message, primary location and code-flow locations of each SARIF result."""
+    results = []
+    for run in json.loads(sarif.read_text())["runs"]:
+        artifacts = run.get("artifacts", [])
+        def uri(location):
+            artifact = location["physicalLocation"]["artifactLocation"]
+            return artifact.get("uri") or artifacts[artifact["index"]]["location"]["uri"]
+        for result in run["results"]:
+            flow = [{"uri": uri(item["location"]), "line": item["location"]["physicalLocation"]["region"]["startLine"]}
+                    for f in result.get("codeFlows", []) for thread in f["threadFlows"] for item in thread["locations"]]
+            results.append({"ruleId": result["ruleId"], "level": result["level"], "message": result["message"]["text"],
+                            "uri": uri(result["locations"][0]),
+                            "line": result["locations"][0]["physicalLocation"]["region"]["startLine"], "flow": flow})
+    return results
+
+
+def text_results(output):
+    """Warnings in compiler-style text output, each with the notes that follow it as its flow."""
+    results = []
+    for line in output.splitlines():
+        match = DIAGNOSTIC.match(line)
+        if not match:
+            continue
+        path, number, level, message, check = match.groups()
+        if level == "warning":
+            results.append({"ruleId": check or "", "level": level, "message": message,
+                            "uri": path, "line": int(number), "flow": []})
+        elif level == "note" and results:
+            results[-1]["flow"].append({"uri": path, "line": int(number)})
+    return results
+
+
+def baseline(tool, executable, source, flags, timeout):
+    """Run Clang's stock analyzer or clang-tidy on one TU; the record has the same fields as analyze's."""
+    with tempfile.TemporaryDirectory() as temp:
+        sarif = Path(temp) / "out.sarif"
+        command = ([executable, "--analyze", "--analyzer-output", "sarif", "-o", str(sarif), *flags, str(source)]
+                   if tool == "csa" else
+                   [executable, str(source), "--checks=-*,clang-analyzer-*,bugprone-*", "--header-filter=.*", "--quiet", "--", *flags])
+        try:
+            done = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
+        except subprocess.TimeoutExpired:
+            return {"parsed": False, "status": "timeout", "errors": [f"no result within {timeout} s"]}
+        output = done.stdout + done.stderr
+        errors = [line for line in output.splitlines() if ": error:" in line or "Assertion" in line]
+        parsed = done.returncode == 0 and not errors and (tool != "csa" or sarif.exists())
+        record = {"parsed": parsed, "returncode": done.returncode, "errorCount": len(errors), "errors": errors[:3]}
+        if done.returncode < 0:
+            record["status"] = f"terminated by signal {-done.returncode}"
+        if parsed:
+            record["diagnostics"] = sarif_results(sarif) if tool == "csa" else text_results(done.stdout)
+        return record
+
+
 def analyze(native, source, flags, timeout, models=None):
     with tempfile.TemporaryDirectory() as temp:
         sarif, coverage = Path(temp) / "out.sarif", Path(temp) / "coverage.json"
@@ -113,18 +178,7 @@ def analyze(native, source, flags, timeout, models=None):
             record["status"] = f"terminated by signal {-done.returncode}"
         if not parsed:
             return record
-        results = []
-        for run in json.loads(sarif.read_text())["runs"]:
-            artifacts = run.get("artifacts", [])
-            def uri(location):
-                artifact = location["physicalLocation"]["artifactLocation"]
-                return artifact.get("uri") or artifacts[artifact["index"]]["location"]["uri"]
-            for result in run["results"]:
-                flow = [{"uri": uri(item["location"]), "line": item["location"]["physicalLocation"]["region"]["startLine"]}
-                        for f in result.get("codeFlows", []) for thread in f["threadFlows"] for item in thread["locations"]]
-                results.append({"ruleId": result["ruleId"], "level": result["level"], "message": result["message"]["text"],
-                                "uri": uri(result["locations"][0]),
-                                "line": result["locations"][0]["physicalLocation"]["region"]["startLine"], "flow": flow})
+        results = sarif_results(sarif)
         record.update(diagnostics=results, functionsAnalyzed=cov.get("functionsAnalyzed"),
                       functionsOverBudget=len(cov.get("budgetExhausted", [])),
                       overBudgetFunctions=sorted(entry.get("function", "") for entry in cov.get("budgetExhausted", [])),
@@ -149,13 +203,20 @@ def main():
     parser.add_argument("--cases", type=Path, default=ROOT / "corpus/real-bugs/cases.json")
     parser.add_argument("--commands", type=Path, default=ROOT / "corpus/real-bugs/commands.json")
     parser.add_argument("--clones", type=Path, required=True)
-    parser.add_argument("--native", required=True)
+    parser.add_argument("--native", help="cuda-lifetime-native, required with --tool cuda-lifetime")
+    parser.add_argument("--tool", choices=("cuda-lifetime", "csa", "clang-tidy"), default="cuda-lifetime")
+    parser.add_argument("--clang", default="clang++", help="the clang++ for --tool csa")
+    parser.add_argument("--tidy", default="clang-tidy", help="the clang-tidy for --tool clang-tidy")
     parser.add_argument("--cuda-path", default="/usr/local/cuda-13.2")
     parser.add_argument("--gcc-toolchain", default="/usr")
     parser.add_argument("--timeout", type=float, default=900)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--only", action="append", default=[], help="analyze only this case (repeatable)")
     args = parser.parse_args()
+    if args.tool == "cuda-lifetime" and not args.native:
+        parser.error("--native is required with --tool cuda-lifetime")
+    executable = {"csa": args.clang, "clang-tidy": args.tidy}.get(args.tool, args.native)
+    version = subprocess.run([executable, "--version"], capture_output=True, text=True).stdout.strip()
     cases = [case for case in json.loads(args.cases.read_text())["cases"] if not args.only or case["id"] in args.only]
     commands = json.loads(args.commands.read_text())
     records = []
@@ -172,12 +233,13 @@ def main():
                 names[key] = str(dep_tree)
             with tempfile.TemporaryDirectory() as temp:
                 prefix = overlay(temp, tree, [commands["headerPatches"][name] for name in command.get("headerPatches", [])])
-                prefix += [f"-I{ROOT / 'corpus/real-bugs/generated' / name}" for name in command.get("generatedHeaders", [])]
+                prefix += [f"-I{args.commands.resolve().parent / 'generated' / name}" for name in command.get("generatedHeaders", [])]
                 prefix += expand([*commands["common"], *command["flags"]], names)
                 models, helpers = summarize(args.native, command.get("summarize", []), names, temp, prefix, args.timeout) \
-                    if command.get("summarize") else (None, [])
+                    if command.get("summarize") and args.tool == "cuda-lifetime" else (None, [])
                 flags = [*expand(CUDA if command["language"] == "cuda" else ["-x", command["language"]], names), *prefix]
-                record = analyze(args.native, tree / source, flags, args.timeout, models)
+                record = analyze(args.native, tree / source, flags, args.timeout, models) if args.tool == "cuda-lifetime" \
+                    else baseline(args.tool, executable, tree / source, flags, args.timeout)
             if helpers:
                 record["summaries"] = helpers
             if pinned:
@@ -200,7 +262,8 @@ def main():
                     d["uri"].endswith(case["file"]) and (d["ruleId"], d["message"]) in same for d in fixed["diagnostics"])
         records.append(row)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps({"schemaVersion": 1, "cases": records}, indent=2) + "\n")
+    args.out.write_text(json.dumps({"schemaVersion": 1, "tool": args.tool, "toolVersion": version,
+                                    "cases": records}, indent=2) + "\n")
 
 
 if __name__ == "__main__":
