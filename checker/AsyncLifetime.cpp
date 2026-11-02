@@ -28,6 +28,43 @@ namespace {
 using Stream = uint64_t;
 enum Memory { Unknown, Pinned, Pageable, Device, Ordered };
 enum Access { HostRead, HostWrite, DeviceUse };
+// The rule a report belongs to.
+enum class Rule : unsigned { CL1 = 1, CL2 = 2, CL3 = 3, CL4 = 4 };
+// cudaMemcpyKind.
+enum CopyKind : int { HostToHost = 0, HostToDevice = 1, DeviceToHost = 2, DeviceToDevice = 3, DefaultCopy = 4 };
+// How a stream is ordered with the legacy default stream (stored in StreamKinds).
+enum class StreamKind : unsigned { Unknown = 0, Legacy = 1, Blocking = 2, NonBlocking = 3, PerThread = 4 };
+// cudaStreamNonBlocking and cudaEventDisableTiming.
+constexpr uint64_t StreamNonBlockingFlag = 0x1, EventDisableTimingFlag = 0x2;
+// identity() maps a concrete handle h to 2h + 2 (symbolic handles are odd), so
+// the null stream, cudaStreamLegacy ((cudaStream_t)1) and cudaStreamPerThread
+// ((cudaStream_t)2) have fixed identities.
+constexpr Stream handleIdentity(uint64_t handle) { return handle * 2 + 2; }
+constexpr Stream NullStream = handleIdentity(0), LegacyStream = handleIdentity(1), PerThreadStream = handleIdentity(2);
+// The effect a model gives a call: cudalifetime::Model::effect, which is also
+// the "effect" field of a JSON model (Models.cpp lists the accepted names).
+enum class Effect {
+  None, Other, Copy, EnqueueCopy, Memset, MemsetAsync, Launch, CaptureBegin, CaptureEnd, GraphLaunch,
+  SyncStream, SyncDevice, SyncEvent, EventElapsed, EventRecord, StreamWaitEvent, FreeAsync, FreeDevice,
+  FreeHost, HostRegister, HostUnregister, MallocHost, MallocDevice, MallocAsync, StreamCreate, EventCreate,
+  AddressOnly, Observe, Destroy
+};
+Effect effectOf(const std::string &name) {
+  static const std::map<std::string, Effect> effects = {
+    {"copy", Effect::Copy}, {"enqueue_copy", Effect::EnqueueCopy}, {"memset", Effect::Memset},
+    {"memset_async", Effect::MemsetAsync}, {"launch", Effect::Launch}, {"capture_begin", Effect::CaptureBegin},
+    {"capture_end", Effect::CaptureEnd}, {"graph_launch", Effect::GraphLaunch}, {"sync_stream", Effect::SyncStream},
+    {"sync_device", Effect::SyncDevice}, {"sync_event", Effect::SyncEvent}, {"event_elapsed", Effect::EventElapsed},
+    {"event_record", Effect::EventRecord}, {"stream_wait_event", Effect::StreamWaitEvent},
+    {"free_async", Effect::FreeAsync}, {"free_device", Effect::FreeDevice}, {"free_host", Effect::FreeHost},
+    {"host_register", Effect::HostRegister}, {"host_unregister", Effect::HostUnregister},
+    {"malloc_host", Effect::MallocHost}, {"malloc_device", Effect::MallocDevice}, {"malloc_async", Effect::MallocAsync},
+    {"stream_create", Effect::StreamCreate}, {"event_create", Effect::EventCreate},
+    {"address_only", Effect::AddressOnly}, {"observe", Effect::Observe}, {"destroy", Effect::Destroy}};
+  if (name.empty()) return Effect::None;
+  auto it = effects.find(name);
+  return it == effects.end() ? Effect::Other : it->second;
+}
 struct Pair {
   uint64_t first = 0, second = 0;
   bool operator==(const Pair &o) const { return first == o.first && second == o.second; }
@@ -161,8 +198,8 @@ class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eva
     return nullptr;
   }
   static uint64_t identity(SVal v) {
-    if (auto n = v.getAs<loc::ConcreteInt>()) return n->getValue()->getZExtValue() * 2 + 2;
-    if (auto n = v.getAs<nonloc::ConcreteInt>()) return n->getValue()->getZExtValue() * 2 + 2;
+    if (auto n = v.getAs<loc::ConcreteInt>()) return handleIdentity(n->getValue()->getZExtValue());
+    if (auto n = v.getAs<nonloc::ConcreteInt>()) return handleIdentity(n->getValue()->getZExtValue());
     if (auto *r = base(v)) return reinterpret_cast<uintptr_t>(r) | 1;
     if (auto s = v.getAsSymbol()) return reinterpret_cast<uintptr_t>(s) | 1;
     return 0;
@@ -178,8 +215,8 @@ class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eva
   static uint64_t streamIdentity(ProgramStateRef s, SVal value) {
     uint64_t raw = identity(value);
     auto &builder = s->getStateManager().getSValBuilder();
-    if (raw == 2 || sameValue(s, value, builder.makeZeroVal(builder.getContext().VoidPtrTy)))
-      return cudalifetime::info().perThread ? 6 : 4;
+    if (raw == NullStream || sameValue(s, value, builder.makeZeroVal(builder.getContext().VoidPtrTy)))
+      return defaultStream();
     for (auto entry : s->get<StreamValues>()) if (sameValue(s, entry.second, value)) return entry.first;
     return identity(value);
   }
@@ -193,7 +230,7 @@ class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eva
   static unsigned completed(ProgramStateRef s, Stream stream) {
     auto *n = s->get<HostCompleted>(stream); return n ? *n : 0;
   }
-  static Stream defaultStream() { return cudalifetime::info().perThread ? 6 : 4; }
+  static Stream defaultStream() { return cudalifetime::info().perThread ? PerThreadStream : LegacyStream; }
   static bool capturing(ProgramStateRef s, Stream stream) { return stream && s->get<CaptureOrigins>(stream); }
   static void unknownDirection() {
     cudalifetime::info().coverageUnknown.insert("cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled");
@@ -216,17 +253,16 @@ class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eva
     if (r->hasMemorySpace<StackSpaceRegion>(s)) return Pageable;
     return Unknown;
   }
-  static unsigned kind(ProgramStateRef s, Stream stream) {
-    // 1 legacy, 2 blocking, 3 nonblocking, 4 per-thread, 0 unknown.
-    if (stream == 2) return cudalifetime::info().perThread ? 4 : 1;
-    if (stream == 4) return 1; // cudaStreamLegacy == (cudaStream_t)1.
-    if (stream == 6) return 4; // cudaStreamPerThread == (cudaStream_t)2.
-    auto *v = s->get<StreamKinds>(stream); return v ? *v : 0;
+  static StreamKind kind(ProgramStateRef s, Stream stream) {
+    if (stream == NullStream) return cudalifetime::info().perThread ? StreamKind::PerThread : StreamKind::Legacy;
+    if (stream == LegacyStream) return StreamKind::Legacy;
+    if (stream == PerThreadStream) return StreamKind::PerThread;
+    auto *v = s->get<StreamKinds>(stream); return v ? static_cast<StreamKind>(*v) : StreamKind::Unknown;
   }
   static bool distinct(ProgramStateRef s, Stream a, Stream b) {
     if (!a || !b || a == b) return false;
     const bool aCreated = s->get<StreamKinds>(a), bCreated = s->get<StreamKinds>(b);
-    const bool aReserved = a == 4 || a == 6, bReserved = b == 4 || b == 6;
+    const bool aReserved = a == LegacyStream || a == PerThreadStream, bReserved = b == LegacyStream || b == PerThreadStream;
     if ((aCreated && (bCreated || bReserved)) || (bCreated && aReserved) ||
         (aReserved && bReserved)) return true;
     const auto *av = s->get<StreamValues>(a), *bv = s->get<StreamValues>(b);
@@ -254,14 +290,14 @@ class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eva
   static ProgramStateRef enqueue(ProgramStateRef s, Stream stream, SVal value = UnknownVal()) {
     if (!value.isUnknownOrUndef()) s = s->set<StreamValues>(stream, value);
     // Legacy's device ordering is independent of host completion.
-    unsigned k = kind(s, stream);
+    const StreamKind k = kind(s, stream);
     for (auto it : s->get<Sequences>()) {
-      unsigned other = kind(s, it.first);
+      const StreamKind other = kind(s, it.first);
       // CUDA's per-thread default stream is blocking with respect to an
       // explicitly used legacy stream, but does not order ordinary streams.
       // CUDA 13.2.2 archive: stream-sync-behavior#per-thread-default-stream.
-      if ((k == 1 && (other == 2 || other == 4)) ||
-          ((k == 2 || k == 4) && other == 1)) {
+      if ((k == StreamKind::Legacy && (other == StreamKind::Blocking || other == StreamKind::PerThread)) ||
+          ((k == StreamKind::Blocking || k == StreamKind::PerThread) && other == StreamKind::Legacy)) {
         s = bound(s, stream, it.first, it.second);
         for (auto wait : s->get<WaitBounds>())
           if (wait.first.first == it.first)
@@ -296,7 +332,7 @@ class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eva
     }
     return overlaps(s, a, b) ? 1 : 0;
   }
-  void report(CheckerContext &c, ProgramStateRef s, unsigned rule,
+  void report(CheckerContext &c, ProgramStateRef s, Rule rule,
               const std::string &description, Memory mem, const char *semantic,
               const Pending *op = nullptr, bool contract = false, bool informational = false,
               const Allocation *allocation = nullptr, const MemRegion *allocationKey = nullptr) const {
@@ -304,7 +340,7 @@ class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eva
     if (!node) return;
     const char *names[] = {"unknown", "pinned", "pageable", "device", "stream-ordered"};
     const bool certain = !contract && (mem == Pinned || mem == Ordered);
-    const cudalifetime::ReportKind kind{"CL" + std::to_string(rule), informational ? "note" : certain ? "error" : "warning",
+    const cudalifetime::ReportKind kind{"CL" + std::to_string(static_cast<unsigned>(rule)), informational ? "note" : certain ? "error" : "warning",
                                         names[mem], semantic};
     const std::string key = kind.rule + "/" + kind.level + "/" + kind.memory + "/" + kind.semantic;
     auto &type = bugTypes[key];
@@ -348,9 +384,9 @@ class AsyncLifetimeChecker : public Checker<check::PreCall, check::PostCall, eva
     if (!r || capturing(s, stream)) return;
     if (auto *key = allocationRegion(s, r)) {
       const auto *alloc = s->get<Allocations>(key);
-      if (alloc->freed) report(c, s, 3, std::string(action) + " uses an allocation after its asynchronous free was issued", Ordered, "S6", nullptr, false, false, alloc, key);
+      if (alloc->freed) report(c, s, Rule::CL3, std::string(action) + " uses an allocation after its asynchronous free was issued", Ordered, "S6", nullptr, false, false, alloc, key);
       else if (!ordered(s, stream, alloc->stream, alloc->seq))
-        report(c, s, 3, std::string(action) + " uses a stream-ordered allocation without an allocation dependency", Ordered, "S5", nullptr, !distinct(s, stream, alloc->stream), false, alloc, key);
+        report(c, s, Rule::CL3, std::string(action) + " uses a stream-ordered allocation without an allocation dependency", Ordered, "S5", nullptr, !distinct(s, stream, alloc->stream), false, alloc, key);
     }
   }
   static std::string name(const CallEvent &call) { return declName(dyn_cast_or_null<FunctionDecl>(call.getDecl())); }
@@ -579,15 +615,15 @@ public:
         if (inner.copy) m = *inner.copy;
         else if (inner.sync) m = *inner.sync;
       }
-      const auto &e = m.effect;
-      if (e == "sync_stream" || e == "sync_device" || e == "sync_event" || e == "event_elapsed" || e == "copy")
+      const Effect e = effectOf(m.effect);
+      if (e == Effect::SyncStream || e == Effect::SyncDevice || e == Effect::SyncEvent || e == Effect::EventElapsed || e == Effect::Copy)
         result.synchronizes = true;
       // A synchronization on every path through the body (a "must" claim,
       // unlike copies) makes a summary of its own.
-      if ((e == "sync_stream" || e == "sync_device") && !result.sync && !neverReturns(definition) && alwaysReached(definition, call)) {
-        cudalifetime::Model sync; sync.function = definition->getQualifiedNameAsString(); sync.effect = e; sync.assumption = true;
+      if ((e == Effect::SyncStream || e == Effect::SyncDevice) && !result.sync && !neverReturns(definition) && alwaysReached(definition, call)) {
+        cudalifetime::Model sync; sync.function = definition->getQualifiedNameAsString(); sync.effect = m.effect; sync.assumption = true;
         Forwarded f;
-        if (e == "sync_stream") {
+        if (e == Effect::SyncStream) {
           if (auto constant = m.constants.find("stream"); constant != m.constants.end()) { f.constant = true; f.value = constant->second; }
           else if (m.receiver.count("stream")) {
             if (const auto *member = dyn_cast<CXXMemberCallExpr>(call); member && member->getImplicitObjectArgument())
@@ -598,10 +634,10 @@ public:
           else if (f.receiver) sync.receiver.insert("stream");
           else if (f.constant) sync.constants["stream"] = f.value;
         }
-        if (e == "sync_device" || f.valid()) result.sync = sync;
+        if (e == Effect::SyncDevice || f.valid()) result.sync = sync;
       }
-      if (e != "enqueue_copy") continue;
-      cudalifetime::Model copy; copy.function = definition->getQualifiedNameAsString(); copy.effect = e; copy.assumption = true;
+      if (e != Effect::EnqueueCopy) continue;
+      cudalifetime::Model copy; copy.function = definition->getQualifiedNameAsString(); copy.effect = m.effect; copy.assumption = true;
       bool forwardsBuffer = false, forwardsStream = false;
       for (const char *key : {"dst", "src", "size", "kind", "stream", "count"}) {
         Forwarded f;
@@ -643,6 +679,17 @@ public:
     }
     memo[fd] = result;
     return memo[fd];
+  }
+  // A concrete byte count, and the bits it covers (0 when unknown or too large).
+  static std::optional<uint64_t> byteCount(SVal size) {
+    if (auto bytes = size.getAs<nonloc::ConcreteInt>()) return bytes->getValue()->getLimitedValue();
+    return std::nullopt;
+  }
+  static uint64_t bitsOf(std::optional<uint64_t> count) { return count && *count <= UINT64_MAX / 8 ? *count * 8 : 0; }
+  // A concrete cudaMemcpyKind, or -1.
+  static int kindOf(SVal kind) {
+    if (auto v = kind.getAs<nonloc::ConcreteInt>()) return v->getValue()->getSExtValue();
+    return -1;
   }
   static SVal arg(ProgramStateRef s, const CallEvent &call, const cudalifetime::Model &m, const char *key) {
     auto &manager = s->getStateManager();
@@ -907,7 +954,7 @@ public:
       unsigned overlap = rangeOverlap(s, r, bits, op.region, op.bits);
       if (!overlap) continue;
       if ((isLoad && op.access == HostRead) || (!isLoad && (op.access == HostWrite || op.access == HostRead)))
-        report(c, s, 1, isLoad ? readMessage : writeMessage, op.memory, op.memory == Pinned ? "S1" : "S2", &op, overlap != 2);
+        report(c, s, Rule::CL1, isLoad ? readMessage : writeMessage, op.memory, op.memory == Pinned ? "S1" : "S2", &op, overlap != 2);
     }
   }
   void checkPreCall(const CallEvent &call, CheckerContext &c) const;
@@ -942,6 +989,27 @@ public:
   }
   bool evalCall(const CallEvent &call, CheckerContext &c) const;
   void applyCall(const CallEvent &call, CheckerContext &c, ProgramStateRef s, const cudalifetime::Model *given = nullptr) const;
+  // The call applyCall is handling, for the per-effect handlers below; each
+  // returns the state to transition to.
+  struct Site {
+    const CallEvent &call;
+    CheckerContext &c;
+    const cudalifetime::Model &m;
+    const std::string &name;
+    Stream stream;
+    const MemRegion *ptr;
+  };
+  void unmodeledCall(const Site &site, ProgramStateRef s) const;
+  ProgramStateRef applySyncCopy(const Site &site, ProgramStateRef s) const;
+  ProgramStateRef applyMemset(const Site &site, ProgramStateRef s, bool async) const;
+  ProgramStateRef applyCaptureEnd(const Site &site, ProgramStateRef s) const;
+  ProgramStateRef applyAsyncCopy(const Site &site, ProgramStateRef s) const;
+  ProgramStateRef applyLaunch(const Site &site, ProgramStateRef s) const;
+  ProgramStateRef applyEventElapsed(const Site &site, ProgramStateRef s) const;
+  ProgramStateRef applyEventRecord(const Site &site, ProgramStateRef s) const;
+  ProgramStateRef applyWait(const Site &site, ProgramStateRef s, bool hostSync) const;
+  ProgramStateRef applyDeviceFree(const Site &site, ProgramStateRef s, bool async) const;
+  ProgramStateRef applyHostRelease(const Site &site, ProgramStateRef s) const;
   void applyAllocation(const CallEvent &call, CheckerContext &c, ProgramStateRef s) const;
   void checkLocation(SVal location, bool isLoad, const Stmt *, CheckerContext &c) const;
   void checkBind(SVal location, SVal value, const Stmt *, bool, CheckerContext &c) const;
@@ -1045,9 +1113,9 @@ ProgramStateRef AsyncLifetimeChecker::opaqueCall(const CallEvent &call, CheckerC
     // Through pointers to const the callee can only read, which conflicts
     // only with a pending D2H into the buffer.
     if (mayWrite)
-      report(c, s, 1, "Host buffer still used by asynchronous work is passed to an opaque call that may access it", op.memory, "S2", &op, true);
+      report(c, s, Rule::CL1, "Host buffer still used by asynchronous work is passed to an opaque call that may access it", op.memory, "S2", &op, true);
     else if (op.access == HostRead)
-      report(c, s, 1, "Opaque call may read a host buffer before asynchronous D2H completion", op.memory, "S2", &op, true);
+      report(c, s, Rule::CL1, "Opaque call may read a host buffer before asynchronous D2H completion", op.memory, "S2", &op, true);
   };
   for (auto op : writable) check(op, true);
   for (auto op : readOnly) if (!writable.contains(op)) check(op, false);
@@ -1055,241 +1123,317 @@ ProgramStateRef AsyncLifetimeChecker::opaqueCall(const CallEvent &call, CheckerC
 }
 
 void AsyncLifetimeChecker::applyCall(const CallEvent &call, CheckerContext &c, ProgramStateRef s, const cudalifetime::Model *given) const {
-  auto n = name(call); auto m = given ? *given : model(n); const auto &e = m.effect;
-  Stream stream = streamIdentity(s, arg(s, call, m, "stream"));
+  const std::string n = name(call);
+  const cudalifetime::Model m = given ? *given : model(n);
+  const Effect e = effectOf(m.effect);
+  const Stream stream = streamIdentity(s, arg(s, call, m, "stream"));
   if (m.args.count("stream") && stream == 0) ++cudalifetime::info().unmodeled[n + ":unknown-stream"];
-  auto *r = base(arg(s, call, m, "ptr"));
-  if (e.empty()) {
-    if (cudalifetime::isCudaApi(dyn_cast_or_null<FunctionDecl>(call.getDecl()))) ++cudalifetime::info().unmodeled[n];
-    // A lifetime ends here whether or not the callee is inlined. Other calls are
-    // checked at PostCall, once it is known whether CSA inlined them.
-    if (!endsLifetime(call, n)) {
-      auto next = reach(call, s);
-      if (next != s) c.addTransition(next);
-      return;
-    }
-    const bool destructor = isa<CXXDestructorCall>(call);
-    const MemRegion *self = destructor ? cast<CXXDestructorCall>(call).getCXXThisVal().getAsRegion() : nullptr;
-    if (self) self = self->StripCasts();
-    for (auto op : s->get<PendingOps>()) {
-      bool match = false;
-      for (unsigned i = 0; i < call.getNumArgs(); ++i) match |= overlaps(s, base(call.getArgSVal(i)), op.region);
-      if (const auto *method = dyn_cast<CXXInstanceCall>(&call)) match |= overlaps(s, base(method->getCXXThisVal()), op.region);
-      const MemRegion *const *owned = self ? s->get<ContainerOwners>(op.region->getBaseRegion()) : nullptr;
-      if (owned && *owned == self && op.access != DeviceUse) {
-        report(c, s, 2, "Host container is destroyed, releasing its buffer, while asynchronous work may still use it", op.memory, "S4", &op, true);
-        continue;
-      }
-      if (match && op.access != DeviceUse)
-        report(c, s, 2, destructor ? "Object lifetime ends with pending asynchronous work" : "Host buffer is released with pending asynchronous work",
-               op.memory, "S4", &op, true);
-    }
+  const Site site{call, c, m, n, stream, base(arg(s, call, m, "ptr"))};
+  if (e == Effect::None) {
+    unmodeledCall(site, s);
     return;
   }
   ++cudalifetime::info().modeledCalls;
-  if (capturing(s, stream) && (e == "enqueue_copy" || e == "launch" || e == "memset_async" || e == "free_async")) {
+  const bool queues = e == Effect::EnqueueCopy || e == Effect::Launch || e == Effect::MemsetAsync || e == Effect::FreeAsync;
+  if (queues && capturing(s, stream)) {
     noteCapture();  // recorded into the graph; nothing runs until the graph is launched
     c.addTransition(s);
     return;
   }
-  if (e == "copy") {
-    // Synchronous cudaMemcpy runs on the default stream. With host memory on
-    // either side it returns only after the copy and all earlier work on the
-    // default stream (and on the streams it waits for) is complete, or, for a
-    // pageable H2D source, once the source is staged; device-to-device copies
-    // do not synchronize. CUDA 13.2.2 archive: api-sync-behavior#memcpy.
-    const Stream def = defaultStream();
-    auto *dst = base(arg(s, call, m, "dst")), *src = base(arg(s, call, m, "src"));
-    uint64_t bits = 0;
-    if (auto bytes = arg(s, call, m, "size").getAs<nonloc::ConcreteInt>()) {
-      uint64_t count = bytes->getValue()->getLimitedValue();
-      if (count <= UINT64_MAX / 8) bits = count * 8;
-    }
-    int copyKind = -1;
-    if (auto v = arg(s, call, m, "kind").getAs<nonloc::ConcreteInt>()) copyKind = v->getValue()->getSExtValue();
-    s = enqueue(s, def, c.getSValBuilder().makeZeroVal(c.getASTContext().VoidPtrTy));
-    deviceUse(c, s, src, def, "cudaMemcpy"); deviceUse(c, s, dst, def, "cudaMemcpy");
-    auto host = [&](const MemRegion *r) { const Memory k = memory(s, r); return k == Pinned || k == Pageable; };
-    // With cudaMemcpyDefault and no operand known to be host memory, the copy
-    // is treated as device to device; say so when an operand's kind is unknown.
-    if (copyKind == 4 && !host(dst) && !host(src) && (memory(s, dst) == Unknown || memory(s, src) == Unknown)) unknownDirection();
-    const bool writesHost = copyKind == 0 || copyKind == 2 || (copyKind == 4 && host(dst));
-    const bool readsHost = copyKind == 0 || copyKind == 1 || (copyKind == 4 && host(src));
-    if (writesHost || readsHost) {
-      s = syncStream(s, def);
-      // What remains pending is on streams the default stream does not wait for.
-      if (writesHost) hostAccess(c, s, dst, bits, false, "", "cudaMemcpy writes a host buffer that asynchronous work on another stream still uses");
-      if (readsHost) hostAccess(c, s, src, bits, true, "cudaMemcpy reads a host buffer before an asynchronous D2H on another stream completes", "");
-    } else if (copyKind == 3 || copyKind == 4) {
-      s = pending(s, dst, def, DeviceUse, call.getOriginExpr(), c);
-      s = pending(s, src, def, DeviceUse, call.getOriginExpr(), c);
-    } else ++cudalifetime::info().unmodeled[n + ":unknown-copy-kind"];
-  } else if (e == "memset" || e == "memset_async") {
-    // cudaMemset is asynchronous with respect to the host unless the target is
-    // pinned host memory. CUDA 13.2.2 archive: api-sync-behavior#memset.
-    const Stream target = e == "memset" ? defaultStream() : stream;
-    uint64_t bits = 0;
-    if (auto bytes = arg(s, call, m, "size").getAs<nonloc::ConcreteInt>()) {
-      uint64_t count = bytes->getValue()->getLimitedValue();
-      if (count <= UINT64_MAX / 8) bits = count * 8;
-    }
-    s = enqueue(s, target, e == "memset" ? c.getSValBuilder().makeZeroVal(c.getASTContext().VoidPtrTy) : arg(s, call, m, "stream"));
-    deviceUse(c, s, r, target, e == "memset" ? "cudaMemset" : "cudaMemsetAsync");
-    const bool pinned = memory(s, r, bits) == Pinned;
-    if (e == "memset" && pinned) {
-      s = syncStream(s, target);
-      hostAccess(c, s, r, bits, false, "", "cudaMemset writes a host buffer that asynchronous work on another stream still uses");
-    } else s = pending(s, r, target, pinned ? HostRead : DeviceUse, call.getOriginExpr(), c, bits);
-  } else if (e == "capture_begin") {
+  switch (e) {
+  case Effect::Copy: s = applySyncCopy(site, s); break;
+  case Effect::Memset: s = applyMemset(site, s, false); break;
+  case Effect::MemsetAsync: s = applyMemset(site, s, true); break;
+  case Effect::CaptureBegin:
     s = s->set<CaptureOrigins>(stream, stream);
     noteCapture();
-  } else if (e == "capture_end") {
-    for (auto entry : s->get<CaptureOrigins>()) if (entry.second == stream) s = s->remove<CaptureOrigins>(entry.first);
-    for (auto entry : s->get<CapturedEvents>()) if (entry.second == stream) s = s->remove<CapturedEvents>(entry.first);
-    if (auto out = arg(s, call, m, "ptr").getAs<Loc>())
-      s = s->bindLoc(*out, UnknownVal(), c.getStackFrame());
-  } else if (e == "graph_launch") {
+    break;
+  case Effect::CaptureEnd: s = applyCaptureEnd(site, s); break;
+  case Effect::GraphLaunch:
     s = enqueue(s, stream, arg(s, call, m, "stream"));
     noteCapture();
-  } else if (e == "enqueue_copy") {
-    s = enqueue(s, stream, arg(s, call, m, "stream"));
-    auto *dst = base(arg(s, call, m, "dst")), *src = base(arg(s, call, m, "src"));
-    uint64_t bits = 0;
-    if (auto bytes = arg(s, call, m, "size").getAs<nonloc::ConcreteInt>()) {
-      uint64_t count = bytes->getValue()->getLimitedValue();
-      if (!count) { c.addTransition(s); return; }
-      if (count <= UINT64_MAX / 8) bits = count * 8;
-    }
-    int copyKind = -1;
-    if (auto v = arg(s, call, m, "kind").getAs<nonloc::ConcreteInt>()) copyKind = v->getValue()->getSExtValue();
-    deviceUse(c, s, src, stream, "cudaMemcpyAsync"); deviceUse(c, s, dst, stream, "cudaMemcpyAsync");
-    if (copyKind == 1) { s = pending(s, src, stream, HostWrite, call.getOriginExpr(), c, bits); s = pending(s, dst, stream, DeviceUse, call.getOriginExpr(), c); }
-    else if (copyKind == 2) { s = pending(s, dst, stream, HostRead, call.getOriginExpr(), c, bits); s = pending(s, src, stream, DeviceUse, call.getOriginExpr(), c); }
-    else if (copyKind == 3) { s = pending(s, dst, stream, DeviceUse, call.getOriginExpr(), c); s = pending(s, src, stream, DeviceUse, call.getOriginExpr(), c); }
-    else if (copyKind == 4) {
-      // cudaMemcpyDefault: unified addressing picks the direction from the
-      // pointers. A host destination is written (D2H or H2H), so the host must
-      // not touch it; a host source is read (H2D or H2H), so the host must not
-      // write it. An operand of unknown memory kind is left out and reported.
-      const Memory dstKind = memory(s, dst, bits), srcKind = memory(s, src, bits);
-      if (dstKind == Pinned || dstKind == Pageable) s = pending(s, dst, stream, HostRead, call.getOriginExpr(), c, bits);
-      else if (dstKind == Device || dstKind == Ordered) s = pending(s, dst, stream, DeviceUse, call.getOriginExpr(), c);
-      if (srcKind == Pinned || srcKind == Pageable) s = pending(s, src, stream, HostWrite, call.getOriginExpr(), c, bits);
-      else if (srcKind == Device || srcKind == Ordered) s = pending(s, src, stream, DeviceUse, call.getOriginExpr(), c);
-      if (dstKind == Unknown || srcKind == Unknown) unknownDirection();
-    }
-    else if (copyKind != 0) { ++cudalifetime::info().unmodeled[n + ":unknown-copy-kind"]; }
-  } else if (e == "launch") {
-    s = enqueue(s, stream, arg(s, call, m, "stream"));
-    for (unsigned i = 0; i < call.getNumArgs(); ++i) {
-      if (m.args.count("stream") && m.args.at("stream") == i) continue;
-      auto *buffer = base(call.getArgSVal(i));
-      deviceUse(c, s, buffer, stream, "Modeled launch");
-      s = pending(s, buffer, stream, DeviceUse, call.getOriginExpr(), c);
-    }
-  } else if (e == "sync_stream") s = syncStream(s, stream);
-  else if (e == "sync_device") {
+    break;
+  case Effect::EnqueueCopy: s = applyAsyncCopy(site, s); break;
+  case Effect::Launch: s = applyLaunch(site, s); break;
+  case Effect::SyncStream: s = syncStream(s, stream); break;
+  case Effect::SyncDevice:
     for (auto seq : s->get<Sequences>()) s = retire(s, seq.first, seq.second);
-  } else if (e == "event_elapsed") {
-    // CUDA 13.2.2 event API: an incomplete start or end returns NotReady.
-    // A successful timing query therefore proves only their recorded captures.
-    for (const char *key : {"start", "end"}) {
-      const uint64_t event = eventIdentity(s, arg(s, call, m, key));
-      for (auto b : s->get<EventBounds>())
-        if (b.first.first == event && b.first.second) s = retire(s, b.first.second, b.second);
-    }
-    if (auto out = arg(s, call, m, "ms").getAs<Loc>())
-      s = s->bindLoc(*out, UnknownVal(), c.getStackFrame());
-  } else if (e == "event_record" && capturing(s, stream)) {
-    // A record inside a capture is a graph node; a stream that waits on it
-    // joins the capture.
-    const uint64_t event = eventIdentity(s, arg(s, call, m, "event"));
-    s = s->set<EventValues>(event, arg(s, call, m, "event"));
-    for (auto b : s->get<EventBounds>()) if (b.first.first == event) s = s->remove<EventBounds>(b.first);
-    s = s->set<RecordedEvents>(event, true)->set<CapturedEvents>(event, *s->get<CaptureOrigins>(stream));
-  } else if (e == "event_record") {
-    const uint64_t event = eventIdentity(s, arg(s, call, m, "event"));
-    s = s->set<EventValues>(event, arg(s, call, m, "event"));
-    s = enqueue(s, stream, arg(s, call, m, "stream"));
-    for (auto b : s->get<EventBounds>()) if (b.first.first == event) s = s->remove<EventBounds>(b.first);
-    s = s->set<RecordedEvents>(event, true)->set<EventBounds>({event, stream}, sequence(s, stream));
-    for (auto wait : s->get<WaitBounds>()) if (wait.first.first == stream) s = s->set<EventBounds>({event, wait.first.second}, wait.second);
-  } else if (e == "stream_wait_event" && (capturing(s, stream) || s->get<CapturedEvents>(eventIdentity(s, arg(s, call, m, "event"))))) {
-    if (const auto *origin = s->get<CapturedEvents>(eventIdentity(s, arg(s, call, m, "event"))))
-      s = s->set<CaptureOrigins>(stream, *origin);
-    noteCapture();
-  } else if (e == "stream_wait_event" || e == "sync_event") {
-    const uint64_t event = eventIdentity(s, arg(s, call, m, "event"));
-    s = s->set<EventValues>(event, arg(s, call, m, "event"));
-    const auto *recorded = s->get<RecordedEvents>(event);
-    // Only an event created on this path is known to be unrecorded; one read
-    // from an object, a container or another process has unknown history.
-    if (recorded && !*recorded)
-      report(c, s, 4, "Event has no recorded capture on this path; waiting establishes no dependency", Unknown, "S8", nullptr, true);
-    else if (!recorded)
-      cudalifetime::info().coverageUnknown.insert("event with no creation or record on this path: the dependency it carries is unknown");
-    if (e == "stream_wait_event") s = enqueue(s, stream, arg(s, call, m, "stream"));
-    for (auto b : s->get<EventBounds>()) if (b.first.first == event) {
-      if (e == "sync_event" && b.first.second) s = retire(s, b.first.second, b.second);
-      else s = bound(s, stream, b.first.second, b.second);
-      // Work after the capture matters only if the waiter is not already ordered after it.
-      for (auto alloc : s->get<Allocations>())
-        if (!alloc.second.freed && alloc.second.stream == b.first.second && alloc.second.seq > b.second &&
-            !ordered(s, stream, alloc.second.stream, alloc.second.seq))
-          report(c, s, 4, "Event capture predates asynchronous allocation and does not cover it", Ordered, "S8", nullptr, true);
-      for (auto op : s->get<PendingOps>())
-        if (op.stream == b.first.second && op.seq > b.second && !ordered(s, stream, op.stream, op.seq))
-          report(c, s, 4, "Event capture predates pending producer work and does not cover it", op.memory, "S8", &op, true);
-    }
-  } else if (e == "free_async" || e == "free_device") {
-    if (e == "free_async") s = enqueue(s, stream, arg(s, call, m, "stream"));
-    if (const auto *key = allocationRegion(s, r)) {
-      const auto *alloc = s->get<Allocations>(key);
-      bool reported = false;
-      for (auto op : s->get<PendingOps>()) if (overlaps(s, op.region, r)) {
-        bool safe = e == "free_async" ? ordered(s, stream, op.stream, op.seq) : completed(s, op.stream) >= op.seq;
-        if (!safe) {
-          report(c, s, 3, "Stream-ordered allocation is freed while another operation may still use it", Ordered, e == "free_async" ? "S6" : "S7", &op, e == "free_async" && !distinct(s, stream, op.stream));
-          reported = true; break;
-        }
-      }
-      if (!reported && e == "free_async" && !ordered(s, stream, alloc->stream, alloc->seq))
-        report(c, s, 3, "cudaFreeAsync has no dependency on the asynchronous allocation", Ordered, "S6", nullptr, !distinct(s, stream, alloc->stream), false, alloc, key);
-      if (!reported && e == "free_device" && completed(s, alloc->stream) < alloc->seq)
-        report(c, s, 3, "Asynchronous allocation is not known complete before cudaFree", Ordered, "S7", nullptr, false, false, alloc, key);
-      auto allocation = *alloc; allocation.freed = true;
-      allocation.freeStream = stream; allocation.freeSeq = sequence(s, stream);
-      s = s->set<Allocations>(key, allocation);
-    }
-    else if (e == "free_device") {
-      for (auto op : s->get<PendingOps>()) if (op.access == DeviceUse && overlaps(s, op.region, r)) {
-        report(c, s, 3, "Ordinary cudaFree may implicitly synchronize; this path relies on that behavior", Device, "S10", &op, false, true);
-        break;
-      }
-    }
-    // Ordinary cudaFree does not prove unrelated host completion.
-  } else if (e == "free_host" || e == "host_unregister") {
-    for (auto op : s->get<PendingOps>()) if (overlaps(s, op.region, r) && op.access != DeviceUse)
-      report(c, s, 2, "Host buffer is released or unregistered before asynchronous work is known complete", op.memory, "S4", &op, true);
-    if (r) s = s->remove<Memories>(r)->remove<RegisteredExtents>(r);
+    break;
+  case Effect::EventElapsed: s = applyEventElapsed(site, s); break;
+  case Effect::EventRecord: s = applyEventRecord(site, s); break;
+  case Effect::StreamWaitEvent: s = applyWait(site, s, false); break;
+  case Effect::SyncEvent: s = applyWait(site, s, true); break;
+  case Effect::FreeAsync: s = applyDeviceFree(site, s, true); break;
+  case Effect::FreeDevice: s = applyDeviceFree(site, s, false); break;
+  case Effect::FreeHost:
+  case Effect::HostUnregister: s = applyHostRelease(site, s); break;
+  default: break;  // no stream or buffer effect (destroy, or an effect handled elsewhere)
   }
   c.addTransition(s);
 }
 
-void AsyncLifetimeChecker::applyAllocation(const CallEvent &call, CheckerContext &c, ProgramStateRef s) const {
-  auto m = model(name(call)); const auto &e = m.effect;
-  if (e == "host_register") {
-    if (auto *r = base(arg(s, call, m, "ptr"))) {
-      uint64_t bits = 0;
-      if (auto bytes = arg(s, call, m, "size").getAs<nonloc::ConcreteInt>()) {
-        uint64_t count = bytes->getValue()->getLimitedValue();
-        if (count <= UINT64_MAX / 8) bits = count * 8;
+// A call with no model. A lifetime ends here whether or not the callee is
+// inlined; other calls are checked at PostCall, once it is known whether CSA
+// inlined them.
+void AsyncLifetimeChecker::unmodeledCall(const Site &site, ProgramStateRef s) const {
+  const CallEvent &call = site.call;
+  CheckerContext &c = site.c;
+  if (cudalifetime::isCudaApi(dyn_cast_or_null<FunctionDecl>(call.getDecl()))) ++cudalifetime::info().unmodeled[site.name];
+  if (!endsLifetime(call, site.name)) {
+    auto next = reach(call, s);
+    if (next != s) c.addTransition(next);
+    return;
+  }
+  const bool destructor = isa<CXXDestructorCall>(call);
+  const MemRegion *self = destructor ? cast<CXXDestructorCall>(call).getCXXThisVal().getAsRegion() : nullptr;
+  if (self) self = self->StripCasts();
+  for (auto op : s->get<PendingOps>()) {
+    bool match = false;
+    for (unsigned i = 0; i < call.getNumArgs(); ++i) match |= overlaps(s, base(call.getArgSVal(i)), op.region);
+    if (const auto *method = dyn_cast<CXXInstanceCall>(&call)) match |= overlaps(s, base(method->getCXXThisVal()), op.region);
+    const MemRegion *const *owned = self ? s->get<ContainerOwners>(op.region->getBaseRegion()) : nullptr;
+    if (owned && *owned == self && op.access != DeviceUse) {
+      report(c, s, Rule::CL2, "Host container is destroyed, releasing its buffer, while asynchronous work may still use it", op.memory, "S4", &op, true);
+      continue;
+    }
+    if (match && op.access != DeviceUse)
+      report(c, s, Rule::CL2, destructor ? "Object lifetime ends with pending asynchronous work" : "Host buffer is released with pending asynchronous work",
+             op.memory, "S4", &op, true);
+  }
+}
+
+// Synchronous cudaMemcpy runs on the default stream. With host memory on
+// either side it returns only after the copy and all earlier work on the
+// default stream (and on the streams it waits for) is complete, or, for a
+// pageable H2D source, once the source is staged; device-to-device copies
+// do not synchronize. CUDA 13.2.2 archive: api-sync-behavior#memcpy.
+ProgramStateRef AsyncLifetimeChecker::applySyncCopy(const Site &site, ProgramStateRef s) const {
+  const CallEvent &call = site.call;
+  CheckerContext &c = site.c;
+  const Stream def = defaultStream();
+  auto *dst = base(arg(s, call, site.m, "dst")), *src = base(arg(s, call, site.m, "src"));
+  const uint64_t bits = bitsOf(byteCount(arg(s, call, site.m, "size")));
+  const int copyKind = kindOf(arg(s, call, site.m, "kind"));
+  s = enqueue(s, def, c.getSValBuilder().makeZeroVal(c.getASTContext().VoidPtrTy));
+  deviceUse(c, s, src, def, "cudaMemcpy"); deviceUse(c, s, dst, def, "cudaMemcpy");
+  auto host = [&](const MemRegion *r) { const Memory k = memory(s, r); return k == Pinned || k == Pageable; };
+  // With cudaMemcpyDefault and no operand known to be host memory, the copy
+  // is treated as device to device; say so when an operand's kind is unknown.
+  if (copyKind == DefaultCopy && !host(dst) && !host(src) && (memory(s, dst) == Unknown || memory(s, src) == Unknown)) unknownDirection();
+  const bool writesHost = copyKind == HostToHost || copyKind == DeviceToHost || (copyKind == DefaultCopy && host(dst));
+  const bool readsHost = copyKind == HostToHost || copyKind == HostToDevice || (copyKind == DefaultCopy && host(src));
+  if (writesHost || readsHost) {
+    s = syncStream(s, def);
+    // What remains pending is on streams the default stream does not wait for.
+    if (writesHost) hostAccess(c, s, dst, bits, false, "", "cudaMemcpy writes a host buffer that asynchronous work on another stream still uses");
+    if (readsHost) hostAccess(c, s, src, bits, true, "cudaMemcpy reads a host buffer before an asynchronous D2H on another stream completes", "");
+  } else if (copyKind == DeviceToDevice || copyKind == DefaultCopy) {
+    s = pending(s, dst, def, DeviceUse, call.getOriginExpr(), c);
+    s = pending(s, src, def, DeviceUse, call.getOriginExpr(), c);
+  } else ++cudalifetime::info().unmodeled[site.name + ":unknown-copy-kind"];
+  return s;
+}
+
+// cudaMemset is asynchronous with respect to the host unless the target is
+// pinned host memory. CUDA 13.2.2 archive: api-sync-behavior#memset.
+ProgramStateRef AsyncLifetimeChecker::applyMemset(const Site &site, ProgramStateRef s, bool async) const {
+  const CallEvent &call = site.call;
+  CheckerContext &c = site.c;
+  const Stream target = async ? site.stream : defaultStream();
+  const uint64_t bits = bitsOf(byteCount(arg(s, call, site.m, "size")));
+  s = enqueue(s, target, async ? arg(s, call, site.m, "stream") : c.getSValBuilder().makeZeroVal(c.getASTContext().VoidPtrTy));
+  deviceUse(c, s, site.ptr, target, async ? "cudaMemsetAsync" : "cudaMemset");
+  const bool pinned = memory(s, site.ptr, bits) == Pinned;
+  if (!async && pinned) {
+    s = syncStream(s, target);
+    hostAccess(c, s, site.ptr, bits, false, "", "cudaMemset writes a host buffer that asynchronous work on another stream still uses");
+  } else s = pending(s, site.ptr, target, pinned ? HostRead : DeviceUse, call.getOriginExpr(), c, bits);
+  return s;
+}
+
+ProgramStateRef AsyncLifetimeChecker::applyCaptureEnd(const Site &site, ProgramStateRef s) const {
+  for (auto entry : s->get<CaptureOrigins>()) if (entry.second == site.stream) s = s->remove<CaptureOrigins>(entry.first);
+  for (auto entry : s->get<CapturedEvents>()) if (entry.second == site.stream) s = s->remove<CapturedEvents>(entry.first);
+  if (auto out = arg(s, site.call, site.m, "ptr").getAs<Loc>())
+    s = s->bindLoc(*out, UnknownVal(), site.c.getStackFrame());
+  return s;
+}
+
+ProgramStateRef AsyncLifetimeChecker::applyAsyncCopy(const Site &site, ProgramStateRef s) const {
+  const CallEvent &call = site.call;
+  CheckerContext &c = site.c;
+  const Stream stream = site.stream;
+  s = enqueue(s, stream, arg(s, call, site.m, "stream"));
+  auto *dst = base(arg(s, call, site.m, "dst")), *src = base(arg(s, call, site.m, "src"));
+  const std::optional<uint64_t> count = byteCount(arg(s, call, site.m, "size"));
+  if (count && *count == 0) return s;  // an empty copy touches nothing
+  const uint64_t bits = bitsOf(count);
+  const int copyKind = kindOf(arg(s, call, site.m, "kind"));
+  const Stmt *origin = call.getOriginExpr();
+  deviceUse(c, s, src, stream, "cudaMemcpyAsync"); deviceUse(c, s, dst, stream, "cudaMemcpyAsync");
+  switch (copyKind) {
+  case HostToDevice:
+    s = pending(s, src, stream, HostWrite, origin, c, bits);
+    s = pending(s, dst, stream, DeviceUse, origin, c);
+    break;
+  case DeviceToHost:
+    s = pending(s, dst, stream, HostRead, origin, c, bits);
+    s = pending(s, src, stream, DeviceUse, origin, c);
+    break;
+  case DeviceToDevice:
+    s = pending(s, dst, stream, DeviceUse, origin, c);
+    s = pending(s, src, stream, DeviceUse, origin, c);
+    break;
+  case DefaultCopy: {
+    // cudaMemcpyDefault: unified addressing picks the direction from the
+    // pointers. A host destination is written (D2H or H2H), so the host must
+    // not touch it; a host source is read (H2D or H2H), so the host must not
+    // write it. An operand of unknown memory kind is left out and reported.
+    const Memory dstKind = memory(s, dst, bits), srcKind = memory(s, src, bits);
+    if (dstKind == Pinned || dstKind == Pageable) s = pending(s, dst, stream, HostRead, origin, c, bits);
+    else if (dstKind == Device || dstKind == Ordered) s = pending(s, dst, stream, DeviceUse, origin, c);
+    if (srcKind == Pinned || srcKind == Pageable) s = pending(s, src, stream, HostWrite, origin, c, bits);
+    else if (srcKind == Device || srcKind == Ordered) s = pending(s, src, stream, DeviceUse, origin, c);
+    if (dstKind == Unknown || srcKind == Unknown) unknownDirection();
+    break;
+  }
+  case HostToHost: break;
+  default: ++cudalifetime::info().unmodeled[site.name + ":unknown-copy-kind"]; break;
+  }
+  return s;
+}
+
+ProgramStateRef AsyncLifetimeChecker::applyLaunch(const Site &site, ProgramStateRef s) const {
+  const CallEvent &call = site.call;
+  s = enqueue(s, site.stream, arg(s, call, site.m, "stream"));
+  for (unsigned i = 0; i < call.getNumArgs(); ++i) {
+    if (site.m.args.count("stream") && site.m.args.at("stream") == i) continue;
+    auto *buffer = base(call.getArgSVal(i));
+    deviceUse(site.c, s, buffer, site.stream, "Modeled launch");
+    s = pending(s, buffer, site.stream, DeviceUse, call.getOriginExpr(), site.c);
+  }
+  return s;
+}
+
+// CUDA 13.2.2 event API: an incomplete start or end returns NotReady. A
+// successful timing query therefore proves only their recorded captures.
+ProgramStateRef AsyncLifetimeChecker::applyEventElapsed(const Site &site, ProgramStateRef s) const {
+  for (const char *key : {"start", "end"}) {
+    const uint64_t event = eventIdentity(s, arg(s, site.call, site.m, key));
+    for (auto b : s->get<EventBounds>())
+      if (b.first.first == event && b.first.second) s = retire(s, b.first.second, b.second);
+  }
+  if (auto out = arg(s, site.call, site.m, "ms").getAs<Loc>())
+    s = s->bindLoc(*out, UnknownVal(), site.c.getStackFrame());
+  return s;
+}
+
+ProgramStateRef AsyncLifetimeChecker::applyEventRecord(const Site &site, ProgramStateRef s) const {
+  const Stream stream = site.stream;
+  const SVal value = arg(s, site.call, site.m, "event");
+  const uint64_t event = eventIdentity(s, value);
+  s = s->set<EventValues>(event, value);
+  if (capturing(s, stream)) {
+    // A record inside a capture is a graph node; a stream that waits on it
+    // joins the capture.
+    for (auto b : s->get<EventBounds>()) if (b.first.first == event) s = s->remove<EventBounds>(b.first);
+    return s->set<RecordedEvents>(event, true)->set<CapturedEvents>(event, *s->get<CaptureOrigins>(stream));
+  }
+  s = enqueue(s, stream, arg(s, site.call, site.m, "stream"));
+  for (auto b : s->get<EventBounds>()) if (b.first.first == event) s = s->remove<EventBounds>(b.first);
+  s = s->set<RecordedEvents>(event, true)->set<EventBounds>({event, stream}, sequence(s, stream));
+  for (auto wait : s->get<WaitBounds>()) if (wait.first.first == stream) s = s->set<EventBounds>({event, wait.first.second}, wait.second);
+  return s;
+}
+
+// cudaStreamWaitEvent orders the stream after the event's capture;
+// cudaEventSynchronize (hostSync) completes that capture for the host.
+ProgramStateRef AsyncLifetimeChecker::applyWait(const Site &site, ProgramStateRef s, bool hostSync) const {
+  const CallEvent &call = site.call;
+  CheckerContext &c = site.c;
+  const Stream stream = site.stream;
+  const uint64_t event = eventIdentity(s, arg(s, call, site.m, "event"));
+  if (!hostSync && (capturing(s, stream) || s->get<CapturedEvents>(event))) {
+    if (const auto *origin = s->get<CapturedEvents>(event)) s = s->set<CaptureOrigins>(stream, *origin);
+    noteCapture();
+    return s;
+  }
+  s = s->set<EventValues>(event, arg(s, call, site.m, "event"));
+  const auto *recorded = s->get<RecordedEvents>(event);
+  // Only an event created on this path is known to be unrecorded; one read
+  // from an object, a container or another process has unknown history.
+  if (recorded && !*recorded)
+    report(c, s, Rule::CL4, "Event has no recorded capture on this path; waiting establishes no dependency", Unknown, "S8", nullptr, true);
+  else if (!recorded)
+    cudalifetime::info().coverageUnknown.insert("event with no creation or record on this path: the dependency it carries is unknown");
+  if (!hostSync) s = enqueue(s, stream, arg(s, call, site.m, "stream"));
+  for (auto b : s->get<EventBounds>()) if (b.first.first == event) {
+    if (hostSync && b.first.second) s = retire(s, b.first.second, b.second);
+    else s = bound(s, stream, b.first.second, b.second);
+    // Work after the capture matters only if the waiter is not already ordered after it.
+    for (auto alloc : s->get<Allocations>())
+      if (!alloc.second.freed && alloc.second.stream == b.first.second && alloc.second.seq > b.second &&
+          !ordered(s, stream, alloc.second.stream, alloc.second.seq))
+        report(c, s, Rule::CL4, "Event capture predates asynchronous allocation and does not cover it", Ordered, "S8", nullptr, true);
+    for (auto op : s->get<PendingOps>())
+      if (op.stream == b.first.second && op.seq > b.second && !ordered(s, stream, op.stream, op.seq))
+        report(c, s, Rule::CL4, "Event capture predates pending producer work and does not cover it", op.memory, "S8", &op, true);
+  }
+  return s;
+}
+
+// cudaFreeAsync (async) and cudaFree of device memory. Ordinary cudaFree
+// does not prove unrelated host completion.
+ProgramStateRef AsyncLifetimeChecker::applyDeviceFree(const Site &site, ProgramStateRef s, bool async) const {
+  CheckerContext &c = site.c;
+  const Stream stream = site.stream;
+  const MemRegion *r = site.ptr;
+  if (async) s = enqueue(s, stream, arg(s, site.call, site.m, "stream"));
+  if (const auto *key = allocationRegion(s, r)) {
+    const auto *alloc = s->get<Allocations>(key);
+    bool reported = false;
+    for (auto op : s->get<PendingOps>()) if (overlaps(s, op.region, r)) {
+      bool safe = async ? ordered(s, stream, op.stream, op.seq) : completed(s, op.stream) >= op.seq;
+      if (!safe) {
+        report(c, s, Rule::CL3, "Stream-ordered allocation is freed while another operation may still use it", Ordered, async ? "S6" : "S7", &op, async && !distinct(s, stream, op.stream));
+        reported = true; break;
       }
+    }
+    if (!reported && async && !ordered(s, stream, alloc->stream, alloc->seq))
+      report(c, s, Rule::CL3, "cudaFreeAsync has no dependency on the asynchronous allocation", Ordered, "S6", nullptr, !distinct(s, stream, alloc->stream), false, alloc, key);
+    if (!reported && !async && completed(s, alloc->stream) < alloc->seq)
+      report(c, s, Rule::CL3, "Asynchronous allocation is not known complete before cudaFree", Ordered, "S7", nullptr, false, false, alloc, key);
+    auto allocation = *alloc; allocation.freed = true;
+    allocation.freeStream = stream; allocation.freeSeq = sequence(s, stream);
+    s = s->set<Allocations>(key, allocation);
+  } else if (!async) {
+    for (auto op : s->get<PendingOps>()) if (op.access == DeviceUse && overlaps(s, op.region, r)) {
+      report(c, s, Rule::CL3, "Ordinary cudaFree may implicitly synchronize; this path relies on that behavior", Device, "S10", &op, false, true);
+      break;
+    }
+  }
+  return s;
+}
+
+// cudaFreeHost and cudaHostUnregister.
+ProgramStateRef AsyncLifetimeChecker::applyHostRelease(const Site &site, ProgramStateRef s) const {
+  const MemRegion *r = site.ptr;
+  for (auto op : s->get<PendingOps>()) if (overlaps(s, op.region, r) && op.access != DeviceUse)
+    report(site.c, s, Rule::CL2, "Host buffer is released or unregistered before asynchronous work is known complete", op.memory, "S4", &op, true);
+  if (r) s = s->remove<Memories>(r)->remove<RegisteredExtents>(r);
+  return s;
+}
+
+void AsyncLifetimeChecker::applyAllocation(const CallEvent &call, CheckerContext &c, ProgramStateRef s) const {
+  auto m = model(name(call)); const Effect e = effectOf(m.effect);
+  if (e == Effect::HostRegister) {
+    if (auto *r = base(arg(s, call, m, "ptr"))) {
+      const uint64_t bits = bitsOf(byteCount(arg(s, call, m, "size")));
       c.addTransition(s->set<Memories>(r, Pinned)->set<RegisteredExtents>(r, bits));
     }
     return;
   }
-  if (e != "malloc_host" && e != "malloc_device" && e != "malloc_async" && e != "stream_create" && e != "event_create") return;
+  if (e != Effect::MallocHost && e != Effect::MallocDevice && e != Effect::MallocAsync && e != Effect::StreamCreate && e != Effect::EventCreate) return;
   auto out = arg(s, call, m, "ptr").getAs<Loc>();
   if (!out) return;
   SVal value = UnknownVal();
@@ -1300,16 +1444,17 @@ void AsyncLifetimeChecker::applyAllocation(const CallEvent &call, CheckerContext
     value = c.getSValBuilder().conjureSymbolVal(call, type, c.blockCount());
     s = s->bindLoc(*out, value, c.getStackFrame());
   }
-  if (e == "stream_create") {
-    unsigned streamKind = name(call) == "cudaStreamCreate" ? 2 : 0;
-    if (auto v = arg(s, call, m, "flags").getAs<nonloc::ConcreteInt>()) streamKind = (v->getValue()->getZExtValue() & 1) ? 3 : 2;
-    s = s->set<StreamKinds>(identity(value), streamKind)->set<StreamValues>(identity(value), value);
-  } else if (e == "event_create") {
+  if (e == Effect::StreamCreate) {
+    StreamKind streamKind = name(call) == "cudaStreamCreate" ? StreamKind::Blocking : StreamKind::Unknown;
+    if (auto v = arg(s, call, m, "flags").getAs<nonloc::ConcreteInt>())
+      streamKind = (v->getValue()->getZExtValue() & StreamNonBlockingFlag) ? StreamKind::NonBlocking : StreamKind::Blocking;
+    s = s->set<StreamKinds>(identity(value), static_cast<unsigned>(streamKind))->set<StreamValues>(identity(value), value);
+  } else if (e == Effect::EventCreate) {
     s = s->set<RecordedEvents>(identity(value), false)->set<EventValues>(identity(value), value);
     if (auto flags = arg(s, call, m, "flags").getAs<nonloc::ConcreteInt>())
-      s = s->set<EventTimingDisabled>(identity(value), (flags->getValue()->getZExtValue() & 2) != 0);
+      s = s->set<EventTimingDisabled>(identity(value), (flags->getValue()->getZExtValue() & EventDisableTimingFlag) != 0);
   } else if (auto *r = base(value)) {
-    Memory mem = e == "malloc_host" ? Pinned : e == "malloc_async" ? Ordered : Device;
+    Memory mem = e == Effect::MallocHost ? Pinned : e == Effect::MallocAsync ? Ordered : Device;
     s = s->set<Memories>(r, mem);
     if (mem == Ordered) {
       Stream stream = streamIdentity(s, arg(s, call, m, "stream"));
@@ -1325,8 +1470,9 @@ void AsyncLifetimeChecker::applyAllocation(const CallEvent &call, CheckerContext
 bool AsyncLifetimeChecker::evalCall(const CallEvent &call, CheckerContext &c) const {
   cudalifetime::info().perThread = c.getPreprocessor().isMacroDefined("CUDA_API_PER_THREAD_DEFAULT_STREAM");
   const auto m = model(name(call));
-  if (m.effect.empty() || m.effect == "observe" || !call.getOriginExpr()) return false;
-  if (m.effect == "address_only") {  // inspects the pointer value, not the buffer: CSA evaluates it
+  const Effect effect = effectOf(m.effect);
+  if (effect == Effect::None || effect == Effect::Observe || !call.getOriginExpr()) return false;
+  if (effect == Effect::AddressOnly) {  // inspects the pointer value, not the buffer: CSA evaluates it
     if (m.assumption) cudalifetime::info().assumedModels.insert(m.function);
     return false;
   }
@@ -1339,7 +1485,7 @@ bool AsyncLifetimeChecker::evalCall(const CallEvent &call, CheckerContext &c) co
   if (m.assumption) cudalifetime::info().assumedModels.insert(m.function);
   auto s = c.getState();
   bool impossibleSuccess = false;
-  if (m.effect == "event_elapsed") for (const char *key : {"start", "end"}) {
+  if (effect == Effect::EventElapsed) for (const char *key : {"start", "end"}) {
     const uint64_t event = eventIdentity(s, arg(s, call, m, key));
     const auto *recorded = s->get<RecordedEvents>(event);
     const auto *disabled = s->get<EventTimingDisabled>(event);
@@ -1352,7 +1498,7 @@ bool AsyncLifetimeChecker::evalCall(const CallEvent &call, CheckerContext &c) co
     auto failed = s->assume(result, true);
     if (failed) {
       failed = failed->BindExpr(call.getOriginExpr(), c.getStackFrame(), result);
-      if (resultIsUsed(call.getOriginExpr(), c.getASTContext()) || name(call) == "cudaEventQuery" || name(call) == "cudaStreamQuery" || m.effect == "event_elapsed") c.addTransition(failed);
+      if (resultIsUsed(call.getOriginExpr(), c.getASTContext()) || name(call) == "cudaEventQuery" || name(call) == "cudaStreamQuery" || effect == Effect::EventElapsed) c.addTransition(failed);
       else {
         ++cudalifetime::info().cudaFailurePathsSkipped;
         c.generateSink(failed, c.getPredecessor());
@@ -1361,9 +1507,9 @@ bool AsyncLifetimeChecker::evalCall(const CallEvent &call, CheckerContext &c) co
     if (impossibleSuccess) return true;
     s = s->BindExpr(call.getOriginExpr(), c.getStackFrame(), builder.makeZeroVal(resultType));
   }
-  const auto &e = m.effect;
-  if (e == "malloc_host" || e == "malloc_device" || e == "malloc_async" ||
-      e == "stream_create" || e == "event_create" || e == "host_register")
+  const Effect e = effect;
+  if (e == Effect::MallocHost || e == Effect::MallocDevice || e == Effect::MallocAsync ||
+      e == Effect::StreamCreate || e == Effect::EventCreate || e == Effect::HostRegister)
     applyAllocation(call, c, s);
   else applyCall(call, c, s);
   return true;
@@ -1385,13 +1531,13 @@ void AsyncLifetimeChecker::checkBind(SVal location, SVal value, const Stmt *, bo
   for (auto op : s->get<PendingOps>()) if (overlaps(s, source, op.region)) {
     cudalifetime::info().coverageUnknown.insert("pending region stored outside the local stack: subsequent accesses through opaque ownership are not modeled");
     if (op.access != DeviceUse)
-      report(c, s, 1, "Host buffer escapes to nonlocal storage while asynchronous work remains pending", op.memory, "S2", &op, true);
+      report(c, s, Rule::CL1, "Host buffer escapes to nonlocal storage while asynchronous work remains pending", op.memory, "S2", &op, true);
   }
 }
 void AsyncLifetimeChecker::checkPostStmt(const CUDAKernelCallExpr *call, CheckerContext &c) const {
   ++cudalifetime::info().kernelLaunches;
   auto s = c.getState(); const CallExpr *config = call->getConfig();
-  Stream stream = config && config->getNumArgs() > 3 ? streamIdentity(s, kernelValue(config->getArg(3), c)) : (cudalifetime::info().perThread ? 6 : 4);
+  Stream stream = config && config->getNumArgs() > 3 ? streamIdentity(s, kernelValue(config->getArg(3), c)) : defaultStream();
   if (!stream) ++cudalifetime::info().unmodeled["kernel-launch:unknown-stream"];
   s = enqueue(s, stream, config && config->getNumArgs() > 3 ? kernelValue(config->getArg(3), c) : c.getSValBuilder().makeZeroVal(c.getASTContext().VoidPtrTy));
   for (const auto *argExpr : call->arguments()) {
@@ -1409,7 +1555,7 @@ void AsyncLifetimeChecker::checkEndFunction(const ReturnStmt *, CheckerContext &
     if (op.access == DeviceUse || !op.region->hasMemorySpace<StackSpaceRegion>(s)) continue;
     if (auto *space = dyn_cast<StackSpaceRegion>(op.region->getMemorySpace(s)))
       if (space->getStackFrame() == frame)
-        report(c, s, 2, "Stack buffer lifetime ends while asynchronous work may still access it", op.memory, "S4", &op);
+        report(c, s, Rule::CL2, "Stack buffer lifetime ends while asynchronous work may still access it", op.memory, "S4", &op);
   }
 }
 }
