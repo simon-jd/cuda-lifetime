@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "labelledAt": "2026-11-03T19:12:25Z",
+  "labelOrigin": "Held out from version 0.6.0: mined after the 0.5.0 held-out set, from fix commits in projects not used or searched while 0.5.0 or 0.6.0 was developed, and labelled from each fix commit's message and diff before the checker was run on either revision. siteLines are lines of the buggy (parent) revision in file: the queueing call and the access or lifetime end it races with; for CL4, the call that captures the event, the producer the wait does not cover, and the consumer after the wait. translationUnit is the source analyzed when file is a header.",
+  "matching": "A case is found when the parent revision has a CL1-CL4 diagnostic whose primary location or any code-flow location in the labelled file is on one of siteLines; the fix silences it when the fixed revision has no such diagnostic.",
+  "cases": [
+    {
+      "id": "cuco-dynamic-map-success-count",
+      "repository": "https://github.com/NVIDIA/cuCollections",
+      "fixCommit": "71bcfa43741627beba2fd38b8bf283d8cb9c2a78",
+      "parentCommit": "ad9c478ad174047d3c426e7775d9372aabb0759f",
+      "file": "include/cuco/detail/dynamic_map.inl",
+      "translationUnit": "tests/dynamic_map/erase_test.cu",
+      "function": "cuco::dynamic_map::insert and cuco::dynamic_map::erase",
+      "siteLines": [173, 178, 179, 221, 226, 227],
+      "bug": "insert and erase queue a D2H cudaMemcpyAsync of a submap's success counter into the stack variable h_num_successes (h_submap_num_successes in erase) on stream and add it to the map sizes on the next lines without synchronizing; the fix synchronizes the stream after each copy.",
+      "inRuleScope": true,
+      "rule": "CL1"
+    },
+    {
+      "id": "cuopt-route-view-staging",
+      "repository": "https://github.com/NVIDIA/cuopt",
+      "fixCommit": "c7c94d2e6e5f00101e296dcb1239f02dd97632be",
+      "parentCommit": "301a9ac71db53c4e5990290c96d3a522c77900cc",
+      "file": "cpp/src/routing/solution/solution.cu",
+      "function": "cuopt::routing::detail::solution_t::set_route_views",
+      "siteLines": [298, 299, 300],
+      "bug": "Each loop iteration copies the stack local route_view to the device with routes_view.set_element_async on the solution's stream, and route_view is destroyed at the end of the iteration with the copy pending (the function never synchronizes); the fix stages the views in a member host vector, copies it with raft::copy and synchronizes the stream.",
+      "inRuleScope": true,
+      "rule": "CL2"
+    },
+    {
+      "id": "spark-rapids-shuffle-offset-info",
+      "repository": "https://github.com/NVIDIA/spark-rapids-jni",
+      "fixCommit": "013b0671846ab41ad5482f01dbae4b1c54f8d105",
+      "parentCommit": "f6c9383b500f64bebf021a1f98194a5ce3fcbc7a",
+      "file": "src/main/cpp/src/shuffle_assemble.cu",
+      "function": "spark_rapids_jni::compute_offset_column_info",
+      "siteLines": [181, 187, 188],
+      "bug": "The local std::vector offset_info is the host source of the H2D copy that cudf::detail::make_device_uvector_async queues on stream, and it is destroyed when the function returns, before the copy is known to have read it; the fix uses the synchronizing cudf::detail::make_device_uvector.",
+      "inRuleScope": true,
+      "rule": "CL2"
+    },
+    {
+      "id": "ngp-exposure-gradient-read",
+      "repository": "https://github.com/NVlabs/instant-ngp",
+      "fixCommit": "a96f45441f4e57dc3556c43cee5037f0a85e07a3",
+      "parentCommit": "6ee7724370b5e7aa9d514a8c36fae78c112706d9",
+      "file": "src/testbed_nerf.cu",
+      "function": "ngp::Testbed::train_nerf",
+      "siteLines": [3163, 3169],
+      "bug": "cudaMemcpyAsync queues a D2H copy of the per-camera exposure gradients into the host vector m_nerf.training.cam_exposure_gradient on stream, and the optimization loop reads that vector right after without synchronizing; the fix synchronizes the stream after the copy.",
+      "inRuleScope": true,
+      "rule": "CL1"
+    },
+    {
+      "id": "gromacs-shift-vector-event",
+      "repository": "https://github.com/gromacs/gromacs",
+      "fixCommit": "4a676c0a467c621cb7a1ec24df2a6a96146a7712",
+      "parentCommit": "8b0e9d74fa922e1a238dd3ec94558a75ac953f31",
+      "file": "src/gromacs/mdlib/sim_util.cpp",
+      "function": "do_force",
+      "siteLines": [1775, 1801, 1930],
+      "bug": "With GPU coordinate buffer ops, the local coordinate conversion (convertCoordinatesGpu) marks the event the non-local stream waits on before the non-local nonbonded kernel, but the shift vectors that kernel reads are uploaded only afterwards (gpu_upload_shiftvec), so the wait does not cover the upload; the fix moves the upload before the conversion.",
+      "inRuleScope": true,
+      "rule": "CL4"
+    },
+    {
+      "id": "gromacs-nonlocal-x-wait",
+      "repository": "https://github.com/gromacs/gromacs",
+      "fixCommit": "422429f5cdd3ea0fa14d7e5466ba10a16d8e9653",
+      "parentCommit": "c22bafa6bb4ecd3792c1a7c76bb70d8b65eaed02",
+      "file": "src/gromacs/mdlib/sim_util.cpp",
+      "function": "do_force",
+      "siteLines": [1269, 1477, 1479],
+      "bug": "With GPU halo exchange and CPU bonded or free-energy work, the non-local coordinates are copied D2H by stateGpu->copyCoordinatesFromGpu, but do_force then waits on the nonbonded module's D2H event (wait_nonlocal_x_copy_D2H_done), which that copy does not record, before do_force_lowlevel reads x on the host; the fix waits on the state propagator's event for the copy (waitCoordinatesReadyOnHost).",
+      "inRuleScope": true,
+      "rule": "CL4"
+    }
+  ]
+}
