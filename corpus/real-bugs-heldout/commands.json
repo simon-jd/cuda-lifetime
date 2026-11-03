@@ -117,7 +117,8 @@
     }
    },
    "generatedHeaders": [
-    "rapids-logger"
+    "rapids-logger",
+    "openmp"
    ],
    "summarize": [
     {
@@ -132,6 +133,9 @@
      "file": "{rmm}/cpp/src/device_buffer.cpp",
      "language": "c++"
     }
+   ],
+   "headerPatches": [
+    "cccl-string-view-deduction-guides"
    ]
   },
   "cuvs-all-neighbors-host-dataset": {
@@ -506,6 +510,14 @@
    "pattern": "class = typename std::enable_if<(\\s*detail::is_allowed_element_type_conversion_t)",
    "replacement": "class = std::enable_if_t<\\1",
    "reason": "raft::span's converting constructor defaults its last template parameter to std::enable_if<...> without ::type, so it never drops out of overload resolution. GCC does not instantiate the constexpr body while libstdc++'s std::variant checks a conversion; Clang does, and fails on every span<float> to span<double> conversion it considers. The patch uses std::enable_if_t, which removes the constructor when the conversion is not allowed."
+  },
+  "cccl-string-view-deduction-guides": {
+   "in": "cccl",
+   "header": "libcudacxx/include/cuda/std/string_view",
+   "includeRoot": "libcudacxx/include",
+   "pattern": "^_CCCL_HOST (basic_string_view\\()",
+   "replacement": "\\1",
+   "reason": "CCCL 3.1 marks the deduction guides from std::basic_string and std::basic_string_view _CCCL_HOST (__host__ in CUDA mode). nvcc accepts that; Clang rejects any deduction guide annotated other than __host__ __device__. A deduction guide declares no function body, so the patch drops the annotation, which Clang accepts and which deduces the same types."
   }
  }
 }
