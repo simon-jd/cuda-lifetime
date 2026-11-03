@@ -55,6 +55,11 @@ so the fixed revisions are reported again. Of the six misses, five are in
 functions that exhaust the node budget, several with `cudaMemcpyDefault`
 copies whose direction is unknown, and one does not parse
 ([corpus/real-bugs-heldout/README.md](corpus/real-bugs-heldout/README.md)).
+Clang's stock analyzer and clang-tidy, run on the same units with the same
+flags, report nothing about these races: on the corpora and both bug sets
+their only hits on labelled lines are dead-store, narrowing and
+signed-bitwise warnings, present in the fixed code too
+([docs/evaluation.md](docs/evaluation.md#stock-analyzer-and-clang-tidy)).
 
 compute-sanitizer is a dynamic, device-side tool, so it complements the
 checker rather than serving as a baseline for it: on the same stale-read

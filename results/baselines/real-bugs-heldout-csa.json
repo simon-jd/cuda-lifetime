@@ -1,0 +1,1183 @@
+{
+  "schemaVersion": 1,
+  "tool": "csa",
+  "toolVersion": "clang version 23.1.3 (https://github.com/llvm/llvm-project 0d261d1ca552c95a8f007e061c787ac7132fbcbc)\nTarget: x86_64-unknown-linux-gnu\nThread model: posix\nInstalledDir: .deps/LLVM-23.1.3-Linux-X64/bin",
+  "cases": [
+    {
+      "id": "nccl-ep-mask-clean",
+      "inRuleScope": true,
+      "rule": "CL2",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'offset' is never read",
+            "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+            "line": 775,
+            "flow": [
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 775
+              }
+            ]
+          },
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'cur_offset' is never read",
+            "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+            "line": 806,
+            "flow": [
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 806
+              }
+            ]
+          },
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'offset' is never read",
+            "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+            "line": 1799,
+            "flow": [
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 1799
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Access to field 'round_scales' results in a dereference of a null pointer (loaded from variable 'config')",
+            "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+            "line": 2234,
+            "flow": [
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2116
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2116
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2116
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2116
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2116
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2117
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2117
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2117
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2117
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2117
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2118
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2118
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2118
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2118
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2118
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2119
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2119
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2119
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2120
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2120
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2124
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2124
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2130
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2130
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2132
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2132
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2133
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2133
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2134
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2134
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2135
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2135
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2136
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2136
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2137
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2137
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2138
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2138
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2139
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2139
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2140
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2140
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2146
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2146
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2147
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2147
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2154
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2154
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2157
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2159
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2159
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2160
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2160
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2161
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2161
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2162
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2162
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2163
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2163
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2164
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2164
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2165
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2165
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2166
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2166
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2167
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2167
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2168
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2168
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2169
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2182
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2182
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2203
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2203
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2204
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2204
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2205
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2205
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2219
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2285
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2285
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2288
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2222
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2222
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2224
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2224
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2226
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2226
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2229
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2229
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2230
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2230
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2231
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2231
+              },
+              {
+                "uri": "nccl-ep-mask-clean@b0983be1ad/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2234
+              }
+            ]
+          }
+        ],
+        "diagnosticCount": 4
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'offset' is never read",
+            "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+            "line": 775,
+            "flow": [
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 775
+              }
+            ]
+          },
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'cur_offset' is never read",
+            "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+            "line": 806,
+            "flow": [
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 806
+              }
+            ]
+          },
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'offset' is never read",
+            "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+            "line": 1799,
+            "flow": [
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 1799
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Access to field 'round_scales' results in a dereference of a null pointer (loaded from variable 'config')",
+            "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+            "line": 2234,
+            "flow": [
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2116
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2116
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2116
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2116
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2116
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2117
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2117
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2117
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2117
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2117
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2118
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2118
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2118
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2118
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2118
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2119
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2119
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2119
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2120
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2120
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2124
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2124
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2130
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2130
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2132
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2132
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2133
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2133
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2134
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2134
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2135
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2135
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2136
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2136
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2137
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2137
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2138
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2138
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2139
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2139
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2140
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2140
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2146
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2146
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2147
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2147
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2154
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2154
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2157
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2159
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2159
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2160
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2160
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2161
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2161
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2162
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2162
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2163
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2163
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2164
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2164
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2165
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2165
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2166
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2166
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2167
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2167
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2168
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2168
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2169
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2182
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2182
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2203
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2203
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2204
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2204
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2205
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2205
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2219
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2285
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2285
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2288
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2222
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2222
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2224
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2224
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2226
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2226
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2229
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2229
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2230
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2230
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2231
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2231
+              },
+              {
+                "uri": "nccl-ep-mask-clean@10945c51e5/contrib/nccl_ep/nccl_ep.cc",
+                "line": 2234
+              }
+            ]
+          }
+        ],
+        "diagnosticCount": 4
+      },
+      "result": "missed"
+    },
+    {
+      "id": "cuvs-vamana-serialize-dataset",
+      "inRuleScope": true,
+      "rule": "CL1",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "raft": "c172b3f82a2f564dabeed479df300c24318aed5b",
+          "rmm": "38a0339356ebee8428e3105fea06fb26e0478509"
+        },
+        "diagnosticCount": 0
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "raft": "c172b3f82a2f564dabeed479df300c24318aed5b",
+          "rmm": "38a0339356ebee8428e3105fea06fb26e0478509"
+        },
+        "diagnosticCount": 0
+      },
+      "result": "missed"
+    },
+    {
+      "id": "cuvs-binary-quantizer-threshold",
+      "inRuleScope": true,
+      "rule": "CL1",
+      "buggy": {
+        "parsed": false,
+        "returncode": 1,
+        "errorCount": 4,
+        "errors": [
+          ".deps/recall/trees/cccl-ecfd3adfaa/libcudacxx/include/cuda/std/string_view:835:12: error: in CUDA/HIP, deduction guides may only be annotated with '__host__ __device__'; '__host__'-only, '__device__'-only, or '__global__' deduction guides are not allowed",
+          ".deps/recall/trees/cccl-ecfd3adfaa/libcudacxx/include/cuda/std/string_view:839:12: error: in CUDA/HIP, deduction guides may only be annotated with '__host__ __device__'; '__host__'-only, '__device__'-only, or '__global__' deduction guides are not allowed",
+          ".deps/recall/trees/cccl-ecfd3adfaa/libcudacxx/include/cuda/std/string_view:844:12: error: in CUDA/HIP, deduction guides may only be annotated with '__host__ __device__'; '__host__'-only, '__device__'-only, or '__global__' deduction guides are not allowed"
+        ],
+        "dependencies": {
+          "raft": "67d961fe27fd980786c54ac57d338278ad0b387c",
+          "rmm": "0f511d24698bd799393fe1baf08435d2ca79410e",
+          "cccl": "ecfd3adfaa7ebcb81d80d5b297ab3551619fda02"
+        }
+      },
+      "fixed": {
+        "parsed": false,
+        "returncode": 1,
+        "errorCount": 4,
+        "errors": [
+          ".deps/recall/trees/cccl-ecfd3adfaa/libcudacxx/include/cuda/std/string_view:835:12: error: in CUDA/HIP, deduction guides may only be annotated with '__host__ __device__'; '__host__'-only, '__device__'-only, or '__global__' deduction guides are not allowed",
+          ".deps/recall/trees/cccl-ecfd3adfaa/libcudacxx/include/cuda/std/string_view:839:12: error: in CUDA/HIP, deduction guides may only be annotated with '__host__ __device__'; '__host__'-only, '__device__'-only, or '__global__' deduction guides are not allowed",
+          ".deps/recall/trees/cccl-ecfd3adfaa/libcudacxx/include/cuda/std/string_view:844:12: error: in CUDA/HIP, deduction guides may only be annotated with '__host__ __device__'; '__host__'-only, '__device__'-only, or '__global__' deduction guides are not allowed"
+        ],
+        "dependencies": {
+          "raft": "67d961fe27fd980786c54ac57d338278ad0b387c",
+          "rmm": "0f511d24698bd799393fe1baf08435d2ca79410e",
+          "cccl": "ecfd3adfaa7ebcb81d80d5b297ab3551619fda02"
+        }
+      },
+      "result": "not-analyzable"
+    },
+    {
+      "id": "cuvs-all-neighbors-host-dataset",
+      "inRuleScope": true,
+      "rule": "CL1",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "raft": "26773571bde0c03b156b20cac4ee19e67c03a91d",
+          "rmm": "2d645925a1aea7ce8809aa57e6d78e32bdb0e36b"
+        },
+        "diagnosticCount": 0
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "raft": "26773571bde0c03b156b20cac4ee19e67c03a91d",
+          "rmm": "2d645925a1aea7ce8809aa57e6d78e32bdb0e36b"
+        },
+        "diagnosticCount": 0
+      },
+      "result": "missed"
+    },
+    {
+      "id": "cuml-tsne-min-max-source",
+      "inRuleScope": true,
+      "rule": "CL1",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "raft": "c0eaacd8682c2b22cd5bc1e1c5add88925fe9a94",
+          "cuvs": "14d9ef8755544a9ef05efca2e3b5d85426699e13",
+          "rmm": "c65202f52766e12c73e293b16d6a520a069d4afc"
+        },
+        "diagnosticCount": 0
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "raft": "06cb6935a5ea81d42f47b490dcdb639fd4596a3b",
+          "cuvs": "14d9ef8755544a9ef05efca2e3b5d85426699e13",
+          "rmm": "c65202f52766e12c73e293b16d6a520a069d4afc"
+        },
+        "diagnosticCount": 0
+      },
+      "result": "missed"
+    },
+    {
+      "id": "cuml-cd-alpha-temporary",
+      "inRuleScope": true,
+      "rule": "CL2",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "raft": "c0eaacd8682c2b22cd5bc1e1c5add88925fe9a94",
+          "cuvs": "14d9ef8755544a9ef05efca2e3b5d85426699e13",
+          "rmm": "c65202f52766e12c73e293b16d6a520a069d4afc"
+        },
+        "diagnosticCount": 0
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "raft": "06cb6935a5ea81d42f47b490dcdb639fd4596a3b",
+          "cuvs": "14d9ef8755544a9ef05efca2e3b5d85426699e13",
+          "rmm": "c65202f52766e12c73e293b16d6a520a069d4afc"
+        },
+        "diagnosticCount": 0
+      },
+      "result": "missed"
+    },
+    {
+      "id": "raft-mst-edge-count",
+      "inRuleScope": true,
+      "rule": "CL2",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "02bec8dacb7ad3fe3a7ec3ee837b8d37a0ac0333"
+        },
+        "diagnosticCount": 0
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "02bec8dacb7ad3fe3a7ec3ee837b8d37a0ac0333"
+        },
+        "diagnosticCount": 0
+      },
+      "result": "missed"
+    },
+    {
+      "id": "raft-device-reference-read",
+      "inRuleScope": true,
+      "rule": "CL1",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "02bec8dacb7ad3fe3a7ec3ee837b8d37a0ac0333"
+        },
+        "diagnosticCount": 1
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "02bec8dacb7ad3fe3a7ec3ee837b8d37a0ac0333"
+        },
+        "diagnosticCount": 1
+      },
+      "result": "missed"
+    },
+    {
+      "id": "cugraph-bfs-source-temporary",
+      "inRuleScope": true,
+      "rule": "CL2",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "raft": "e848681d1cb07045c35c518aeff4d8a66d7186bf",
+          "rmm": "c65202f52766e12c73e293b16d6a520a069d4afc"
+        },
+        "diagnosticCount": 0
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "raft": "06cb6935a5ea81d42f47b490dcdb639fd4596a3b",
+          "rmm": "c65202f52766e12c73e293b16d6a520a069d4afc"
+        },
+        "diagnosticCount": 0
+      },
+      "result": "missed"
+    },
+    {
+      "id": "warp-memtile-scratch-free",
+      "inRuleScope": true,
+      "rule": "CL3",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'optimizations_may_trigger_texture_bug' during its initialization is never read",
+            "uri": "warp-memtile-scratch-free@8d403225dd/warp/native/warp.cu",
+            "line": 4625,
+            "flow": [
+              {
+                "uri": "warp-memtile-scratch-free@8d403225dd/warp/native/warp.cu",
+                "line": 4625
+              }
+            ]
+          }
+        ],
+        "diagnosticCount": 3
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'optimizations_may_trigger_texture_bug' during its initialization is never read",
+            "uri": "warp-memtile-scratch-free@9ca77345d2/warp/native/warp.cu",
+            "line": 4656,
+            "flow": [
+              {
+                "uri": "warp-memtile-scratch-free@9ca77345d2/warp/native/warp.cu",
+                "line": 4656
+              }
+            ]
+          }
+        ],
+        "diagnosticCount": 3
+      },
+      "result": "missed"
+    }
+  ]
+}

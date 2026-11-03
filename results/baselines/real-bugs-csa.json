@@ -1,0 +1,3519 @@
+{
+  "schemaVersion": 1,
+  "tool": "csa",
+  "toolVersion": "clang version 23.1.3 (https://github.com/llvm/llvm-project 0d261d1ca552c95a8f007e061c787ac7132fbcbc)\nTarget: x86_64-unknown-linux-gnu\nThread model: posix\nInstalledDir: .deps/LLVM-23.1.3-Linux-X64/bin",
+  "cases": [
+    {
+      "id": "cudf-json-scoped-host-value",
+      "inRuleScope": true,
+      "rule": "CL2",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "9bef8393ea1f80f7b2799a01f9035c30e3a2e6eb"
+        },
+        "diagnosticCount": 0
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "9bef8393ea1f80f7b2799a01f9035c30e3a2e6eb"
+        },
+        "diagnosticCount": 0
+      },
+      "result": "missed"
+    },
+    {
+      "id": "cudf-device-view-staging",
+      "inRuleScope": true,
+      "rule": "CL2",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "386f76d5f0c76d523139e7b98d30c11253a70065"
+        },
+        "diagnosticCount": 0
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "386f76d5f0c76d523139e7b98d30c11253a70065"
+        },
+        "diagnosticCount": 0
+      },
+      "result": "missed"
+    },
+    {
+      "id": "cudf-string-scalar-source",
+      "inRuleScope": true,
+      "rule": "CL2",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "631aa4df185985c33238155840d0d3c6bab59c3f"
+        },
+        "diagnosticCount": 0
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "631aa4df185985c33238155840d0d3c6bab59c3f"
+        },
+        "diagnosticCount": 0
+      },
+      "result": "missed"
+    },
+    {
+      "id": "cudf-parquet-string-offsets",
+      "inRuleScope": true,
+      "rule": "CL2",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "c5d25378bfffa04f46666b0fb0e7e21e533fe00d"
+        },
+        "diagnosticCount": 0
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "c5d25378bfffa04f46666b0fb0e7e21e533fe00d"
+        },
+        "diagnosticCount": 0
+      },
+      "result": "missed"
+    },
+    {
+      "id": "cudf-regex-program",
+      "inRuleScope": true,
+      "rule": "CL2",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "c5d25378bfffa04f46666b0fb0e7e21e533fe00d"
+        },
+        "diagnosticCount": 0
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "dependencies": {
+          "rmm": "c5d25378bfffa04f46666b0fb0e7e21e533fe00d"
+        },
+        "diagnosticCount": 0
+      },
+      "result": "missed"
+    },
+    {
+      "id": "cudf-arrow-stream-chunk",
+      "inRuleScope": true,
+      "rule": "CL2",
+      "buggy": {
+        "parsed": false,
+        "returncode": 1,
+        "errorCount": 1,
+        "errors": [
+          ".deps/recall/trees/cudf-7ff0ef8a93/cpp/src/interop/arrow_utilities.hpp:11:10: fatal error: 'nanoarrow/nanoarrow.h' file not found"
+        ],
+        "dependencies": {
+          "rmm": "9319cb40bb50672f0a6beb43f387a63e1a6fb4bf"
+        }
+      },
+      "fixed": {
+        "parsed": false,
+        "returncode": 1,
+        "errorCount": 1,
+        "errors": [
+          ".deps/recall/trees/cudf-edc3696e97/cpp/src/interop/arrow_utilities.hpp:11:10: fatal error: 'nanoarrow/nanoarrow.h' file not found"
+        ],
+        "dependencies": {
+          "rmm": "9319cb40bb50672f0a6beb43f387a63e1a6fb4bf"
+        }
+      },
+      "result": "not-analyzable"
+    },
+    {
+      "id": "gpe-staging-slot-reuse",
+      "inRuleScope": true,
+      "rule": "CL1",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "diagnosticCount": 0
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "diagnosticCount": 0
+      },
+      "result": "missed"
+    },
+    {
+      "id": "rmm-merge-lists-event",
+      "inRuleScope": true,
+      "rule": "CL4",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "diagnosticCount": 0
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "diagnosticCount": 0
+      },
+      "result": "missed"
+    },
+    {
+      "id": "llama-set-tensor-visibility",
+      "inRuleScope": false,
+      "rule": null,
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "core.BitwiseShift",
+            "level": "warning",
+            "message": "The result of left shift is undefined because the right operand is >= 2147483647, not smaller than 32, the capacity of 'int'",
+            "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+            "line": 1266,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1266
+              }
+            ]
+          },
+          {
+            "ruleId": "core.UndefinedBinaryOperatorResult",
+            "level": "warning",
+            "message": "The right operand of '*' is a garbage value",
+            "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+            "line": 1502,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1458
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1458
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1485
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1485
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1500
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1502
+              }
+            ]
+          },
+          {
+            "ruleId": "core.UndefinedBinaryOperatorResult",
+            "level": "warning",
+            "message": "The left operand of '-' is a garbage value",
+            "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+            "line": 1615,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1562
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1562
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1584
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1595
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1595
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1604
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1610
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1611
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1611
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1612
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1612
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1613
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1613
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1614
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1614
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1615
+              }
+            ]
+          },
+          {
+            "ruleId": "core.UndefinedBinaryOperatorResult",
+            "level": "warning",
+            "message": "The right operand of '*' is a garbage value",
+            "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+            "line": 1734,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1666
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1666
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1706
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1706
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1731
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1734
+              }
+            ]
+          },
+          {
+            "ruleId": "core.UndefinedBinaryOperatorResult",
+            "level": "warning",
+            "message": "The right operand of '*' is a garbage value",
+            "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+            "line": 1874,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1828
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1837
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1837
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1865
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1866
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1866
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1867
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1867
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1868
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1868
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1869
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1869
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1870
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1870
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1871
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1871
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1872
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1872
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1873
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1873
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 1874
+              }
+            ]
+          },
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'n_ctx' during its initialization is never read",
+            "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+            "line": 8153,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8153
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Access to field 'extra' results in a dereference of a null pointer (loaded from variable 'src0')",
+            "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+            "line": 8421,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9950
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10062
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10073
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10077
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10077
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10083
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10083
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9631
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9631
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8416
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8416
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8418
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8418
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8418
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8418
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8419
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8419
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8419
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8421
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Array access (via field 'ne') results in a null pointer dereference",
+            "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+            "line": 8895,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9950
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10021
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10021
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10021
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10021
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8893
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8893
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 8895
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Access to field 'backend' results in a dereference of a null pointer (loaded from variable 'ids')",
+            "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+            "line": 9423,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9950
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10021
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10021
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10025
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10073
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10077
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10077
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10083
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10083
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9415
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9423
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Access to field 'backend' results in a dereference of a null pointer (loaded from variable 'src0')",
+            "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+            "line": 9555,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9950
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10037
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10073
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10077
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10077
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10083
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 10083
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9553
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9553
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9553
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9555
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Access to field 'backend' results in a dereference of a null pointer",
+            "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+            "line": 9800,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9893
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9771
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9771
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9778
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9778
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9778
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9784
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9784
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9788
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9788
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9794
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9795
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9795
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9800
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9800
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9800
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Array access (via field 'ne') results in a null pointer dereference",
+            "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+            "line": 9942,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9942
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Array access (via field 'ne') results in a null pointer dereference",
+            "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+            "line": 9942,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@7a9f75c38b/ggml-cuda.cu",
+                "line": 9942
+              }
+            ]
+          }
+        ],
+        "diagnosticCount": 13
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "core.BitwiseShift",
+            "level": "warning",
+            "message": "The result of left shift is undefined because the right operand is >= 2147483647, not smaller than 32, the capacity of 'int'",
+            "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+            "line": 1266,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1266
+              }
+            ]
+          },
+          {
+            "ruleId": "core.UndefinedBinaryOperatorResult",
+            "level": "warning",
+            "message": "The right operand of '*' is a garbage value",
+            "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+            "line": 1502,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1458
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1458
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1485
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1485
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1500
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1502
+              }
+            ]
+          },
+          {
+            "ruleId": "core.UndefinedBinaryOperatorResult",
+            "level": "warning",
+            "message": "The left operand of '-' is a garbage value",
+            "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+            "line": 1615,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1562
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1562
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1584
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1595
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1595
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1604
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1610
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1611
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1611
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1612
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1612
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1613
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1613
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1614
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1614
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1615
+              }
+            ]
+          },
+          {
+            "ruleId": "core.UndefinedBinaryOperatorResult",
+            "level": "warning",
+            "message": "The right operand of '*' is a garbage value",
+            "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+            "line": 1734,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1666
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1666
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1706
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1706
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1731
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1734
+              }
+            ]
+          },
+          {
+            "ruleId": "core.UndefinedBinaryOperatorResult",
+            "level": "warning",
+            "message": "The right operand of '*' is a garbage value",
+            "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+            "line": 1874,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1828
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1837
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1837
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1865
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1866
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1866
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1867
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1867
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1868
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1868
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1869
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1869
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1870
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1870
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1871
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1871
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1872
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1872
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1873
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1873
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 1874
+              }
+            ]
+          },
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'n_ctx' during its initialization is never read",
+            "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+            "line": 8153,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8153
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Access to field 'extra' results in a dereference of a null pointer (loaded from variable 'src0')",
+            "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+            "line": 8421,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9950
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10062
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10073
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10077
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10077
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10083
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10083
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9631
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9631
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8416
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8416
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8418
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8418
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8418
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8418
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8419
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8419
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8419
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8421
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Array access (via field 'ne') results in a null pointer dereference",
+            "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+            "line": 8895,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9950
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10021
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10021
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10021
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10021
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8893
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8893
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 8895
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Access to field 'backend' results in a dereference of a null pointer (loaded from variable 'ids')",
+            "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+            "line": 9423,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9950
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10021
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10021
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10025
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10073
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10077
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10077
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10083
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10083
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9415
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9423
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Access to field 'backend' results in a dereference of a null pointer (loaded from variable 'src0')",
+            "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+            "line": 9555,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9950
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10037
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10073
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10077
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10077
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10080
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10083
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 10083
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9553
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9553
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9553
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9555
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Access to field 'backend' results in a dereference of a null pointer",
+            "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+            "line": 9800,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9893
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9771
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9771
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9778
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9778
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9778
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9784
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9784
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9788
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9788
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9794
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9795
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9795
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9800
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9800
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9800
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Array access (via field 'ne') results in a null pointer dereference",
+            "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+            "line": 9942,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9942
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Array access (via field 'ne') results in a null pointer dereference",
+            "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+            "line": 9942,
+            "flow": [
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9930
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9934
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9933
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9935
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9937
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9941
+              },
+              {
+                "uri": "llama-set-tensor-visibility@f34432ca1e/ggml-cuda.cu",
+                "line": 9942
+              }
+            ]
+          }
+        ],
+        "diagnosticCount": 13
+      },
+      "result": "missed"
+    },
+    {
+      "id": "llama-copy-stream",
+      "inRuleScope": false,
+      "rule": null,
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'size' is never read",
+            "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+            "line": 801,
+            "flow": [
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 801
+              }
+            ]
+          },
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'size' is never read",
+            "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+            "line": 839,
+            "flow": [
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 839
+              }
+            ]
+          },
+          {
+            "ruleId": "core.DivideZero",
+            "level": "warning",
+            "message": "Division by zero",
+            "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+            "line": 1471,
+            "flow": [
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1392
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1392
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1400
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1400
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1401
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1401
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1423
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1423
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1423
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1426
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1426
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1430
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1430
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1456
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1456
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1465
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1465
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1468
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1468
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1475
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1477
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1477
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1456
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1465
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1465
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1466
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 647
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 648
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 650
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 648
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 650
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 648
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 656
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1466
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1466
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1468
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1468
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1470
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1470
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1471
+              }
+            ]
+          },
+          {
+            "ruleId": "core.DivideZero",
+            "level": "warning",
+            "message": "Division by zero",
+            "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+            "line": 1478,
+            "flow": [
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1392
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1392
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1400
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1400
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1401
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1401
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1423
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1423
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1423
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1426
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1426
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1430
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1430
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1456
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1456
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1465
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1465
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1466
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 647
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 648
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 650
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 648
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 650
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 648
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 656
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1466
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1466
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1468
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1468
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1475
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1477
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1477
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 1478
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Array access (via field 'ne') results in a null pointer dereference",
+            "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+            "line": 2026,
+            "flow": [
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 2161
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 2161
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 2165
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 2259
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 2022
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 2026
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Array access (via field 'ne') results in a null pointer dereference",
+            "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+            "line": 2251,
+            "flow": [
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 2161
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 2161
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 2165
+              },
+              {
+                "uri": "llama-copy-stream@0478174d59/ggml/src/ggml-cuda.cu",
+                "line": 2251
+              }
+            ]
+          }
+        ],
+        "diagnosticCount": 6
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'size' is never read",
+            "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+            "line": 801,
+            "flow": [
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 801
+              }
+            ]
+          },
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'size' is never read",
+            "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+            "line": 839,
+            "flow": [
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 839
+              }
+            ]
+          },
+          {
+            "ruleId": "core.DivideZero",
+            "level": "warning",
+            "message": "Division by zero",
+            "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+            "line": 1471,
+            "flow": [
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1392
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1392
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1400
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1400
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1401
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1401
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1423
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1423
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1423
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1426
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1426
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1430
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1430
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1456
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1456
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1465
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1465
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1468
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1468
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1475
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1477
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1477
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1456
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1465
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1465
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1466
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 647
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 648
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 650
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 648
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 650
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 648
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 656
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1466
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1466
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1468
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1468
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1470
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1470
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1471
+              }
+            ]
+          },
+          {
+            "ruleId": "core.DivideZero",
+            "level": "warning",
+            "message": "Division by zero",
+            "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+            "line": 1478,
+            "flow": [
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1392
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1392
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1400
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1400
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1401
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1401
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1405
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1407
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1422
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1423
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1423
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1423
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1424
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1426
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1426
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1430
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1430
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1456
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1456
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1465
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1465
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1466
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 647
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 648
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 650
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 648
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 649
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 650
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 648
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 656
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1466
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1466
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1468
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1468
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1475
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1477
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1477
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 1478
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Array access (via field 'ne') results in a null pointer dereference",
+            "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+            "line": 2026,
+            "flow": [
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 2161
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 2161
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 2165
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 2259
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 2022
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 2026
+              }
+            ]
+          },
+          {
+            "ruleId": "core.NullDereference",
+            "level": "warning",
+            "message": "Array access (via field 'ne') results in a null pointer dereference",
+            "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+            "line": 2251,
+            "flow": [
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 2161
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 2161
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 2165
+              },
+              {
+                "uri": "llama-copy-stream@be55695eff/ggml/src/ggml-cuda.cu",
+                "line": 2251
+              }
+            ]
+          }
+        ],
+        "diagnosticCount": 6
+      },
+      "result": "missed"
+    },
+    {
+      "id": "samples-system-atomics",
+      "inRuleScope": false,
+      "rule": null,
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'val' is never read",
+            "uri": "samples-system-atomics@12b046a80e/Samples/0_Introduction/systemWideAtomics/systemWideAtomics.cu",
+            "line": 159,
+            "flow": [
+              {
+                "uri": "samples-system-atomics@12b046a80e/Samples/0_Introduction/systemWideAtomics/systemWideAtomics.cu",
+                "line": 159
+              }
+            ]
+          }
+        ],
+        "diagnosticCount": 1
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "deadcode.DeadStores",
+            "level": "warning",
+            "message": "Value stored to 'val' is never read",
+            "uri": "samples-system-atomics@3e6d1858af/Samples/0_Introduction/systemWideAtomics/systemWideAtomics.cu",
+            "line": 159,
+            "flow": [
+              {
+                "uri": "samples-system-atomics@3e6d1858af/Samples/0_Introduction/systemWideAtomics/systemWideAtomics.cu",
+                "line": 159
+              }
+            ]
+          }
+        ],
+        "diagnosticCount": 1
+      },
+      "result": "missed"
+    },
+    {
+      "id": "csc-pingpong-mpi-send",
+      "inRuleScope": false,
+      "rule": null,
+      "buggy": {
+        "parsed": false,
+        "returncode": 1,
+        "errorCount": 1,
+        "errors": [
+          "csc-pingpong-mpi-send@4651d72644/exercises/sycl/08-ping-pong/CUDA/src/pingpong.cpp:3:10: fatal error: 'mpi.h' file not found"
+        ]
+      },
+      "fixed": {
+        "parsed": false,
+        "returncode": 1,
+        "errorCount": 1,
+        "errors": [
+          "csc-pingpong-mpi-send@ed08e50039/exercises/sycl/08-ping-pong/CUDA/src/pingpong.cpp:3:10: fatal error: 'mpi.h' file not found"
+        ]
+      },
+      "result": "not-analyzable"
+    },
+    {
+      "id": "cail-staged-copy",
+      "inRuleScope": false,
+      "rule": null,
+      "buggy": {
+        "parsed": false,
+        "returncode": 1,
+        "errorCount": 1,
+        "errors": [
+          "cail-staged-copy@397c2f52fd/src/gpu/cuda/../../core/cail.h:7:10: fatal error: 'mpi.h' file not found"
+        ]
+      },
+      "fixed": {
+        "parsed": false,
+        "returncode": 1,
+        "errorCount": 1,
+        "errors": [
+          "cail-staged-copy@e9bf0c3586/src/gpu/cuda/../../core/cail.h:7:10: fatal error: 'mpi.h' file not found"
+        ]
+      },
+      "result": "not-analyzable"
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "mode": "tidy",
+  "tool": [
+    "LLVM (http://llvm.org/):"
+  ],
+  "matching": "rule-agnostic: any warning on a label's file and line",
+  "status": {
+    "passed": 20,
+    "failed": 0,
+    "timeout": 0,
+    "unavailable": 0
+  },
+  "totals": {
+    "tp": 2,
+    "fp": 2,
+    "fn": 8,
+    "tn": 8
+  },
+  "warnings": 18,
+  "offLabelWarnings": [
+    "corpus/seed/cl1_pageable_d2h_bad.cpp:3: 2 adjacent parameters of 'cl1_pageable_d2h_bad' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]",
+    "corpus/seed/cl1_pageable_d2h_good.cpp:3: 2 adjacent parameters of 'cl1_pageable_d2h_good' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]",
+    "corpus/seed/cl1_pinned_d2h_bad.cpp:3: 2 adjacent parameters of 'cl1_pinned_d2h_bad' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]",
+    "corpus/seed/cl1_pinned_d2h_good.cpp:3: 2 adjacent parameters of 'cl1_pinned_d2h_good' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]",
+    "corpus/seed/cl1_pinned_h2d_bad.cpp:3: 2 adjacent parameters of 'cl1_pinned_h2d_bad' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]",
+    "corpus/seed/cl1_pinned_h2d_good.cpp:3: 2 adjacent parameters of 'cl1_pinned_h2d_good' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]",
+    "corpus/seed/cl2_free_host_bad.cpp:3: 2 adjacent parameters of 'cl2_free_host_bad' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]",
+    "corpus/seed/cl2_free_host_good.cpp:3: 2 adjacent parameters of 'cl2_free_host_good' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]",
+    "corpus/seed/cl2_stack_return_bad.cpp:3: 2 adjacent parameters of 'cl2_stack_return_bad' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]",
+    "corpus/seed/cl2_stack_return_good.cpp:3: 2 adjacent parameters of 'cl2_stack_return_good' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]",
+    "corpus/seed/cl3_async_cuda_free_bad.cpp:3: 2 adjacent parameters of 'cl3_async_cuda_free_bad' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]",
+    "corpus/seed/cl3_async_cuda_free_good.cpp:3: 2 adjacent parameters of 'cl3_async_cuda_free_good' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]",
+    "corpus/seed/cl4_empty_event_bad.cpp:3: 2 adjacent parameters of 'cl4_empty_event_bad' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]",
+    "corpus/seed/cl4_empty_event_good.cpp:3: 2 adjacent parameters of 'cl4_empty_event_good' of similar type ('cudaStream_t') are easily swapped by mistake [bugprone-easily-swappable-parameters]"
+  ],
+  "cases": [
+    {
+      "id": "cl1_pinned_d2h_bad",
+      "expect": "warning",
+      "outcome": "tp",
+      "warnings": [
+        "Value stored to 'value' during its initialization is never read [clang-analyzer-deadcode.DeadStores]"
+      ]
+    },
+    {
+      "id": "cl1_pinned_d2h_good",
+      "expect": "none",
+      "outcome": "fp",
+      "warnings": [
+        "Value stored to 'value' during its initialization is never read [clang-analyzer-deadcode.DeadStores]"
+      ]
+    },
+    {
+      "id": "cl1_pinned_h2d_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "cl1_pinned_h2d_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "cl1_pageable_d2h_bad",
+      "expect": "warning",
+      "outcome": "tp",
+      "warnings": [
+        "Value stored to 'value' during its initialization is never read [clang-analyzer-deadcode.DeadStores]"
+      ]
+    },
+    {
+      "id": "cl1_pageable_d2h_good",
+      "expect": "none",
+      "outcome": "fp",
+      "warnings": [
+        "Value stored to 'value' during its initialization is never read [clang-analyzer-deadcode.DeadStores]"
+      ]
+    },
+    {
+      "id": "cl2_free_host_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "cl2_free_host_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "cl2_stack_return_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "cl2_stack_return_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "cl3_cross_stream_alloc_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "cl3_cross_stream_alloc_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "cl3_cross_stream_free_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "cl3_cross_stream_free_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "cl3_async_cuda_free_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "cl3_async_cuda_free_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "cl4_empty_event_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "cl4_empty_event_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "cl4_stale_event_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "cl4_stale_event_good",
+      "expect": "none",
+      "outcome": "tn"
+    }
+  ]
+}

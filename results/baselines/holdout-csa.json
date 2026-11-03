@@ -1,0 +1,293 @@
+{
+  "schemaVersion": 1,
+  "mode": "analyze",
+  "tool": [
+    "clang version 23.1.3 (https://github.com/llvm/llvm-project 0d261d1ca552c95a8f007e061c787ac7132fbcbc)"
+  ],
+  "matching": "rule-agnostic: any warning on a label's file and line",
+  "status": {
+    "passed": 48,
+    "failed": 0,
+    "timeout": 0,
+    "unavailable": 0
+  },
+  "totals": {
+    "tp": 4,
+    "fp": 4,
+    "fn": 21,
+    "tn": 20
+  },
+  "warnings": 8,
+  "offLabelWarnings": [],
+  "cases": [
+    {
+      "id": "h01_interior_write_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h01_interior_write_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h02_wrong_stream_sync_bad",
+      "expect": "warning",
+      "outcome": "tp",
+      "warnings": [
+        "Value stored to 'value' during its initialization is never read [deadcode.DeadStores]"
+      ]
+    },
+    {
+      "id": "h02_wrong_stream_sync_good",
+      "expect": "none",
+      "outcome": "fp",
+      "warnings": [
+        "Value stored to 'value' during its initialization is never read [deadcode.DeadStores]"
+      ]
+    },
+    {
+      "id": "h03_wait_is_not_host_completion_bad",
+      "expect": "warning",
+      "outcome": "tp",
+      "warnings": [
+        "Value stored to 'value' during its initialization is never read [deadcode.DeadStores]"
+      ]
+    },
+    {
+      "id": "h03_wait_is_not_host_completion_good",
+      "expect": "none",
+      "outcome": "fp",
+      "warnings": [
+        "Value stored to 'value' during its initialization is never read [deadcode.DeadStores]"
+      ]
+    },
+    {
+      "id": "h04_branch_completion_bad",
+      "expect": "warning",
+      "outcome": "tp",
+      "warnings": [
+        "Value stored to 'value' during its initialization is never read [deadcode.DeadStores]"
+      ]
+    },
+    {
+      "id": "h04_branch_completion_good",
+      "expect": "none",
+      "outcome": "fp",
+      "warnings": [
+        "Value stored to 'value' during its initialization is never read [deadcode.DeadStores]"
+      ]
+    },
+    {
+      "id": "h05_sibling_field_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h05_sibling_field_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h06_copy_byte_extent_bad",
+      "expect": "warning",
+      "outcome": "tp",
+      "warnings": [
+        "Value stored to 'value' during its initialization is never read [deadcode.DeadStores]"
+      ]
+    },
+    {
+      "id": "h06_copy_byte_extent_good",
+      "expect": "none",
+      "outcome": "fp",
+      "warnings": [
+        "Value stored to 'value' during its initialization is never read [deadcode.DeadStores]"
+      ]
+    },
+    {
+      "id": "h07_stack_interior_return_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h07_stack_interior_return_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h08_unregister_pending_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h08_unregister_pending_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h09_opaque_destructor_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h09_opaque_destructor_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h10_freehost_alias_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h10_freehost_alias_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h11_pageable_stack_return_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h11_pageable_stack_return_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h12_registered_field_return_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h12_registered_field_return_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h13_transitive_dependency_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h13_transitive_dependency_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h14_rerecord_replaces_capture_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h14_rerecord_replaces_capture_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h15_free_after_remote_use_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h15_free_after_remote_use_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h16_cudafree_wrong_sync_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h16_cudafree_wrong_sync_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h17_legacy_blocking_order_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h17_legacy_blocking_order_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h18_perthread_not_legacy_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h18_perthread_not_legacy_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h19_empty_event_host_wait_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h19_empty_event_host_wait_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h20_capture_before_copy_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h20_capture_before_copy_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h21_capture_between_copies_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h21_capture_between_copies_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h22_wait_snapshot_not_retroactive_bad_cl4",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h22_wait_snapshot_not_retroactive_bad_cl3",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h22_wait_snapshot_not_retroactive_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h23_stale_event_host_wait_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h23_stale_event_host_wait_good",
+      "expect": "none",
+      "outcome": "tn"
+    },
+    {
+      "id": "h24_destroy_is_legal_bad",
+      "expect": "warning",
+      "outcome": "fn"
+    },
+    {
+      "id": "h24_destroy_is_legal_good",
+      "expect": "none",
+      "outcome": "tn"
+    }
+  ]
+}

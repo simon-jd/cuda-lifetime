@@ -291,6 +291,38 @@ unmodeled. One TU does not parse (CCCL 3.1 under Clang 23). The per-case
 reasons are in
 [corpus/real-bugs-heldout/README.md](../corpus/real-bugs-heldout/README.md).
 
+## Stock analyzer and clang-tidy
+
+The same translation units, with the same flags, through Clang 23.1.3's
+stock static analyzer (`clang++ --analyze`, default checkers) and clang-tidy
+23.1.3 (`clang-analyzer-*` and `bugprone-*`, headers included, the projects'
+own `.clang-tidy` files overridden). Neither has CL1–CL4 rules, so matching
+ignores the rule: on the corpora, any warning on a label's file and line
+counts (`scripts/score_baseline.py`); on the fixed bugs, any diagnostic on a
+site line, as for cuda-lifetime (`scripts/run_real_bugs.py --tool csa` and
+`--tool clang-tidy`). Results are in `results/baselines/`.
+
+| | cuda-lifetime 0.5.0 | Stock CSA | clang-tidy |
+|---|---|---|---|
+| Seed, TP/FP/FN/TN | 10/0/0/10 | 2/2/8/8 | 2/2/8/8 |
+| Holdout (seen, regression), TP/FP/FN/TN | 25/0/0/24 | 4/4/21/20 | 4/4/21/20 |
+| Development bugs within the rules, found of 8 | 3 | 0 | 0 |
+| Held-out bugs, found of 10 | 4 | 0 | 1 |
+
+Every corpus hit of both baselines is `deadcode.DeadStores` ("value stored
+during its initialization is never read") on a line that the positive and
+the negative case of a pair share, so each true positive comes with a false
+positive; none is about the asynchronous lifetime. clang-tidy's one held-out
+hit (Warp) and one hit on a development case outside the rules (cuda-samples
+`systemWideAtomics`) are `bugprone-signed-bitwise` and
+`bugprone-narrowing-conversions` warnings that happen to sit on a site line
+and remain after the fix. Neither baseline reports anything about a host
+access or lifetime racing an asynchronous copy; that is not what their
+checks look for, so this shows the gap the rules fill rather than a
+competing detector. The baselines fail to parse the same TUs cuda-lifetime
+does (cuVS's CCCL 3.1 revision, the MPI and nanoarrow cases), and
+clang-tidy crashes on the cuVS one.
+
 ## What compute-sanitizer sees
 
 compute-sanitizer is not a baseline for these rules. It checks the device
@@ -337,6 +369,27 @@ Build the checker and run the corpora:
 ```sh
 ctest --test-dir build --output-on-failure
 python3 tests/run_seed.py --native build/cuda-lifetime-native --out results/seed
+```
+
+The fixed bugs, development and held-out, with cuda-lifetime and the two
+baselines (LLVM 23.1.3 release binaries for the baselines):
+
+```sh
+for set in real-bugs real-bugs-heldout; do
+  python3 scripts/run_real_bugs.py --cases corpus/$set/cases.json \
+    --commands corpus/$set/commands.json --clones .deps/recall \
+    --native build/cuda-lifetime-native --out results/$set-run.json
+  for tool in csa clang-tidy; do
+    python3 scripts/run_real_bugs.py --tool $tool --clang $LLVM/bin/clang++ \
+      --tidy $LLVM/bin/clang-tidy --cases corpus/$set/cases.json \
+      --commands corpus/$set/commands.json --clones .deps/recall \
+      --out results/$set-$tool.json
+  done
+done
+python3 scripts/baseline.py --compdb results/seed/compile_commands.json \
+  --mode analyze --clang $LLVM/bin/clang++ --out results/seed-csa
+python3 scripts/score_baseline.py --labels corpus/seed/labels.json \
+  --report results/seed-csa/report.json --out results/seed-csa.json
 ```
 
 Build the three projects, then translate each nvcc database into

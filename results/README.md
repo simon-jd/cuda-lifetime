@@ -93,6 +93,16 @@ The same runner and 0.5.0 build on the held-out cases in
 one record per case with both revisions' diagnostics, coverage and loaded
 summaries, and the dependency commits used.
 
+## `baselines/`
+
+Clang 23.1.3's stock analyzer and clang-tidy on the same inputs as the
+checker. `seed-*.json` and `holdout-*.json` score `scripts/baseline.py`
+reports (in `reports/`, paths made relative) against the corpus labels with
+`scripts/score_baseline.py`, listing the warnings behind each hit.
+`real-bugs-*.json` and `real-bugs-heldout-*.json` are
+`scripts/run_real_bugs.py --tool csa|clang-tidy` records: per revision, the
+number of diagnostics and those that touch the labelled file.
+
 ## `real-bugs/parquet-budget.json`
 
 Why `cudf-parquet-string-offsets` is missed: the same TU at 2,000,000 nodes,

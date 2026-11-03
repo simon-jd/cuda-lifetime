@@ -43,4 +43,8 @@ describe removing nvcc flags and adding host-only and CUDA-path arguments.
 `scripts/baseline.py` runs Clang (syntax check or the stock analyzer) and
 clang-tidy on the same translated database as cuda-lifetime, so both see the
 same host definitions and include paths. Compare their raw diagnostics, not only return codes; the baseline
-script does not map their rule names onto CL1–CL4.
+script does not map their rule names onto CL1–CL4. `scripts/score_baseline.py`
+scores a report against corpus labels, and `scripts/run_real_bugs.py --tool`
+runs both on the fixed bugs; the results, none of which concern an
+asynchronous lifetime, are in
+[evaluation.md](evaluation.md#stock-analyzer-and-clang-tidy).
