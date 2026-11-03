@@ -99,10 +99,7 @@ class HeaderPatchTests(unittest.TestCase):
                 overlay(temp, Path(tree), [self.PATCH])
 
     def test_commands_name_known_patches_and_existing_generated_headers(self):
-        for corpus in ("real-bugs", "real-bugs-heldout"):
-            path = ROOT / "corpus" / corpus / "commands.json"
-            if not path.exists():
-                continue
+        for path in sorted((ROOT / "corpus").glob("real-bugs*/commands.json")):
             commands = json.loads(path.read_text())
             for case in commands["cases"].values():
                 for name in case.get("headerPatches", []):
