@@ -283,6 +283,15 @@ def main():
             row[name] = relative(record, tree, f"{case['id']}@{revision[:10]}")
             print(case["id"], name, "parsed" if record["parsed"] else "not parsed",
                   len(record.get("diagnostics", [])), "diagnostics", flush=True)
+        if args.tool != "cuda-lifetime":
+            # Baselines warn throughout the headers; keep the count and the
+            # diagnostics that touch the labelled file, which is all matching uses.
+            for name in ("buggy", "fixed"):
+                if "diagnostics" in row[name]:
+                    every = row[name]["diagnostics"]
+                    row[name]["diagnosticCount"] = len(every)
+                    row[name]["diagnostics"] = [d for d in every if d["uri"].endswith(case["file"]) or
+                                                any(f["uri"].endswith(case["file"]) for f in d["flow"])]
         buggy, fixed = row["buggy"], row["fixed"]
         if not buggy["parsed"]:
             row["result"] = "not-analyzable"
