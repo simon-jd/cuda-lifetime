@@ -677,10 +677,6 @@ public:
       return false;
     return std::distance(record->field_begin(), record->field_end()) == 1;
   }
-  struct Summary {
-    bool done = false, synchronizes = false, copies = false;
-    std::optional<cudalifetime::Model> copy, sync;
-  };
   struct Forwarded {
     // level -1: the address of the parameter; 0: its value; 1: an element of
     // the array it points to.
@@ -689,6 +685,67 @@ public:
     int64_t value = 0;
     bool valid() const { return param >= 0 || constant || receiver; }
   };
+  // A body that, on every path to its normal exit, calls the function a
+  // parameter points to (RAFT's interruptible wait polls the query its caller
+  // passes, cudaStreamQuery or cudaEventQuery): which parameter, and where the
+  // call's arguments come from.
+  struct Through {
+    unsigned callee = 0;
+    std::vector<Forwarded> args;
+  };
+  struct Summary {
+    bool done = false, synchronizes = false, copies = false;
+    std::optional<cudalifetime::Model> copy, sync;
+    std::optional<Through> through;
+  };
+  // The parameter of fd that a call's callee expression reads, when the call
+  // goes through a function pointer (or reference) parameter.
+  static int calleeParameter(const CallExpr *call, const FunctionDecl *fd) {
+    const Expr *callee = call->getCallee()->IgnoreParenImpCasts();
+    if (const auto *unary = dyn_cast<UnaryOperator>(callee); unary && unary->getOpcode() == UO_Deref)
+      callee = unary->getSubExpr()->IgnoreParenImpCasts();
+    const auto *ref = dyn_cast<DeclRefExpr>(callee);
+    const auto *param = ref ? dyn_cast<ParmVarDecl>(ref->getDecl()) : nullptr;
+    if (!param || !param->getType().getNonReferenceType()->isFunctionPointerType())
+      return -1;
+    for (unsigned i = 0; i < fd->getNumParams(); ++i)
+      if (fd->getParamDecl(i) == param)
+        return static_cast<int>(i);
+    return -1;
+  }
+  // The function an argument names (cudaStreamQuery, &cudaStreamQuery).
+  static const FunctionDecl *referencedFunction(const Expr *e) {
+    e = e->IgnoreParenImpCasts();
+    if (const auto *unary = dyn_cast<UnaryOperator>(e); unary && unary->getOpcode() == UO_AddrOf)
+      e = unary->getSubExpr()->IgnoreParenImpCasts();
+    const auto *ref = dyn_cast<DeclRefExpr>(e);
+    return ref ? dyn_cast<FunctionDecl>(ref->getDecl()) : nullptr;
+  }
+  // The model of a call to a body summarized as calling through a parameter,
+  // once the function passed for it is known: the target's synchronization,
+  // with its operands taken from the arguments the body forwards to it.
+  static std::optional<cudalifetime::Model> resolveThrough(const Through &through, const FunctionDecl *target) {
+    const cudalifetime::Model m = model(declName(target));
+    const Effect e = effectOf(m.effect);
+    if (e != Effect::SyncStream && e != Effect::SyncEvent && e != Effect::SyncDevice)
+      return std::nullopt;
+    cudalifetime::Model out;
+    out.function = declName(target);
+    out.effect = m.effect;
+    out.assumption = true;
+    for (const auto &[key, index] : m.args) {
+      if (index >= through.args.size())
+        return std::nullopt;
+      const Forwarded &f = through.args[index];
+      if (f.param >= 0 && f.level == 0)
+        out.args[key] = static_cast<unsigned>(f.param);
+      else if (f.constant)
+        out.constants[key] = f.value;
+      else
+        return std::nullopt;
+    }
+    return out;
+  }
   // Which parameter of fd an argument expression passes on, or its constant
   // value. Buffers forward as a pointer parameter or the address of a
   // reference parameter; a handle may also be read through a wrapper's
@@ -867,11 +924,23 @@ public:
     Summary result;
     result.done = true;
     std::vector<cudalifetime::Model> copies;
+    auto forwardsAll = [&](const CallExpr *call) {
+      std::vector<Forwarded> args;
+      for (const Expr *argument : call->arguments())
+        args.push_back(forwarded(argument, definition, true));
+      return args;
+    };
     for (const CallExpr *call : visitor.calls) {
       const FunctionDecl *callee = call->getDirectCallee();
+      if (!callee) {
+        if (int param = calleeParameter(call, definition);
+            param >= 0 && !result.through && !neverReturns(definition) && alwaysReached(definition, call))
+          result.through = Through{static_cast<unsigned>(param), forwardsAll(call)};
+        continue;
+      }
       // A callee that never returns (an error handler that synchronizes, then
       // throws) ends its path: what it does is never followed by the caller's code.
-      if (!callee || isa<CXXOperatorCallExpr>(call) || neverReturns(callee))
+      if (isa<CXXOperatorCallExpr>(call) || neverReturns(callee))
         continue;
       cudalifetime::Model m = model(declName(callee));
       if (m.effect.empty() && !cudalifetime::isCudaApi(callee)) {
@@ -881,6 +950,27 @@ public:
           m = *inner.copy;
         else if (inner.sync)
           m = *inner.sync;
+        else if (inner.through && inner.through->callee < call->getNumArgs()) {
+          const Expr *passed = call->getArg(inner.through->callee);
+          if (const FunctionDecl *target = referencedFunction(passed)) {
+            // The function is named here: the call is that function's wait.
+            if (auto resolved = resolveThrough(*inner.through, target)) {
+              m = *resolved;
+              result.synchronizes = true;
+            }
+          } else if (Forwarded f = forwarded(passed, definition, false);
+                     f.param >= 0 && f.level == 0 && !result.through && !neverReturns(definition) &&
+                     alwaysReached(definition, call)) {
+            // This body passes its own function parameter on.
+            Through through{static_cast<unsigned>(f.param), {}};
+            for (const Forwarded &arg : inner.through->args)
+              through.args.push_back(arg.param >= 0 && arg.level == 0 && unsigned(arg.param) < call->getNumArgs()
+                                         ? forwarded(call->getArg(arg.param), definition, true)
+                                     : arg.constant ? arg
+                                                    : Forwarded());
+            result.through = through;
+          }
+        }
       }
       const Effect e = effectOf(m.effect);
       if (e == Effect::SyncStream || e == Effect::SyncDevice || e == Effect::SyncEvent || e == Effect::EventElapsed ||
@@ -888,28 +978,31 @@ public:
         result.synchronizes = true;
       // A synchronization on every path through the body (a "must" claim,
       // unlike copies) makes a summary of its own.
-      if ((e == Effect::SyncStream || e == Effect::SyncDevice) && !result.sync && !neverReturns(definition) &&
-          alwaysReached(definition, call)) {
+      if ((e == Effect::SyncStream || e == Effect::SyncDevice || e == Effect::SyncEvent) && !result.sync &&
+          !neverReturns(definition) && alwaysReached(definition, call)) {
         cudalifetime::Model sync;
         sync.function = definition->getQualifiedNameAsString();
         sync.effect = m.effect;
         sync.assumption = true;
         Forwarded f;
-        if (e == Effect::SyncStream) {
-          if (auto constant = m.constants.find("stream"); constant != m.constants.end()) {
+        if (e != Effect::SyncDevice) {
+          const std::string key = e == Effect::SyncEvent ? "event" : "stream";
+          if (auto constant = m.constants.find(key); constant != m.constants.end()) {
             f.constant = true;
             f.value = constant->second;
-          } else if (m.receiver.count("stream")) {
+          } else if (m.receiver.count(key)) {
             if (const auto *member = dyn_cast<CXXMemberCallExpr>(call); member && member->getImplicitObjectArgument())
               f = forwarded(member->getImplicitObjectArgument(), definition, true);
-          } else if (auto it = m.args.find("stream"); it != m.args.end() && it->second < call->getNumArgs())
+          } else if (auto it = m.args.find(key); it != m.args.end() && it->second < call->getNumArgs())
             f = forwarded(call->getArg(it->second), definition, true);
           if (f.param >= 0 && f.level == 0)
-            sync.args["stream"] = static_cast<unsigned>(f.param);
+            sync.args[key] = static_cast<unsigned>(f.param);
           else if (f.receiver)
-            sync.receiver.insert("stream");
-          else if (f.constant)
-            sync.constants["stream"] = f.value;
+            sync.receiver.insert(key);
+          else if (f.constant && e == Effect::SyncStream)
+            sync.constants[key] = f.value;
+          else
+            f = Forwarded();
         }
         if (e == Effect::SyncDevice || f.valid())
           result.sync = sync;
@@ -1219,6 +1312,17 @@ public:
             cudalifetime::info().assumedModels.insert("generated summary: " + applied.function);
             applyCall(call, c, s, &applied);
             return;
+          } else if (summary.through && summary.through->callee < call.getNumArgs()) {
+            // The body polls the function its caller passes; the argument's
+            // value names it (CSA replays a call without inlining when a loop
+            // in it reaches the block visit limit, as RAFT's wait does).
+            if (const FunctionDecl *target = call.getArgSVal(summary.through->callee).getAsFunctionDecl())
+              if (auto resolved = resolveThrough(*summary.through, target)) {
+                cudalifetime::info().assumedModels.insert("generated summary: " + fd->getQualifiedNameAsString() +
+                                                          " waits through " + resolved->function);
+                applyCall(call, c, s, &*resolved);
+                return;
+              }
           }
     if (s != c.getState())
       c.addTransition(s);
