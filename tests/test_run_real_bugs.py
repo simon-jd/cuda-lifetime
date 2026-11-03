@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from scripts.run_real_bugs import ROOT, compiler_errors, expand, on_lines, overlay, relative, text_results
+from scripts.run_real_bugs import ROOT, compiler_errors, costliest, expand, on_lines, overlay, relative, text_results
 
 
 class RealBugMatchingTests(unittest.TestCase):
@@ -18,6 +18,11 @@ class RealBugMatchingTests(unittest.TestCase):
         self.assertFalse(on_lines(self.diagnostic("file:///t/src/a.cu", 11), path, lines))
         # The same line number in another file does not count.
         self.assertFalse(on_lines(self.diagnostic("file:///t/src/b.cu", 10, [("file:///t/include/x.h", 12)]), path, lines))
+
+    def test_costliest_functions_are_those_with_the_most_steps(self):
+        entries = [{"function": name, "steps": steps} for name, steps in (("a", 5), ("b", 225000), ("c", 40))]
+        self.assertEqual([e["function"] for e in costliest(entries, 2)], ["b", "c"])
+        self.assertEqual(costliest([]), [])
 
     def test_tree_paths_become_case_labels(self):
         tree = Path("/work/trees/cudf-0123456789")

@@ -40,10 +40,20 @@ with tempfile.TemporaryDirectory() as temp:
     cov = json.loads(coverage.read_text())
     assert cov['tus']['parsed'] == 1 and not cov['tus']['failed'], cov
     assert cov['llvmVersion'] == '23.1.3', cov
+    # Steps come from CSA's entry-point statistics, one record per top-level function.
+    assert len(cov['entryPoints']) == cov['functionsAnalyzed'], cov['entryPoints']
+    assert cov['steps'] == sum(e['steps'] for e in cov['entryPoints']) and all(e['steps'] > 0 for e in cov['entryPoints']), cov
+    assert all('profile' not in e for e in cov['entryPoints'])
+    profiled = subprocess.run([sys.argv[1], str(root / 'cases.cpp'), '--sarif', str(sarif), '--coverage', str(coverage), '--node-profile', '--', '-std=c++17'], text=True, capture_output=True)
+    assert profiled.returncode == 0, profiled.stderr
+    for entry in json.loads(coverage.read_text())['entryPoints']:
+        assert sum(count for _, count in entry['profile']['byFrame']) <= entry['keptNodes'], entry
+        assert entry['profile']['byLine'] and all(label.startswith('cases.cpp:') or ':' in label for label, _ in entry['profile']['byLine']), entry
     small = subprocess.run([sys.argv[1], str(root / 'cases.cpp'), '--sarif', str(sarif), '--coverage', str(coverage), '--max-nodes', '1', '--', '-std=c++17'], text=True, capture_output=True)
     assert small.returncode == 0, small.stderr
     small_cov = json.loads(coverage.read_text())
     assert small_cov['budgetExhausted'], 'Exceeded node budget was not recorded'
+    assert any(e['exhausted'] and e['steps'] == 1 for e in small_cov['entryPoints']), small_cov['entryPoints']
     assert small_cov['functionsAnalyzed'] >= len(small_cov['budgetExhausted']), small_cov
     kernel_source = root / 'kernel.cu'
     kernel_expected = {number for number, line in enumerate(kernel_source.read_text().splitlines(), 1) if '// CL3' in line}

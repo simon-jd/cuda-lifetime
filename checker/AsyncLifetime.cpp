@@ -4,6 +4,7 @@
 #include "clang/AST/ExprCXX.h"
 #include "clang/AST/ParentMapContext.h"
 #include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Analysis/AnalysisDeclContext.h"
 #include "clang/Analysis/CFG.h"
 #include "clang/Lex/Preprocessor.h"
 #include "clang/StaticAnalyzer/Core/BugReporter/BugReporter.h"
@@ -1127,13 +1128,62 @@ public:
       s = s->add<PreservedVariables>(s->getLValue(variable, c.getStackFrame()).getAsRegion());
     c.addTransition(s);
   }
-  void checkEndAnalysis(ExplodedGraph &, BugReporter &, ExprEngine &engine) const {
-    ++cudalifetime::info().functionsAnalyzed;
-    if (engine.hasWorkRemaining()) {
-      const Decl *decl = engine.getRootStackFrame()->getDecl();
-      std::string function = isa<NamedDecl>(decl) ? cast<NamedDecl>(decl)->getQualifiedNameAsString() : "<anonymous>";
-      cudalifetime::info().budgetExhausted.push_back(function);
+  void checkEndAnalysis(ExplodedGraph &graph, BugReporter &, ExprEngine &engine) const {
+    auto &stats = cudalifetime::info();
+    ++stats.functionsAnalyzed;
+    const Decl *decl = engine.getRootStackFrame()->getDecl();
+    cudalifetime::EntryPoint entry;
+    entry.function = functionName(decl);
+    entry.debugName = AnalysisDeclContext::getFunctionName(decl);
+    entry.nodes = graph.size();
+    entry.exhausted = engine.hasWorkRemaining();
+    if (entry.exhausted)
+      stats.budgetExhausted.push_back(entry.function);
+    if (stats.profileNodes)
+      profile(graph, engine, entry);
+    stats.entryPoints.push_back(std::move(entry));
+  }
+  static std::string functionName(const Decl *decl) {
+    return isa<NamedDecl>(decl) ? cast<NamedDecl>(decl)->getQualifiedNameAsString() : "<anonymous>";
+  }
+  // Attribute the kept nodes to the function they are in, to the top-level
+  // function's direct callee they descend from, and to their source line.
+  static void profile(ExplodedGraph &graph, ExprEngine &engine, cudalifetime::EntryPoint &entry) {
+    const StackFrame *root = engine.getRootStackFrame();
+    const SourceManager &sources = engine.getContext().getSourceManager();
+    llvm::DenseMap<const Decl *, unsigned> frames, callees;
+    std::map<std::pair<FileID, unsigned>, unsigned> lines;
+    for (const ExplodedNode &node : graph.nodes()) {
+      const StackFrame *frame = node.getStackFrame();
+      if (!frame)
+        continue;
+      ++frames[frame->getDecl()];
+      const StackFrame *callee = frame;
+      while (callee->getParent() && callee->getParent() != root)
+        callee = callee->getParent();
+      ++callees[callee == root ? nullptr : callee->getDecl()];
+      if (const Stmt *statement = node.getStmtForDiagnostics()) {
+        auto [file, offset] = sources.getDecomposedExpansionLoc(statement->getBeginLoc());
+        if (file.isValid())
+          ++lines[{file, sources.getLineNumber(file, offset)}];
+      }
     }
+    auto top = [](auto &counts, auto label) {
+      std::vector<std::pair<std::string, unsigned>> out;
+      for (auto &[key, count] : counts)
+        out.emplace_back(label(key), count);
+      std::sort(out.begin(), out.end(), [](const auto &a, const auto &b) { return a.second > b.second; });
+      if (out.size() > 12)
+        out.resize(12);
+      return out;
+    };
+    entry.byFrame = top(frames, [](const Decl *d) { return functionName(d); });
+    entry.byCallee = top(callees, [](const Decl *d) { return d ? functionName(d) : std::string("<the function itself>"); });
+    entry.byLine = top(lines, [&](const std::pair<FileID, unsigned> &key) {
+      auto entryFile = sources.getFileEntryRefForID(key.first);
+      return (entryFile ? llvm::sys::path::filename(entryFile->getName()).str() : std::string("<unknown>")) + ":" +
+             std::to_string(key.second);
+    });
   }
   void checkPostCall(const CallEvent &call, CheckerContext &c) const {
     // Honor explicit no-return contracts inside inlined checked-return helpers.

@@ -194,12 +194,13 @@ def baseline(tool, executable, source, flags, timeout):
         return record
 
 
-def analyze(native, source, flags, timeout, models=None):
+def analyze(native, source, flags, timeout, models=None, profile=False):
     with tempfile.TemporaryDirectory() as temp:
         sarif, coverage = Path(temp) / "out.sarif", Path(temp) / "coverage.json"
         try:
             done = subprocess.run([native, str(source), "--sarif", str(sarif), "--coverage", str(coverage),
-                                   *(["--model", str(models)] if models else []), "--", *flags],
+                                   *(["--model", str(models)] if models else []),
+                                   *(["--node-profile"] if profile else []), "--", *flags],
                                   capture_output=True, text=True, timeout=timeout)
         except subprocess.TimeoutExpired:
             return {"parsed": False, "status": "timeout", "errors": [f"no result within {timeout} s"]}
@@ -217,8 +218,14 @@ def analyze(native, source, flags, timeout, models=None):
                       overBudgetFunctions=sorted(entry.get("function", "") for entry in cov.get("budgetExhausted", [])),
                       coverageGaps=sorted({entry["reason"] for entry in cov.get("coverageUnknown", [])}),
                       unmodeledCudaCalls=sorted(cov.get("unmodeledCudaCalls", {})), seconds=cov.get("seconds"),
+                      steps=cov.get("steps"), costliest=costliest(cov.get("entryPoints", [])),
                       assumptions=[a for a in cov.get("assumptions", []) if a.startswith("user model: ")])
         return record
+
+
+def costliest(entry_points, count=8):
+    """The top-level functions that took the most steps (CSA's node budget counts steps)."""
+    return sorted(entry_points, key=lambda entry: -entry.get("steps", 0))[:count]
 
 
 def on_lines(diagnostic, path, lines):
@@ -245,6 +252,8 @@ def main():
     parser.add_argument("--timeout", type=float, default=900)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--only", action="append", default=[], help="analyze only this case (repeatable)")
+    parser.add_argument("--node-profile", action="store_true",
+                        help="record where the costliest functions' exploded-graph nodes are")
     args = parser.parse_args()
     if args.tool == "cuda-lifetime" and not args.native:
         parser.error("--native is required with --tool cuda-lifetime")
@@ -271,7 +280,8 @@ def main():
                 models, helpers = summarize(args.native, command.get("summarize", []), names, temp, prefix, args.timeout) \
                     if command.get("summarize") and args.tool == "cuda-lifetime" else (None, [])
                 flags = [*expand(CUDA if command["language"] == "cuda" else ["-x", command["language"]], names), *prefix]
-                record = analyze(args.native, tree / source, flags, args.timeout, models) if args.tool == "cuda-lifetime" \
+                record = analyze(args.native, tree / source, flags, args.timeout, models, args.node_profile) \
+                    if args.tool == "cuda-lifetime" \
                     else baseline(args.tool, executable, tree / source, flags, args.timeout)
             if helpers:
                 record["summaries"] = helpers

@@ -29,6 +29,17 @@ struct Model {
 struct ReportKind {
   std::string rule, level, memory, semantic;
 };
+// One top-level function's exploration: exploded-graph nodes kept at the end
+// (CSA reclaims some along the way; the budget counts steps, which the tool
+// takes from CSA's entry-point statistics by debugName) and, when profiling,
+// where the kept nodes are: by innermost function, by the top-level
+// function's direct callee they descend from, and by source line.
+struct EntryPoint {
+  std::string function, debugName;
+  unsigned nodes = 0, steps = 0, milliseconds = 0;
+  bool exhausted = false;
+  std::vector<std::pair<std::string, unsigned>> byFrame, byCallee, byLine;
+};
 struct AnalysisInfo {
   std::map<std::string, Model> models;
   std::map<std::string, ReportKind> reports;
@@ -40,6 +51,8 @@ struct AnalysisInfo {
   unsigned pendingMemberCallUses = 0, pendingArgumentUses = 0, pendingPointerEscapes = 0;
   // Top-level functions CSA analyzed: the denominator for budgetExhausted.
   unsigned functionsAnalyzed = 0;
+  std::vector<EntryPoint> entryPoints;
+  bool profileNodes = false;
   bool perThread = false;
 };
 AnalysisInfo &info();
