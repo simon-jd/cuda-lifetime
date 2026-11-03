@@ -68,6 +68,10 @@ device-side fault, a kernel using a stream-ordered allocation before it is
 ordered, and none of the host reads or frees racing an in-flight copy,
 which are not device accesses
 ([docs/evaluation.md](docs/evaluation.md#what-compute-sanitizer-sees)).
+CuSan, a dynamic host/device race detector built on ThreadSanitizer, reports
+the four host reads racing a D2H copy, but not the frees with work pending
+or the stream-ordered allocation race
+([docs/evaluation.md](docs/evaluation.md#cusan)).
 On its hand-written labelled corpora it scores 10/0/0/10 (seed) and 25/1/0/23
 (holdout, first run after its freeze) as TP/FP/FN/TN. Large parts of the scanned code
 were only partly explored, and several CUDA idioms are not modeled; see

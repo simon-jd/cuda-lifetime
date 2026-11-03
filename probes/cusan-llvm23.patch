@@ -1,0 +1,48 @@
+diff --git a/lib/pass/AnalysisTransform.h b/lib/pass/AnalysisTransform.h
+index d82031f..87d5b1f 100644
+--- a/lib/pass/AnalysisTransform.h
++++ b/lib/pass/AnalysisTransform.h
+@@ -155,7 +155,7 @@ class SimpleInstrumenter {
+           if (auto* invoke = dyn_cast<InvokeInst>(cb)) {
+             irb.SetInsertPoint(invoke->getNormalDest()->getFirstNonPHI());
+           } else {
+-            irb.SetInsertPoint(cb->getNextNonDebugInstruction());
++            irb.SetInsertPoint(cb->getNextNode());
+           }
+         }
+ 
+diff --git a/lib/pass/CusanPass.cpp b/lib/pass/CusanPass.cpp
+index f6bfce7..a1732ba 100644
+--- a/lib/pass/CusanPass.cpp
++++ b/lib/pass/CusanPass.cpp
+@@ -27,7 +27,7 @@
+ #include "llvm/IR/PassManager.h"
+ #include "llvm/Pass.h"
+ #include "llvm/Passes/PassBuilder.h"
+-#include "llvm/Passes/PassPlugin.h"
++#include "llvm/Plugins/PassPlugin.h"
+ #include "llvm/Transforms/Scalar.h"
+ #include "llvm/Transforms/Utils/Mem2Reg.h"
+ 
+@@ -74,7 +74,7 @@ bool LegacyCusanPass::runOnModule(llvm::Module& module) {
+ 
+ llvm::PreservedAnalyses CusanPass::run(llvm::Module& module, llvm::ModuleAnalysisManager& AM) {
+   auto promote_pass_preserved = llvm::PreservedAnalyses::all();
+-  const bool is_device_code   = llvm::StringRef(module.getTargetTriple()).contains("nvptx64-nvidia-cuda");
++  const bool is_device_code   = llvm::StringRef(module.getTargetTriple().str()).contains("nvptx64-nvidia-cuda");
+   if (is_device_code) {
+     ModulePassManager module_pass_manager;
+     module_pass_manager.addPass(createModuleToFunctionPassAdaptor(llvm::PromotePass()));
+diff --git a/lib/pass/FunctionDecl.cpp b/lib/pass/FunctionDecl.cpp
+index d1a878b..1a7c962 100644
+--- a/lib/pass/FunctionDecl.cpp
++++ b/lib/pass/FunctionDecl.cpp
+@@ -15,7 +15,7 @@ void FunctionDecl::initialize(llvm::Module& module) {
+   auto& c = module.getContext();
+ 
+   const auto add_optimizer_attributes = [&](auto& arg) {
+-    arg.addAttr(Attribute::NoCapture);
++    arg.addAttr(Attribute::getWithCaptureInfo(arg.getContext(), CaptureInfo::none()));
+     arg.addAttr(Attribute::ReadOnly);
+   };
+ 

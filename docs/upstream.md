@@ -32,7 +32,9 @@ The [Clang Static Analyzer checker list](https://clang.llvm.org/docs/analyzer/ch
 and `clang/include/clang/StaticAnalyzer/Checkers/Checkers.td` at 23.1.3 list
 no checker for CUDA stream lifetimes. [CuSan](https://github.com/tudasc/cusan)
 instruments programs and uses ThreadSanitizer to observe host/device races
-dynamically, and compute-sanitizer's racecheck examines device code. A limited
+dynamically (built and run on the probe programs here, see
+[evaluation.md](evaluation.md#cusan)), and compute-sanitizer's racecheck
+examines device code. A limited
 web search (October 2026) found no equivalent public static checker for host
 code; such a search cannot show that none exists.
 

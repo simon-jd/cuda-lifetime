@@ -22,7 +22,12 @@ programs and uses ThreadSanitizer; compute-sanitizer's racecheck looks at
 device code); AST matchers (clang-tidy); a dataflow analysis over LLVM IR.
 
 **Why.** These races depend on timing and on driver behavior, so the
-executions a test runs rarely show them, and a dynamic tool sees only those.
+executions a test runs rarely show them, and a dynamic tool sees only the
+paths a run executes. CuSan, which tracks happens-before through
+ThreadSanitizer, does report a host read racing a copy whatever the timing,
+but on the probe programs it reports none of the frees with work pending
+or the stream-ordered allocation race
+([evaluation.md](evaluation.md#cusan)).
 Whether a read is safe depends on whether a synchronization covering the
 copy happened on that path, which a flow-insensitive matcher cannot tell.
 CSA supplies the paths, the symbolic values for buffers, streams and events,

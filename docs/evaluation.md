@@ -362,6 +362,40 @@ accesses and data races between device threads are outside its rules. The
 seed and holdout cases cannot be run: they are functions against a
 declaration stub, without `main`.
 
+### CuSan
+
+[CuSan](https://github.com/tudasc/cusan) instruments CUDA API calls and
+kernels at compile time and hands their memory accesses and synchronizations
+to ThreadSanitizer, so it reports host/device races on the paths a run
+executes, whatever the timing. Its authors test it with LLVM 14, 18 and 19.
+At commit `2e2a503` it builds against LLVM 23.1.3 after four API changes
+(`probes/cusan-llvm23.patch`: a moved header, two renamed or removed
+functions, a `Triple` that no longer converts to a string), linked to the
+LLVM 23.1.3 release package, whose CMake package needs a zstd target (the
+system's `libzstd.so.1` was given); the checker's own LLVM build has no
+NVPTX target or ThreadSanitizer runtime. The probes were compiled with
+`cusan-clang++ -O1 -g` for sm_89 and each scenario run once on the RTX 4090
+(`results/probes/cusan.json`):
+
+| Scenario | cuda-lifetime | CuSan |
+|---|---|---|
+| `stale_read pinned`, `stale_read pageable`, `lifetime pinned`, `lifetime pageable`: host read of a D2H destination before synchronizing | CL1 (error pinned, warning pageable) | 1 data race each: the read against the `cudaMemcpyAsync` |
+| `lifetime free-host`: `cudaFreeHost` with a D2H into the buffer pending | CL2 warning | nothing |
+| `lifetime free`: `cudaFree` of a buffer a running kernel writes | CL3 note | nothing |
+| `lifetime ordered-bad`: a kernel on another stream uses a `cudaMallocAsync` allocation with no dependency | CL3 error | nothing |
+| `lifetime ordered-good` | nothing | nothing |
+
+CuSan reports every host read racing an in-flight copy, including runs in
+which, slowed by the instrumentation, the read already saw the copied value
+(`lifetime` printed 42 before and after synchronizing): it tracks the
+missing happens-before edge, not the outcome. It reports nothing for the
+release of a buffer with work pending or for the stream-ordered allocation
+race; in these runs `cudaFreeHost` and `cudaFree` took about 18 ms, waiting
+for the queued work, which is the behavior the CL2 and CL3 reports say the
+code relies on without CUDA promising it. CuSan sees only the executed path
+and needs a GPU run; the checker needs neither but sees only what its rules
+and the analyzer's budget reach.
+
 ## Reproduce
 
 Build the checker and run the corpora:

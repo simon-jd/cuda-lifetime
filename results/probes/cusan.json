@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "tool": "CuSan",
+  "cusanCommit": "2e2a503cb65c1fc9fcf61816aac6a55e1d854dc1",
+  "build": "CuSan built against the LLVM 23.1.3 release package (its LLVMConfig needs a zstd::libzstd_static target; the system libzstd.so.1 was given as that target) after the four LLVM API changes in probes/cusan-llvm23.patch; CuSan's authors test LLVM 14, 18 and 19. The LLVM 23.1.3 source build used for the checker has no NVPTX target and no ThreadSanitizer runtime.",
+  "compile": "cusan-clang++ -O1 -g -x cuda --cuda-path=/usr/local/cuda-13.2 --cuda-gpu-arch=sm_89 probes/<program>.cu -lcudart",
+  "run": "flock /var/tmp/rtx4090.lock timeout 120 ./<program> <mode>; races are ThreadSanitizer 'data race' warnings, with the main() frames of the two accesses",
+  "nvidiaSmi": "NVIDIA GeForce RTX 4090, 595.99.02, 2790 MHz, 64, 100 %",
+  "runs": [
+    {
+      "program": "probes/stale_read.cu",
+      "mode": "pinned",
+      "races": 1,
+      "raceLocations": [
+        [
+          "probes/stale_read.cu:48",
+          "probes/stale_read.cu:47"
+        ]
+      ],
+      "programOutput": [
+        {
+          "memory": "pinned",
+          "beforeSync": 42,
+          "afterSync": 42
+        }
+      ]
+    },
+    {
+      "program": "probes/stale_read.cu",
+      "mode": "pageable",
+      "races": 1,
+      "raceLocations": [
+        [
+          "probes/stale_read.cu:48",
+          "probes/stale_read.cu:47"
+        ]
+      ],
+      "programOutput": [
+        {
+          "memory": "pageable",
+          "beforeSync": 42,
+          "afterSync": 42
+        }
+      ]
+    },
+    {
+      "program": "probes/lifetime.cu",
+      "mode": "pinned",
+      "races": 1,
+      "raceLocations": [
+        [
+          "probes/lifetime.cu:66",
+          "probes/lifetime.cu:59"
+        ]
+      ],
+      "programOutput": [
+        {
+          "gpu": "NVIDIA GeForce RTX 4090",
+          "driver": 13020,
+          "runtime": 13020,
+          "mode": "pinned"
+        },
+        {
+          "immediate": 42,
+          "afterSynchronize": 42
+        }
+      ]
+    },
+    {
+      "program": "probes/lifetime.cu",
+      "mode": "pageable",
+      "races": 1,
+      "raceLocations": [
+        [
+          "probes/lifetime.cu:66",
+          "probes/lifetime.cu:59"
+        ]
+      ],
+      "programOutput": [
+        {
+          "gpu": "NVIDIA GeForce RTX 4090",
+          "driver": 13020,
+          "runtime": 13020,
+          "mode": "pageable"
+        },
+        {
+          "immediate": 42,
+          "afterSynchronize": 42
+        }
+      ]
+    },
+    {
+      "program": "probes/lifetime.cu",
+      "mode": "free",
+      "races": 0,
+      "raceLocations": [],
+      "programOutput": [
+        {
+          "gpu": "NVIDIA GeForce RTX 4090",
+          "driver": 13020,
+          "runtime": 13020,
+          "mode": "free"
+        },
+        {
+          "freeCallMilliseconds": 17.976685
+        }
+      ]
+    },
+    {
+      "program": "probes/lifetime.cu",
+      "mode": "free-host",
+      "races": 0,
+      "raceLocations": [],
+      "programOutput": [
+        {
+          "gpu": "NVIDIA GeForce RTX 4090",
+          "driver": 13020,
+          "runtime": 13020,
+          "mode": "free-host"
+        },
+        {
+          "freeHostCallMilliseconds": 17.552628
+        }
+      ]
+    },
+    {
+      "program": "probes/lifetime.cu",
+      "mode": "ordered-bad",
+      "races": 0,
+      "raceLocations": [],
+      "programOutput": [
+        {
+          "gpu": "NVIDIA GeForce RTX 4090",
+          "driver": 13020,
+          "runtime": 13020,
+          "mode": "ordered-bad"
+        }
+      ]
+    },
+    {
+      "program": "probes/lifetime.cu",
+      "mode": "ordered-good",
+      "races": 0,
+      "raceLocations": [],
+      "programOutput": [
+        {
+          "gpu": "NVIDIA GeForce RTX 4090",
+          "driver": 13020,
+          "runtime": 13020,
+          "mode": "ordered-good"
+        }
+      ]
+    }
+  ]
+}

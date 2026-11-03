@@ -126,6 +126,13 @@ memory, the values `probes/stale_read.cu` read from a `cudaMemcpyAsync` D2H
 destination before and after synchronizing the stream (20 runs each), and the
 checker's reports on that source.
 
+## `probes/cusan.json`
+
+CuSan's runs of the eight probe scenarios: the CuSan commit, how it was
+built (with `probes/cusan-llvm23.patch`), the compile and run commands, the
+GPU state, and per scenario the number of ThreadSanitizer data races, the
+two `main` lines of each, and the program's own output.
+
 ## `probes/sanitizer.json`
 
 Output of `probes/sanitizer.py`: for each scenario of `stale_read.cu` and
