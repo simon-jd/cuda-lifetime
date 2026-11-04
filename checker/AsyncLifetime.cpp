@@ -1272,10 +1272,124 @@ public:
   }
   // Per top-level function: CSA may free the CFGs of one entry point before the next.
   mutable llvm::DenseMap<const CFG *, llvm::BitVector> doomed;
+  // Fallback entry points. CSA starts paths only at main-file functions (the
+  // tool sets AnalyzeAll so that header functions are candidates too) and
+  // never at a function it inlined somewhere. When a function's budget runs
+  // out, the project functions it calls, directly or through other project
+  // functions, that themselves call the CUDA API, a model or a kernel become
+  // entry points of their own, up to maxFallbackRoots per translation unit;
+  // CSA takes them later (callers come first in its order) unless it inlined
+  // them on some path. Other header functions end at their first node.
+  static constexpr unsigned maxFallbackRoots = 16;
+  // Whether a body itself calls the CUDA API, a model or a kernel (not through a wrapper).
+  static bool callsCuda(const FunctionDecl *fd) {
+    struct Scan : RecursiveASTVisitor<Scan> {
+      bool found = false;
+      bool VisitCallExpr(CallExpr *call) {
+        if (const auto *callee = call->getDirectCallee())
+          found |= cudalifetime::isCudaApi(callee) ||
+                   cudalifetime::info().models.count(callee->getQualifiedNameAsString());
+        return !found;
+      }
+      bool VisitCUDAKernelCallExpr(CUDAKernelCallExpr *) {
+        found = true;
+        return false;
+      }
+    } scan;
+    scan.TraverseStmt(fd->getBody());
+    return scan.found;
+  }
+  static bool inMainFile(const Decl *decl, const SourceManager &sources) {
+    const Stmt *body = decl->getBody();
+    return sources.isInMainFile(sources.getExpansionLoc(body ? body->getBeginLoc() : decl->getLocation()));
+  }
+  static bool libraryNamespace(const FunctionDecl *fd) {
+    const std::string name = fd->getQualifiedNameAsString();
+    for (const char *prefix : {"std::", "__gnu_cxx::", "thrust::", "cub::", "cuda::", "testing::"})
+      if (name.rfind(prefix, 0) == 0)
+        return true;
+    return false;
+  }
+  // Whether a body reaches a CUDA call, a model or a kernel launch through direct calls.
+  static bool reachesCuda(const FunctionDecl *fd, unsigned depth = 0) {
+    static std::map<const FunctionDecl *, bool> memo;
+    fd = fd->getCanonicalDecl();
+    if (auto it = memo.find(fd); it != memo.end())
+      return it->second;
+    memo[fd] = false; // recursion
+    const FunctionDecl *definition = fd->getDefinition();
+    if (!definition || !definition->hasBody() || depth > 12)
+      return false;
+    struct Scan : RecursiveASTVisitor<Scan> {
+      unsigned depth;
+      bool found = false;
+      bool visit(const FunctionDecl *callee) {
+        if (!callee)
+          return true;
+        found |= cudalifetime::isCudaApi(callee) || cudalifetime::info().models.count(callee->getQualifiedNameAsString()) ||
+                 reachesCuda(callee, depth + 1);
+        return !found;
+      }
+      bool VisitCallExpr(CallExpr *call) { return visit(call->getDirectCallee()); }
+      bool VisitCXXConstructExpr(CXXConstructExpr *e) { return visit(e->getConstructor()); }
+      bool VisitCUDAKernelCallExpr(CUDAKernelCallExpr *) {
+        found = true;
+        return false;
+      }
+    } scan;
+    scan.depth = depth;
+    scan.TraverseStmt(definition->getBody());
+    return memo[fd] = scan.found;
+  }
+  void addFallbackRoots(const Decl *root, const SourceManager &sources) const {
+    struct Callees : RecursiveASTVisitor<Callees> {
+      std::vector<const FunctionDecl *> found;
+      bool VisitCallExpr(CallExpr *call) {
+        if (const auto *callee = call->getDirectCallee())
+          found.push_back(callee);
+        return true;
+      }
+      bool VisitCXXConstructExpr(CXXConstructExpr *e) {
+        found.push_back(e->getConstructor());
+        return true;
+      }
+    };
+    std::vector<std::pair<const Decl *, unsigned>> work{{root, 0}};
+    std::set<const Decl *> seen{root->getCanonicalDecl()};
+    while (!work.empty()) {
+      auto [decl, depth] = work.back();
+      work.pop_back();
+      Callees callees;
+      callees.TraverseStmt(decl->getBody());
+      for (const FunctionDecl *callee : callees.found) {
+        const FunctionDecl *definition = callee->getDefinition();
+        if (!definition || !definition->hasBody() || !seen.insert(definition->getCanonicalDecl()).second ||
+            sources.isInSystemHeader(sources.getExpansionLoc(definition->getLocation())) ||
+            libraryNamespace(definition) || !reachesCuda(definition))
+          continue;
+        if (!inMainFile(definition, sources) && callsCuda(definition))
+          fallback.insert(definition->getCanonicalDecl());
+        if (depth < 8)
+          work.push_back({definition, depth + 1});
+      }
+    }
+  }
+  mutable std::set<const Decl *> fallback;
+  mutable bool skippedRoot = false, fallbackRoot = false;
+  mutable unsigned fallbackRoots = 0;
   mutable std::chrono::steady_clock::time_point started;
   void checkBeginFunction(CheckerContext &c) const {
-    if (c.inTopFrame())
+    if (c.inTopFrame()) {
+      const Decl *root = c.getStackFrame()->getDecl();
       started = std::chrono::steady_clock::now();
+      fallbackRoot = !inMainFile(root, c.getSourceManager());
+      skippedRoot = fallbackRoot && (!fallback.count(root->getCanonicalDecl()) || fallbackRoots >= maxFallbackRoots);
+      fallbackRoots += fallbackRoot && !skippedRoot;
+      if (skippedRoot) {
+        c.generateSink(c.getState(), c.getPredecessor());
+        return;
+      }
+    }
     // ExprEngine skips CUDAKernelCallExpr operand evaluation; keep referenced
     // locals alive so PostStmt can read the existing store without inventing a value.
     class References : public RecursiveASTVisitor<References> {
@@ -1302,6 +1416,8 @@ public:
   void checkEndAnalysis(ExplodedGraph &graph, BugReporter &, ExprEngine &engine) const {
     auto &stats = cudalifetime::info();
     doomed.clear();
+    if (skippedRoot)
+      return;
     ++stats.functionsAnalyzed;
     const Decl *decl = engine.getRootStackFrame()->getDecl();
     cudalifetime::EntryPoint entry;
@@ -1310,8 +1426,11 @@ public:
     entry.milliseconds = static_cast<unsigned>(
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - started).count());
     entry.exhausted = engine.hasWorkRemaining();
-    if (entry.exhausted)
+    entry.fallback = fallbackRoot;
+    if (entry.exhausted) {
       stats.budgetExhausted.push_back(entry.function);
+      addFallbackRoots(decl, engine.getContext().getSourceManager());
+    }
     if (stats.profileNodes)
       profile(graph, engine, entry);
     stats.entryPoints.push_back(std::move(entry));

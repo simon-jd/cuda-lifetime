@@ -14,7 +14,7 @@ config.test_format = lit.formats.ShTest(execute_external=False)
 config.suffixes = [".cpp"]
 config.test_source_root = os.path.dirname(os.path.abspath(__file__))
 # Fixtures checked by run.py, prescan.py and models.py instead.
-config.excludes = ["prescan", "cases.cpp", "model_repro.cpp"]
+config.excludes = ["prescan", "fallback", "cases.cpp", "model_repro.cpp"]
 
 native = lit_config.params.get("native")
 if not native:

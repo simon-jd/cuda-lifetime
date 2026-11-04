@@ -57,6 +57,16 @@ with tempfile.TemporaryDirectory() as temp:
     assert small_cov['budgetExhausted'], 'Exceeded node budget was not recorded'
     assert any(e['exhausted'] for e in small_cov['entryPoints']), small_cov['entryPoints']
     assert small_cov['functionsAnalyzed'] >= len(small_cov['budgetExhausted']), small_cov
+    # Every path of fallback/roots.cpp stops in a 64-iteration loop, so the
+    # header function that queues the copy becomes an entry point of its own;
+    # the wrapper between them calls no CUDA function itself and does not.
+    fallback = subprocess.run([sys.argv[1], str(root / 'fallback/roots.cpp'), '--sarif', str(sarif), '--coverage', str(coverage), '--', '-std=c++17'], text=True, capture_output=True)
+    assert fallback.returncode == 0, fallback.stderr
+    fallback_cov = json.loads(coverage.read_text())
+    roots = {e['function']: e for e in fallback_cov['entryPoints']}
+    assert roots['caller']['exhausted'] and roots['read_too_early'].get('fallbackRoot') and 'wrapper' not in roots, roots
+    found = [(r['ruleId'], r['locations'][0]['physicalLocation']['artifactLocation']['uri'].rsplit('/', 1)[-1], r['locations'][0]['physicalLocation']['region']['startLine']) for run in json.loads(sarif.read_text())['runs'] for r in run['results']]
+    assert found == [('CL1', 'helpers.h', 7)], found
     kernel_source = root / 'kernel.cu'
     kernel_expected = {number for number, line in enumerate(kernel_source.read_text().splitlines(), 1) if '// CL3' in line}
     for mode in ('legacy', 'per-thread'):

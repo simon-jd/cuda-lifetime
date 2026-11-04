@@ -40,7 +40,8 @@ struct ReportKind {
 struct EntryPoint {
   std::string function;
   unsigned nodes = 0, milliseconds = 0;
-  bool exhausted = false;
+  // fallback: a header function analyzed because a caller's budget ran out before covering it.
+  bool exhausted = false, fallback = false;
   std::vector<std::pair<std::string, unsigned>> byFrame, byCallee, byLine, bySite;
 };
 struct AnalysisInfo {

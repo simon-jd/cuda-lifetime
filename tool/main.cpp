@@ -212,6 +212,9 @@ class Action : public ASTFrontendAction {
     opts.CheckersAndPackages.emplace_back("cuda.AsyncLifetime", true);
     opts.AnalysisDiagOpt = PD_NONE;
     opts.MaxNodesPerTopLevelFunction = maxNodes;
+    // Header functions are entry-point candidates; the checker keeps only
+    // those a function whose budget ran out calls (fallback roots).
+    opts.AnalyzeAll = true;
     // Profiling counts every node created: no reclamation of uninteresting ones.
     if (nodeProfile) opts.GraphTrimInterval = 0;
     ci.getFrontendOpts().OutputFile = sarif;
@@ -273,6 +276,7 @@ int main(int argc, const char **argv) {
     totalNodes += entry.nodes;
     llvm::json::Object record{{"function", entry.function}, {"nodes", entry.nodes},
                               {"milliseconds", entry.milliseconds}, {"exhausted", entry.exhausted}};
+    if (entry.fallback) record["fallbackRoot"] = true;
     auto counts = [](const std::vector<std::pair<std::string, unsigned>> &pairs) {
       llvm::json::Array out;
       for (const auto &[label, count] : pairs) out.push_back(llvm::json::Array{label, count});
