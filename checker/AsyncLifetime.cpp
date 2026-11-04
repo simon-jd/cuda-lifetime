@@ -1626,6 +1626,7 @@ public:
   }
   bool evalCall(const CallEvent &call, CheckerContext &c) const;
   bool evalLibraryInternal(const CallEvent &call, CheckerContext &c) const;
+  bool evalHandleAccessor(const CallEvent &call, CheckerContext &c) const;
   void applyCall(const CallEvent &call, CheckerContext &c, ProgramStateRef s,
                  const cudalifetime::Model *given = nullptr) const;
   // The call applyCall is handling, for the per-effect handlers below; each
@@ -2299,11 +2300,39 @@ bool AsyncLifetimeChecker::evalLibraryInternal(const CallEvent &call, CheckerCon
   return true;
 }
 
+// A stream or event wrapper whose accessor is defined in another translation
+// unit (RMM 26's cuda_stream_view::value() and its conversion to
+// cudaStream_t are in cuda_stream_view.cpp): a const member function without
+// parameters that returns the type of the wrapper's only data member returns
+// that member. Without this, each call returns a fresh value, and a copy
+// queued on stream.value() never matches a wait on the same stream.
+bool AsyncLifetimeChecker::evalHandleAccessor(const CallEvent &call, CheckerContext &c) const {
+  const auto *instance = dyn_cast<CXXInstanceCall>(&call);
+  const auto *method = instance ? dyn_cast_or_null<CXXMethodDecl>(instance->getDecl()) : nullptr;
+  if (!method || !method->isConst() || method->getNumParams() || method->isVirtual() || method->hasBody() ||
+      !handleRecord(method->getThisType()->getPointeeType()))
+    return false;
+  const RecordDecl *record = method->getParent()->getDefinition();
+  const FieldDecl *field = *record->field_begin();
+  const QualType result = call.getResultType();
+  if (!result->isPointerType() && !result->isIntegralOrEnumerationType())
+    return false;
+  if (c.getASTContext().getCanonicalType(result) != c.getASTContext().getCanonicalType(field->getType()))
+    return false;
+  const SVal value = handle(c.getState(), instance->getCXXThisVal(), method->getThisType()->getPointeeType());
+  if (value.isUnknownOrUndef())
+    return false;
+  cudalifetime::info().assumedModels.insert("handle accessor returns the only data member: " +
+                                            method->getQualifiedNameAsString());
+  c.addTransition(c.getState()->BindExpr(call.getOriginExpr(), c.getStackFrame(), value));
+  return true;
+}
+
 bool AsyncLifetimeChecker::evalCall(const CallEvent &call, CheckerContext &c) const {
   cudalifetime::info().perThread = c.getPreprocessor().isMacroDefined("CUDA_API_PER_THREAD_DEFAULT_STREAM");
   const auto m = model(name(call));
   const Effect effect = effectOf(m.effect);
-  if (effect == Effect::None && call.getOriginExpr() && evalLibraryInternal(call, c))
+  if (effect == Effect::None && call.getOriginExpr() && (evalLibraryInternal(call, c) || evalHandleAccessor(call, c)))
     return true;
   if (effect == Effect::None || effect == Effect::Observe || !call.getOriginExpr())
     return false;
