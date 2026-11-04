@@ -1625,6 +1625,7 @@ public:
     return true;
   }
   bool evalCall(const CallEvent &call, CheckerContext &c) const;
+  bool evalLibraryInternal(const CallEvent &call, CheckerContext &c) const;
   void applyCall(const CallEvent &call, CheckerContext &c, ProgramStateRef s,
                  const cudalifetime::Model *given = nullptr) const;
   // The call applyCall is handling, for the per-effect handlers below; each
@@ -2239,10 +2240,71 @@ void AsyncLifetimeChecker::applyAllocation(const CallEvent &call, CheckerContext
   c.addTransition(s);
 }
 
+// Standard-library internals that cannot reach CUDA and whose branches turn
+// on values no path determines: shared_ptr's reference counts (each copy and
+// destruction splits on the count and on whether the program is threaded),
+// iostream state, and locking. CSA inlines them by default; they are
+// evaluated as CSA evaluates a call it does not inline (arguments and globals
+// invalidated, a fresh result), unless a pending buffer reaches the call.
+// The deleter a last reference runs is not followed.
+static bool libraryInternal(const FunctionDecl *fd, const SourceManager &sources) {
+  if (!fd || isa<CXXConstructorDecl>(fd) || isa<CXXDestructorDecl>(fd) ||
+      !sources.isInSystemHeader(sources.getExpansionLoc(fd->getLocation())))
+    return false;
+  const QualType result = fd->getReturnType();
+  if (!result->isVoidType() && !result->isScalarType() && !result->isReferenceType())
+    return false;
+  const DeclContext *context = fd->getDeclContext();
+  std::string owner = isa<CXXRecordDecl>(context) ? cast<CXXRecordDecl>(context)->getQualifiedNameAsString() : "";
+  // A free stream operator (operator<<(ostream &, ...)) belongs to its stream.
+  if (owner.empty() && fd->getNumParams() && fd->getParamDecl(0)->getType()->isReferenceType())
+    if (const auto *record = fd->getParamDecl(0)->getType().getNonReferenceType()->getAsCXXRecordDecl())
+      owner = record->getQualifiedNameAsString();
+  const std::string function = fd->getQualifiedNameAsString();
+  static const char *const owners[] = {"std::_Sp_counted_base", "std::__shared_weak_count", "std::__shared_count",
+                                       "std::basic_ostream", "std::basic_istream", "std::basic_iostream",
+                                       "std::basic_ios", "std::ios_base", "std::basic_streambuf",
+                                       "std::basic_stringbuf", "std::mutex", "std::recursive_mutex",
+                                       "std::__mutex_base", "std::unique_lock"};
+  static const char *const functions[] = {"__gnu_cxx::__exchange_and_add_dispatch", "__gnu_cxx::__atomic_add_dispatch",
+                                          "__gnu_cxx::__is_single_threaded", "std::endl", "std::flush"};
+  auto prefixed = [](const std::string &name, const char *prefix) {
+    const size_t n = std::char_traits<char>::length(prefix);
+    return name.compare(0, n, prefix) == 0 && (name.size() == n || name[n] == ':' || name[n] == '<');
+  };
+  for (const char *prefix : owners)
+    if (prefixed(owner, prefix))
+      return true;
+  for (const char *prefix : functions)
+    if (prefixed(function, prefix))
+      return true;
+  return false;
+}
+
+bool AsyncLifetimeChecker::evalLibraryInternal(const CallEvent &call, CheckerContext &c) const {
+  const auto *fd = dyn_cast_or_null<FunctionDecl>(call.getDecl());
+  if (!libraryInternal(fd, c.getSourceManager()))
+    return false;
+  ProgramStateRef s = reach(call, c.getState());
+  const bool reached = !s->get<MutableReach>().isEmpty() || !s->get<ReadOnlyReach>().isEmpty();
+  if (reached)
+    return false;
+  s = call.invalidateRegions(c.blockCount(), clearReach(s));
+  const QualType result = call.getResultType();
+  if (!result->isVoidType())
+    s = s->BindExpr(call.getOriginExpr(), c.getStackFrame(),
+                    c.getSValBuilder().conjureSymbolVal(call, result, c.blockCount(), this));
+  ++cudalifetime::info().libraryCallsNotInlined;
+  c.addTransition(s);
+  return true;
+}
+
 bool AsyncLifetimeChecker::evalCall(const CallEvent &call, CheckerContext &c) const {
   cudalifetime::info().perThread = c.getPreprocessor().isMacroDefined("CUDA_API_PER_THREAD_DEFAULT_STREAM");
   const auto m = model(name(call));
   const Effect effect = effectOf(m.effect);
+  if (effect == Effect::None && call.getOriginExpr() && evalLibraryInternal(call, c))
+    return true;
   if (effect == Effect::None || effect == Effect::Observe || !call.getOriginExpr())
     return false;
   if (effect == Effect::AddressOnly) { // inspects the pointer value, not the buffer: CSA evaluates it

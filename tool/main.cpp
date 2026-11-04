@@ -313,6 +313,7 @@ int main(int argc, const char **argv) {
       {"entryPoints",std::move(entryPoints)},
       {"cudaFailurePathsSkipped",cudalifetime::info().cudaFailurePathsSkipped},
       {"pathsEndedBeforeThrow",cudalifetime::info().pathsEndedBeforeThrow},
+      {"libraryCallsNotInlined",cudalifetime::info().libraryCallsNotInlined},
       {"defaultStreamMode",cudalifetime::info().perThread ? "per-thread" : "legacy"},
       {"seconds",seconds}, {"peakRssKiB",static_cast<int64_t>(usage.ru_maxrss)}, {"assumptions",std::move(assumptions)}};
   std::error_code ec;

@@ -53,6 +53,8 @@ struct AnalysisInfo {
   unsigned kernelLaunches = 0, escapes = 0, modeledCalls = 0, cudaFailurePathsSkipped = 0;
   // Paths ended on entering a block from which every path throws or calls a function that never returns.
   unsigned pathsEndedBeforeThrow = 0;
+  // Standard-library internals (reference counts, streams, locks) evaluated without inlining.
+  unsigned libraryCallsNotInlined = 0;
   unsigned pendingMemberCallUses = 0, pendingArgumentUses = 0, pendingPointerEscapes = 0;
   // Top-level functions CSA analyzed: the denominator for budgetExhausted.
   unsigned functionsAnalyzed = 0;
