@@ -19,8 +19,8 @@ class RealBugMatchingTests(unittest.TestCase):
         # The same line number in another file does not count.
         self.assertFalse(on_lines(self.diagnostic("file:///t/src/b.cu", 10, [("file:///t/include/x.h", 12)]), path, lines))
 
-    def test_costliest_functions_are_those_with_the_most_steps(self):
-        entries = [{"function": name, "steps": steps} for name, steps in (("a", 5), ("b", 225000), ("c", 40))]
+    def test_costliest_functions_are_those_with_the_most_nodes(self):
+        entries = [{"function": name, "nodes": nodes} for name, nodes in (("a", 5), ("b", 225000), ("c", 40))]
         self.assertEqual([e["function"] for e in costliest(entries, 2)], ["b", "c"])
         self.assertEqual(costliest([]), [])
 

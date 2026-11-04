@@ -16,10 +16,12 @@
 #include "clang/StaticAnalyzer/Core/PathSensitive/ExprEngine.h"
 #include "clang/StaticAnalyzer/Core/PathSensitive/ProgramStateTrait.h"
 #include "clang/StaticAnalyzer/Frontend/CheckerRegistry.h"
+#include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/ImmutableSet.h"
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/Support/Path.h"
 #include <algorithm>
+#include <chrono>
 #include <cstdint>
 #include <optional>
 #include <tuple>
@@ -1197,7 +1199,10 @@ public:
     for (auto entry : s->get<PendingOps>())
       reaper.markLive(entry.region);
   }
+  mutable std::chrono::steady_clock::time_point started;
   void checkBeginFunction(CheckerContext &c) const {
+    if (c.inTopFrame())
+      started = std::chrono::steady_clock::now();
     // ExprEngine skips CUDAKernelCallExpr operand evaluation; keep referenced
     // locals alive so PostStmt can read the existing store without inventing a value.
     class References : public RecursiveASTVisitor<References> {
@@ -1227,8 +1232,9 @@ public:
     const Decl *decl = engine.getRootStackFrame()->getDecl();
     cudalifetime::EntryPoint entry;
     entry.function = functionName(decl);
-    entry.debugName = AnalysisDeclContext::getFunctionName(decl);
     entry.nodes = graph.size();
+    entry.milliseconds = static_cast<unsigned>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - started).count());
     entry.exhausted = engine.hasWorkRemaining();
     if (entry.exhausted)
       stats.budgetExhausted.push_back(entry.function);
@@ -1245,7 +1251,13 @@ public:
     const StackFrame *root = engine.getRootStackFrame();
     const SourceManager &sources = engine.getContext().getSourceManager();
     llvm::DenseMap<const Decl *, unsigned> frames, callees;
-    std::map<std::pair<FileID, unsigned>, unsigned> lines;
+    std::map<std::pair<FileID, unsigned>, unsigned> lines, sites;
+    auto lineOf = [&](SourceLocation location) -> std::optional<std::pair<FileID, unsigned>> {
+      auto [file, offset] = sources.getDecomposedExpansionLoc(location);
+      if (!file.isValid())
+        return std::nullopt;
+      return std::make_pair(file, sources.getLineNumber(file, offset));
+    };
     for (const ExplodedNode &node : graph.nodes()) {
       const StackFrame *frame = node.getStackFrame();
       if (!frame)
@@ -1255,11 +1267,21 @@ public:
       while (callee->getParent() && callee->getParent() != root)
         callee = callee->getParent();
       ++callees[callee == root ? nullptr : callee->getDecl()];
-      if (const Stmt *statement = node.getStmtForDiagnostics()) {
-        auto [file, offset] = sources.getDecomposedExpansionLoc(statement->getBeginLoc());
-        if (file.isValid())
-          ++lines[{file, sources.getLineNumber(file, offset)}];
-      }
+      const Stmt *statement = node.getStmtForDiagnostics();
+      if (statement)
+        if (auto line = lineOf(statement->getBeginLoc()))
+          ++lines[*line];
+      // The project line the node is under: the node's own line in project
+      // code, or the call site of the outermost library frame below it.
+      const Stmt *site = statement;
+      for (const StackFrame *f = frame; f && f->getParent(); f = f->getParent())
+        if (sources.isInSystemHeader(sources.getExpansionLoc(f->getDecl()->getLocation())))
+          site = f->getCallSite();
+        else
+          break;
+      if (site)
+        if (auto line = lineOf(site->getBeginLoc()))
+          ++sites[*line];
     }
     auto top = [](auto &counts, auto label) {
       std::vector<std::pair<std::string, unsigned>> out;
@@ -1272,11 +1294,13 @@ public:
     };
     entry.byFrame = top(frames, [](const Decl *d) { return functionName(d); });
     entry.byCallee = top(callees, [](const Decl *d) { return d ? functionName(d) : std::string("<the function itself>"); });
-    entry.byLine = top(lines, [&](const std::pair<FileID, unsigned> &key) {
+    auto label = [&](const std::pair<FileID, unsigned> &key) {
       auto entryFile = sources.getFileEntryRefForID(key.first);
       return (entryFile ? llvm::sys::path::filename(entryFile->getName()).str() : std::string("<unknown>")) + ":" +
              std::to_string(key.second);
-    });
+    };
+    entry.byLine = top(lines, label);
+    entry.bySite = top(sites, label);
   }
   void checkPostCall(const CallEvent &call, CheckerContext &c) const {
     // Honor explicit no-return contracts inside inlined checked-return helpers.

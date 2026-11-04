@@ -17,7 +17,6 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/JSON.h"
-#include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/Support/raw_ostream.h"
@@ -41,7 +40,6 @@ llvm::cl::opt<bool> includeContract("include-contract", llvm::cl::desc("Retain c
 llvm::cl::opt<std::string> resourceDir("resource-dir", llvm::cl::desc("Clang builtin headers directory; defaults to the matching build SDK"), llvm::cl::init(CUDA_LIFETIME_CLANG_RESOURCE_DIR), llvm::cl::cat(category));
 unsigned parsed = 0;
 bool skippedNoCuda = false;
-std::string entryPointsCsv;
 std::set<std::string> unsupportedRoots;
 // Start at source-file definitions, then follow actual direct callees. Merely
 // including a CUDA header must not force analysis of every unused inline body.
@@ -214,7 +212,8 @@ class Action : public ASTFrontendAction {
     opts.CheckersAndPackages.emplace_back("cuda.AsyncLifetime", true);
     opts.AnalysisDiagOpt = PD_NONE;
     opts.MaxNodesPerTopLevelFunction = maxNodes;
-    opts.DumpEntryPointStatsToCSV = entryPointsCsv; // StringRef: the string outlives the run
+    // Profiling counts every node created: no reclamation of uninteresting ones.
+    if (nodeProfile) opts.GraphTrimInterval = 0;
     ci.getFrontendOpts().OutputFile = sarif;
     auto consumer = ento::CreateAnalysisConsumer(ci);
     consumer->AddCheckerRegistrationFn(cudalifetime::registerChecker);
@@ -230,48 +229,6 @@ class Action : public ASTFrontendAction {
   }
 };
 }
-// Fill each entry point's steps and path time from CSA's entry-point
-// statistics (one CSV row per top-level function, matched by debug name).
-void readEntryPointStats(const std::string &path) {
-  auto buffer = llvm::MemoryBuffer::getFile(path);
-  if (!buffer) return;
-  auto fields = [](llvm::StringRef line) {
-    std::vector<std::string> out(1);
-    bool quoted = false;
-    for (char ch : line) {
-      if (ch == '"') quoted = !quoted;
-      else if (ch == ',' && !quoted) out.emplace_back();
-      else out.back() += ch;
-    }
-    return out;
-  };
-  llvm::SmallVector<llvm::StringRef> lines;
-  (*buffer)->getBuffer().split(lines, '\n', -1, false);
-  if (lines.empty()) return;
-  auto header = fields(lines.front());
-  auto column = [&](llvm::StringRef name) { return std::find(header.begin(), header.end(), name) - header.begin(); };
-  size_t name = column("DebugName"), steps = column("NumSteps"), time = column("PathRunningTime");
-  std::multimap<std::string, std::vector<std::string>> rows;
-  for (auto line : llvm::ArrayRef(lines).drop_front()) {
-    auto row = fields(line);
-    if (name < row.size()) rows.emplace(row[name], row);
-  }
-  auto number = [](const std::vector<std::string> &row, size_t index) {
-    unsigned value = 0;
-    if (index < row.size()) llvm::StringRef(row[index]).getAsInteger(10, value);
-    return value;
-  };
-  for (auto &entry : cudalifetime::info().entryPoints) {
-    std::string escaped;
-    llvm::raw_string_ostream out(escaped);
-    llvm::printEscapedString(entry.debugName, out);
-    auto found = rows.find(escaped);
-    if (found == rows.end()) continue;
-    entry.steps = number(found->second, steps);
-    entry.milliseconds = number(found->second, time);
-    rows.erase(found);
-  }
-}
 int main(int argc, const char **argv) {
   llvm::cl::SetVersionPrinter([](llvm::raw_ostream &out) { out << "cuda-lifetime-native " CUDA_LIFETIME_PRODUCT_VERSION " (LLVM " CUDA_LIFETIME_LLVM_VERSION ")\n"; });
   auto options = CommonOptionsParser::create(argc, argv, category, llvm::cl::OneOrMore);
@@ -280,7 +237,6 @@ int main(int argc, const char **argv) {
   if (!maxNodes) { llvm::errs() << "--max-nodes must be positive\n"; return 2; }
   if (summarizeTo.empty() && (sarif.empty() || coverage.empty())) { llvm::errs() << "--sarif and --coverage are required unless --summarize is given\n"; return 2; }
   cudalifetime::info().profileNodes = nodeProfile;
-  entryPointsCsv = coverage + ".entry-points.csv";
   std::string error;
   if (!cudalifetime::loadModels(models, error)) { llvm::errs() << error << "\n"; return 2; }
   ClangTool tool(options->getCompilations(), options->getSourcePathList());
@@ -311,13 +267,11 @@ int main(int argc, const char **argv) {
   const std::string &source = options->getSourcePathList().front();
   if (status || !parsed) failed.push_back(llvm::json::Object{{"file", source}, {"reason", "Clang parsing or analysis failed"}});
   else analyzed.push_back(source);
-  readEntryPointStats(entryPointsCsv);
-  llvm::sys::fs::remove(entryPointsCsv);
   llvm::json::Array entryPoints;
-  uint64_t totalSteps = 0;
+  uint64_t totalNodes = 0;
   for (const auto &entry : cudalifetime::info().entryPoints) {
-    totalSteps += entry.steps;
-    llvm::json::Object record{{"function", entry.function}, {"steps", entry.steps}, {"keptNodes", entry.nodes},
+    totalNodes += entry.nodes;
+    llvm::json::Object record{{"function", entry.function}, {"nodes", entry.nodes},
                               {"milliseconds", entry.milliseconds}, {"exhausted", entry.exhausted}};
     auto counts = [](const std::vector<std::pair<std::string, unsigned>> &pairs) {
       llvm::json::Array out;
@@ -326,7 +280,7 @@ int main(int argc, const char **argv) {
     };
     if (nodeProfile)
       record["profile"] = llvm::json::Object{{"byFrame", counts(entry.byFrame)}, {"byCallee", counts(entry.byCallee)},
-                                             {"byLine", counts(entry.byLine)}};
+                                             {"byLine", counts(entry.byLine)}, {"bySite", counts(entry.bySite)}};
     entryPoints.push_back(std::move(record));
   }
   for (auto &function : cudalifetime::info().budgetExhausted)
@@ -355,7 +309,8 @@ int main(int argc, const char **argv) {
       {"pendingPointerEscapes",cudalifetime::info().pendingPointerEscapes},
       {"modeledCallVisits",cudalifetime::info().modeledCalls},
       {"functionsAnalyzed",cudalifetime::info().functionsAnalyzed},
-      {"steps",static_cast<int64_t>(totalSteps)}, {"entryPoints",std::move(entryPoints)},
+      {"nodes",static_cast<int64_t>(totalNodes)}, {"nodesCounted", nodeProfile ? "all created" : "kept after reclamation"},
+      {"entryPoints",std::move(entryPoints)},
       {"cudaFailurePathsSkipped",cudalifetime::info().cudaFailurePathsSkipped},
       {"defaultStreamMode",cudalifetime::info().perThread ? "per-thread" : "legacy"},
       {"seconds",seconds}, {"peakRssKiB",static_cast<int64_t>(usage.ru_maxrss)}, {"assumptions",std::move(assumptions)}};

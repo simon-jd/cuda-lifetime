@@ -29,16 +29,19 @@ struct Model {
 struct ReportKind {
   std::string rule, level, memory, semantic;
 };
-// One top-level function's exploration: exploded-graph nodes kept at the end
-// (CSA reclaims some along the way; the budget counts steps, which the tool
-// takes from CSA's entry-point statistics by debugName) and, when profiling,
-// where the kept nodes are: by innermost function, by the top-level
-// function's direct callee they descend from, and by source line.
+// One top-level function's exploration: its exploded-graph nodes at the end
+// of the analysis (CSA's node budget counts the work-list steps that create
+// them) and its path-analysis time. CSA reclaims uninteresting nodes as it
+// goes, so nodes are those kept, except with --node-profile, which turns
+// reclamation off and counts every node created. The profile records where
+// the nodes are: by innermost function, by the top-level function's direct
+// callee they descend from, by source line, and by the project
+// (non-system-header) line they are under.
 struct EntryPoint {
-  std::string function, debugName;
-  unsigned nodes = 0, steps = 0, milliseconds = 0;
+  std::string function;
+  unsigned nodes = 0, milliseconds = 0;
   bool exhausted = false;
-  std::vector<std::pair<std::string, unsigned>> byFrame, byCallee, byLine;
+  std::vector<std::pair<std::string, unsigned>> byFrame, byCallee, byLine, bySite;
 };
 struct AnalysisInfo {
   std::map<std::string, Model> models;
