@@ -1,0 +1,2933 @@
+{
+  "schemaVersion": 1,
+  "tool": "cuda-lifetime",
+  "toolVersion": "cuda-lifetime-native 0.6.0 (LLVM 23.1.3)",
+  "cases": [
+    {
+      "id": "cuco-dynamic-map-success-count",
+      "inRuleScope": true,
+      "rule": "CL1",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "CL3",
+            "level": "note",
+            "message": "Ordinary cudaFree may implicitly synchronize; this path relies on that behavior",
+            "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/utility/allocator.hpp",
+            "line": 60,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 108
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 108
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 113
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 79
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 64
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 55
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 55
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 57
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 57
+              },
+              {
+                "uri": "file:///usr/include/c++/15/bits/unique_ptr.h",
+                "line": 397
+              },
+              {
+                "uri": "file:///usr/include/c++/15/bits/unique_ptr.h",
+                "line": 397
+              },
+              {
+                "uri": "file:///usr/include/c++/15/bits/unique_ptr.h",
+                "line": 398
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/storage_base.cuh",
+                "line": 49
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/utility/allocator.hpp",
+                "line": 60
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+            "line": 99,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 108
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 108
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 113
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 79
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 64
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 55
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 99
+              }
+            ]
+          },
+          {
+            "ruleId": "CL1",
+            "level": "warning",
+            "message": "Host reads the destination before asynchronous D2H completion",
+            "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+            "line": 99,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 108
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 108
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 113
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 79
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 64
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/test_utils.hpp",
+                "line": 55
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 99
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+            "line": 149,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 54
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 149
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 149
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 154
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 154
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 155
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 155
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 155
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 149
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 149
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 149
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 149
+              }
+            ]
+          },
+          {
+            "ruleId": "CL1",
+            "level": "warning",
+            "message": "Host reads the destination before asynchronous D2H completion",
+            "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+            "line": 178,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 54
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 149
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 149
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 154
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 154
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 155
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 155
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 155
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 178
+              }
+            ]
+          },
+          {
+            "ruleId": "CL1",
+            "level": "warning",
+            "message": "Host reads the destination before asynchronous D2H completion",
+            "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+            "line": 179,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 54
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 149
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 149
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 154
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 154
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 155
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 155
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 155
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 173
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 179
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+            "line": 219,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 56
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 56
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 58
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 204
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 204
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 219
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 219
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 219
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 219
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 219
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 219
+              }
+            ]
+          },
+          {
+            "ruleId": "CL1",
+            "level": "warning",
+            "message": "Host reads the destination before asynchronous D2H completion",
+            "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+            "line": 226,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 56
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 56
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 58
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 204
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 204
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 219
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 219
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 226
+              }
+            ]
+          },
+          {
+            "ruleId": "CL1",
+            "level": "warning",
+            "message": "Host reads the destination before asynchronous D2H completion",
+            "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+            "line": 227,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 56
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 56
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/tests/dynamic_map/erase_test.cu",
+                "line": 58
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 204
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 204
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 219
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 219
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 221
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-ad9c478ad1/include/cuco/detail/dynamic_map.inl",
+                "line": 227
+              }
+            ]
+          }
+        ],
+        "functionsAnalyzed": 5,
+        "functionsOverBudget": 4,
+        "overBudgetFunctions": [
+          "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+          "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+          "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+          "CATCH2_INTERNAL_TEMPLATE_TEST_99"
+        ],
+        "coverageGaps": [
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__is_maximum_minimum_noexcept_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<int, int>::device_mutable_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<int, int>::device_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<int, long>::device_mutable_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<int, long>::device_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<long, int>::device_mutable_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<long, int>::device_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<long, long>::device_mutable_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<long, long>::device_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuda::atomic<unsigned long, cuda::std::thread_scope_device> *>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<int, int>::device_mutable_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<int, int>::device_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<int, long>::device_mutable_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<int, long>::device_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<long, int>::device_mutable_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<long, int>::device_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<long, long>::device_mutable_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<long, long>::device_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuda::atomic<unsigned long, cuda::std::thread_scope_device> *> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<unsigned long &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_equality_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_less_than_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_nothrow_less_than_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__pair_select_pair_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_like_with_size",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_nothrow_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_select_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: thrust::detail::allocator_traits_detail::has_member_system",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled",
+          "pending device region reaches an opaque call: device access effects are unknown",
+          "pending region escapes: subsequent accesses through opaque ownership are not modeled"
+        ],
+        "unmodeledCudaCalls": [],
+        "seconds": 55.259180134,
+        "nodes": 1324977,
+        "nodesCounted": "kept after reclamation",
+        "costliest": [
+          {
+            "exhausted": true,
+            "function": "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+            "milliseconds": 12430,
+            "nodes": 331494
+          },
+          {
+            "exhausted": true,
+            "function": "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+            "milliseconds": 12388,
+            "nodes": 331122
+          },
+          {
+            "exhausted": true,
+            "function": "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+            "milliseconds": 12738,
+            "nodes": 330846
+          },
+          {
+            "exhausted": true,
+            "function": "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+            "milliseconds": 11923,
+            "nodes": 330585
+          },
+          {
+            "exhausted": false,
+            "function": "(anonymous namespace)::ns_CATCH2_INTERNAL_TEMPLATE_TEST_100::(lambda)::operator()",
+            "milliseconds": 2,
+            "nodes": 930
+          }
+        ],
+        "assumptions": [],
+        "dependencies": {
+          "catch2": "644821ce28cb25d7992a4d0375b1d83214392592"
+        }
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "CL3",
+            "level": "note",
+            "message": "Ordinary cudaFree may implicitly synchronize; this path relies on that behavior",
+            "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/utility/allocator.hpp",
+            "line": 60,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 108
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 108
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 113
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 79
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 64
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 55
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 55
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 57
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 57
+              },
+              {
+                "uri": "file:///usr/include/c++/15/bits/unique_ptr.h",
+                "line": 397
+              },
+              {
+                "uri": "file:///usr/include/c++/15/bits/unique_ptr.h",
+                "line": 397
+              },
+              {
+                "uri": "file:///usr/include/c++/15/bits/unique_ptr.h",
+                "line": 398
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/storage_base.cuh",
+                "line": 49
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/utility/allocator.hpp",
+                "line": 60
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+            "line": 99,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 108
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 108
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 113
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 79
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 64
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 55
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 99
+              }
+            ]
+          },
+          {
+            "ruleId": "CL1",
+            "level": "warning",
+            "message": "Host reads the destination before asynchronous D2H completion",
+            "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+            "line": 99,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 42
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 108
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 108
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/dynamic_map/erase_test.cu",
+                "line": 113
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 79
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 64
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 53
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/tests/test_utils.hpp",
+                "line": 55
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 96
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuCollections-71bcfa4374/include/cuco/detail/storage/counter_storage.cuh",
+                "line": 99
+              }
+            ]
+          }
+        ],
+        "functionsAnalyzed": 5,
+        "functionsOverBudget": 4,
+        "overBudgetFunctions": [
+          "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+          "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+          "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+          "CATCH2_INTERNAL_TEMPLATE_TEST_99"
+        ],
+        "coverageGaps": [
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__is_maximum_minimum_noexcept_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<int, int>::device_mutable_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<int, int>::device_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<int, long>::device_mutable_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<int, long>::device_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<long, int>::device_mutable_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<long, int>::device_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<long, long>::device_mutable_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuco::legacy::static_map<long, long>::device_view>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::detail::normal_iterator<thrust::device_ptr<cuda::atomic<unsigned long, cuda::std::thread_scope_device> *>> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<int, int>::device_mutable_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<int, int>::device_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<int, long>::device_mutable_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<int, long>::device_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<long, int>::device_mutable_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<long, int>::device_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<long, long>::device_mutable_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuco::legacy::static_map<long, long>::device_view> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<thrust::device_allocator<cuda::atomic<unsigned long, cuda::std::thread_scope_device> *> &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__detail::__nothrow_swappable_with<unsigned long &>::value",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_equality_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_less_than_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__is_cpp17_nothrow_less_than_comparable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__pair_select_pair_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_like_with_size",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_nothrow_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_select_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: thrust::detail::allocator_traits_detail::has_member_system",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled",
+          "pending device region reaches an opaque call: device access effects are unknown",
+          "pending region escapes: subsequent accesses through opaque ownership are not modeled"
+        ],
+        "unmodeledCudaCalls": [],
+        "seconds": 55.623595265,
+        "nodes": 1323359,
+        "nodesCounted": "kept after reclamation",
+        "costliest": [
+          {
+            "exhausted": true,
+            "function": "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+            "milliseconds": 12722,
+            "nodes": 331114
+          },
+          {
+            "exhausted": true,
+            "function": "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+            "milliseconds": 12830,
+            "nodes": 330667
+          },
+          {
+            "exhausted": true,
+            "function": "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+            "milliseconds": 12662,
+            "nodes": 330418
+          },
+          {
+            "exhausted": true,
+            "function": "CATCH2_INTERNAL_TEMPLATE_TEST_99",
+            "milliseconds": 11672,
+            "nodes": 330230
+          },
+          {
+            "exhausted": false,
+            "function": "(anonymous namespace)::ns_CATCH2_INTERNAL_TEMPLATE_TEST_100::(lambda)::operator()",
+            "milliseconds": 2,
+            "nodes": 930
+          }
+        ],
+        "assumptions": [],
+        "dependencies": {
+          "catch2": "644821ce28cb25d7992a4d0375b1d83214392592"
+        }
+      },
+      "result": "found",
+      "fixSilences": true
+    },
+    {
+      "id": "cuopt-route-view-staging",
+      "inRuleScope": true,
+      "rule": "CL2",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+            "line": 313,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 313
+              }
+            ]
+          },
+          {
+            "ruleId": "CL1",
+            "level": "warning",
+            "message": "Host reads the destination before asynchronous D2H completion",
+            "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+            "line": 313,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 313
+              }
+            ]
+          },
+          {
+            "ruleId": "CL1",
+            "level": "warning",
+            "message": "Opaque call may read a host buffer before asynchronous D2H completion",
+            "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+            "line": 313,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 313
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "raft@04e4ff1b58/cpp/include/raft/core/nvtx.hpp",
+            "line": 136,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 151
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 129
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 129
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 135
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 135
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 151
+              },
+              {
+                "uri": "raft@04e4ff1b58/cpp/include/raft/core/nvtx.hpp",
+                "line": 136
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+            "line": 68,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 299
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 81
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 81
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 81
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 84
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 84
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 46
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 46
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 49
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 49
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 68
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 292
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 292
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 297
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 297
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 299
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 297
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 297
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 68
+              }
+            ]
+          },
+          {
+            "ruleId": "CL1",
+            "level": "warning",
+            "message": "Host writes a buffer still used by an asynchronous copy",
+            "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+            "line": 152,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 129
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 129
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 135
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 135
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 146
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 146
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 152
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Host container is destroyed, releasing its buffer, while asynchronous work may still use it",
+            "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+            "line": 153,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 140
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 129
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 129
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 135
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 135
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 140
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 153
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+            "line": 239,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 299
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 225
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 225
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 237
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 237
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 239
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 292
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 292
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 297
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 297
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 299
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 297
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 297
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 239
+              }
+            ]
+          },
+          {
+            "ruleId": "CL1",
+            "level": "warning",
+            "message": "Host writes a buffer still used by an asynchronous copy",
+            "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+            "line": 246,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 225
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 225
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 237
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 237
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 246
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 246
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 248
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 248
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 246
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+            "line": 337,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 337
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 566
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 566
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 569
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 569
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 337
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+            "line": 569,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 580
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 566
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 566
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 569
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 569
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 569
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+            "line": 580,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 580
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 566
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 566
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 569
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 569
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 580
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Host container is destroyed, releasing its buffer, while asynchronous work may still use it",
+            "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+            "line": 710,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 681
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 704
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 704
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 709
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 709
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 709
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 681
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 686
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 686
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 686
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 686
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 709
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-301a9ac71d/cpp/src/routing/solution/solution.cu",
+                "line": 710
+              }
+            ]
+          }
+        ],
+        "functionsAnalyzed": 60,
+        "functionsOverBudget": 23,
+        "overBudgetFunctions": [
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::add_nodes_to_best",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::add_nodes_to_route",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::add_route",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::add_routes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::clear_routes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::copy_device_solution",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::get_num_empty_vehicles",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::is_feasible",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::keep_only_vehicles",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::random_init_routes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::remove_nodes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::add_nodes_to_best",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::add_nodes_to_route",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::add_route",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::add_routes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::clear_routes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::copy_device_solution",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::get_num_empty_vehicles",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::get_unused_vehicles",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::is_feasible",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::keep_only_vehicles",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::random_init_routes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::remove_nodes"
+        ],
+        "coverageGaps": [
+          "CSA does not guarantee exploration of a header-defined explicit template instantiation: cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::solution_t",
+          "CSA does not guarantee exploration of a header-defined explicit template instantiation: cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::view_t::get_node",
+          "CSA does not guarantee exploration of a header-defined explicit template instantiation: cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::solution_t",
+          "CSA does not guarantee exploration of a header-defined explicit template instantiation: cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::view_t::get_node",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__is_maximum_minimum_noexcept_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__pair_select_pair_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_select_tuple_like_assignable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_select_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: raft::common::nvtx::detail::range_name_stack_instance",
+          "CSA does not guarantee exploration of global initialization or destruction: raft::interruptible::registry_",
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled",
+          "pending region escapes: subsequent accesses through opaque ownership are not modeled"
+        ],
+        "unmodeledCudaCalls": [
+          "kernel-launch:unknown-stream",
+          "rmm::detail::memcpy_async:unknown-stream"
+        ],
+        "seconds": 102.992080077,
+        "nodes": 9364263,
+        "nodesCounted": "kept after reclamation",
+        "costliest": [
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::keep_only_vehicles",
+            "milliseconds": 3325,
+            "nodes": 388841
+          },
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::keep_only_vehicles",
+            "milliseconds": 3497,
+            "nodes": 388671
+          },
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::add_nodes_to_best",
+            "milliseconds": 5118,
+            "nodes": 373350
+          },
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::add_nodes_to_best",
+            "milliseconds": 4906,
+            "nodes": 371002
+          },
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::copy_device_solution",
+            "milliseconds": 3917,
+            "nodes": 364489
+          },
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::remove_nodes",
+            "milliseconds": 3515,
+            "nodes": 363679
+          },
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::copy_device_solution",
+            "milliseconds": 4278,
+            "nodes": 363453
+          },
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::remove_nodes",
+            "milliseconds": 3466,
+            "nodes": 362278
+          }
+        ],
+        "assumptions": [
+          "user model: generated summary: raft::copy",
+          "user model: generated summary: rmm::device_uvector<cuopt::routing::detail::NodeInfo<>>::element",
+          "user model: generated summary: rmm::device_uvector<cuopt::routing::detail::route_t<int, float, cuopt::routing::request_t::PDP>::view_t>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuopt::routing::detail::route_t<int, float, cuopt::routing::request_t::VRP>::view_t>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuopt::routing::detail::static_vec_t<cuopt::routing::detail::dim_t>>::front_element",
+          "user model: generated summary: rmm::device_uvector<cuopt::routing::detail::static_vec_t<cuopt::routing::detail::dim_t>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuopt::routing::detail::static_vec_t<cuopt::routing::objective_t>>::front_element",
+          "user model: generated summary: rmm::device_uvector<cuopt::routing::detail::static_vec_t<cuopt::routing::objective_t>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<int>::element",
+          "user model: generated summary: rmm::device_uvector<int>::front_element",
+          "user model: generated summary: rmm::device_uvector<int>::set_element_async",
+          "user model: handle accessor returns the only data member: rmm::cuda_stream_view::operator CUstream_st *",
+          "user model: handle accessor returns the only data member: rmm::cuda_stream_view::value",
+          "user model: rmm::cuda_stream_view::synchronize",
+          "user model: rmm::detail::memcpy_async"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::detail::memcpy_async"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          }
+        ],
+        "dependencies": {
+          "raft": "04e4ff1b588e8ffb306a4abcda64b9b327ff3c0a",
+          "rmm": "c65202f52766e12c73e293b16d6a520a069d4afc"
+        }
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+            "line": 313,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 313
+              }
+            ]
+          },
+          {
+            "ruleId": "CL1",
+            "level": "warning",
+            "message": "Host reads the destination before asynchronous D2H completion",
+            "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+            "line": 313,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 313
+              }
+            ]
+          },
+          {
+            "ruleId": "CL1",
+            "level": "warning",
+            "message": "Opaque call may read a host buffer before asynchronous D2H completion",
+            "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+            "line": 313,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 307
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 310
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_uvector.hpp",
+                "line": 313
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+            "line": 55,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 81
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 81
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 81
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 84
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 84
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 91
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 46
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 46
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 49
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 49
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 55
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/route/route.cuh",
+                "line": 31
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 117
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 117
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/route/route.cuh",
+                "line": 31
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 55
+              }
+            ]
+          },
+          {
+            "ruleId": "CL1",
+            "level": "warning",
+            "message": "Host writes a buffer still used by an asynchronous copy",
+            "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+            "line": 249,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 228
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 228
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 240
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 240
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 249
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 249
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 251
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 251
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 249
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+            "line": 354,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 354
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 584
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 584
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 587
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 587
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 354
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+            "line": 587,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 598
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 584
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 584
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 587
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 587
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 587
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Stack buffer lifetime ends while asynchronous work may still access it",
+            "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+            "line": 598,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 598
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 584
+              },
+              {
+                "uri": "file://.deps/recall/trees/rmm-c65202f527/cpp/include/rmm/device_scalar.hpp",
+                "line": 196
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 584
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 587
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 587
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 598
+              }
+            ]
+          },
+          {
+            "ruleId": "CL2",
+            "level": "warning",
+            "message": "Host container is destroyed, releasing its buffer, while asynchronous work may still use it",
+            "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+            "line": 728,
+            "flow": [
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 699
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 722
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 722
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 727
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 727
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 727
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 699
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 704
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 704
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 704
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 704
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 727
+              },
+              {
+                "uri": "file://.deps/recall/trees/cuopt-c7c94d2e6e/cpp/src/routing/solution/solution.cu",
+                "line": 728
+              }
+            ]
+          }
+        ],
+        "functionsAnalyzed": 58,
+        "functionsOverBudget": 23,
+        "overBudgetFunctions": [
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::add_nodes_to_best",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::add_nodes_to_route",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::add_route",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::add_routes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::clear_routes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::copy_device_solution",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::get_num_empty_vehicles",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::is_feasible",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::keep_only_vehicles",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::random_init_routes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::remove_nodes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::add_nodes_to_best",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::add_nodes_to_route",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::add_route",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::add_routes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::clear_routes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::copy_device_solution",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::get_num_empty_vehicles",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::get_unused_vehicles",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::is_feasible",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::keep_only_vehicles",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::random_init_routes",
+          "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::remove_nodes"
+        ],
+        "coverageGaps": [
+          "CSA does not guarantee exploration of a header-defined explicit template instantiation: cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::solution_t",
+          "CSA does not guarantee exploration of a header-defined explicit template instantiation: cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::view_t::get_node",
+          "CSA does not guarantee exploration of a header-defined explicit template instantiation: cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::solution_t",
+          "CSA does not guarantee exploration of a header-defined explicit template instantiation: cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::view_t::get_node",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::__is_maximum_minimum_noexcept_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__destructible_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__has_integral_minus_impl",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__pair_select_pair_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_select_tuple_like_assignable_v",
+          "CSA does not guarantee exploration of global initialization or destruction: cuda::std::__tuple_select_tuple_like_constructible_v",
+          "CSA does not guarantee exploration of global initialization or destruction: raft::common::nvtx::detail::range_name_stack_instance",
+          "CSA does not guarantee exploration of global initialization or destruction: raft::interruptible::registry_",
+          "CSA does not guarantee exploration of global initialization or destruction: std::__is_implicitly_default_constructible_v",
+          "cudaMemcpyDefault copy with an operand of unknown memory kind: the copy direction for that operand is not modeled",
+          "pending region escapes: subsequent accesses through opaque ownership are not modeled"
+        ],
+        "unmodeledCudaCalls": [
+          "kernel-launch:unknown-stream",
+          "rmm::detail::memcpy_async:unknown-stream"
+        ],
+        "seconds": 99.900329918,
+        "nodes": 9231067,
+        "nodesCounted": "kept after reclamation",
+        "costliest": [
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::keep_only_vehicles",
+            "milliseconds": 3814,
+            "nodes": 388841
+          },
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::keep_only_vehicles",
+            "milliseconds": 3488,
+            "nodes": 388671
+          },
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::add_nodes_to_best",
+            "milliseconds": 5271,
+            "nodes": 373350
+          },
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::add_nodes_to_best",
+            "milliseconds": 5432,
+            "nodes": 371002
+          },
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::PDP>::remove_nodes",
+            "milliseconds": 3521,
+            "nodes": 363679
+          },
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::remove_nodes",
+            "milliseconds": 3548,
+            "nodes": 362278
+          },
+          {
+            "exhausted": true,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::get_unused_vehicles",
+            "milliseconds": 1587,
+            "nodes": 356405
+          },
+          {
+            "exhausted": false,
+            "function": "cuopt::routing::detail::solution_t<int, float, cuopt::routing::request_t::VRP>::remove_routes",
+            "milliseconds": 2327,
+            "nodes": 355725
+          }
+        ],
+        "assumptions": [
+          "user model: generated summary: raft::copy",
+          "user model: generated summary: rmm::device_uvector<cuopt::routing::detail::NodeInfo<>>::element",
+          "user model: generated summary: rmm::device_uvector<cuopt::routing::detail::static_vec_t<cuopt::routing::detail::dim_t>>::front_element",
+          "user model: generated summary: rmm::device_uvector<cuopt::routing::detail::static_vec_t<cuopt::routing::detail::dim_t>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<cuopt::routing::detail::static_vec_t<cuopt::routing::objective_t>>::front_element",
+          "user model: generated summary: rmm::device_uvector<cuopt::routing::detail::static_vec_t<cuopt::routing::objective_t>>::set_element_async",
+          "user model: generated summary: rmm::device_uvector<int>::element",
+          "user model: generated summary: rmm::device_uvector<int>::front_element",
+          "user model: generated summary: rmm::device_uvector<int>::set_element_async",
+          "user model: handle accessor returns the only data member: rmm::cuda_stream_view::operator CUstream_st *",
+          "user model: handle accessor returns the only data member: rmm::cuda_stream_view::value",
+          "user model: rmm::cuda_stream_view::synchronize",
+          "user model: rmm::detail::memcpy_async"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::detail::memcpy_async"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          }
+        ],
+        "dependencies": {
+          "raft": "04e4ff1b588e8ffb306a4abcda64b9b327ff3c0a",
+          "rmm": "c65202f52766e12c73e293b16d6a520a069d4afc"
+        }
+      },
+      "result": "found",
+      "fixSilences": false
+    },
+    {
+      "id": "spark-rapids-shuffle-offset-info",
+      "inRuleScope": true,
+      "rule": "CL2",
+      "buggy": {
+        "parsed": false,
+        "returncode": 1,
+        "errorCount": 20,
+        "errors": [
+          ".deps/recall/trees/spark-rapids-jni-f6c9383b50/src/main/cpp/src/shuffle_assemble.cu:114:1: error: 'operator+' cannot be the name of a variable or data member",
+          ".deps/recall/trees/spark-rapids-jni-f6c9383b50/src/main/cpp/src/shuffle_assemble.cu:114:1: error: expected ';' at end of declaration list",
+          "targets/rmm/build/_deps/cccl-src/thrust/thrust/system/cuda/detail/reduce_by_key.h:830:75: error: invalid operands to binary expression ('spark_rapids_jni::(anonymous namespace)::assemble_column_info_has_validity_output_itergeneric_output_iter<spark_rapids_jni::(anonymous namespace)::assemble_column_info>' and 'const thrust::detail::it_value_t<int *>' (aka 'const int'))"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "absent at this revision"
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{cudf}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
+        ],
+        "dependencies": {
+          "cudf": "6fc6473c35bf73bf7c8955b6b06c6fa287c4dc3b",
+          "rmm": "5d50a37b9612e29d53f8202fba792b1a36f88a79"
+        }
+      },
+      "fixed": {
+        "parsed": false,
+        "returncode": 1,
+        "errorCount": 20,
+        "errors": [
+          ".deps/recall/trees/spark-rapids-jni-013b067184/src/main/cpp/src/shuffle_assemble.cu:114:1: error: 'operator+' cannot be the name of a variable or data member",
+          ".deps/recall/trees/spark-rapids-jni-013b067184/src/main/cpp/src/shuffle_assemble.cu:114:1: error: expected ';' at end of declaration list",
+          "targets/rmm/build/_deps/cccl-src/thrust/thrust/system/cuda/detail/reduce_by_key.h:830:75: error: invalid operands to binary expression ('spark_rapids_jni::(anonymous namespace)::assemble_column_info_has_validity_output_itergeneric_output_iter<spark_rapids_jni::(anonymous namespace)::assemble_column_info>' and 'const thrust::detail::it_value_t<int *>' (aka 'const int'))"
+        ],
+        "summaries": [
+          {
+            "file": "{rmm}/cpp/src/cuda_memcpy.cpp",
+            "status": "absent at this revision"
+          },
+          {
+            "file": "{rmm}/cpp/src/cuda_stream_view.cpp",
+            "status": "summarized",
+            "models": [
+              "rmm::cuda_stream_view::synchronize",
+              "rmm::cuda_stream_view::synchronize_no_throw"
+            ]
+          },
+          {
+            "file": "{rmm}/cpp/src/device_buffer.cpp",
+            "status": "summarized",
+            "models": []
+          },
+          {
+            "file": "{cudf}/cpp/src/utilities/cuda_memcpy.cu",
+            "status": "summarized",
+            "models": [
+              "cudf::detail::cuda_memcpy_async_impl",
+              "cudf::detail::memcpy_async",
+              "cudf::detail::memcpy_batch_async"
+            ]
+          }
+        ],
+        "dependencies": {
+          "cudf": "6fc6473c35bf73bf7c8955b6b06c6fa287c4dc3b",
+          "rmm": "5d50a37b9612e29d53f8202fba792b1a36f88a79"
+        }
+      },
+      "result": "not-analyzable"
+    },
+    {
+      "id": "ngp-exposure-gradient-read",
+      "inRuleScope": true,
+      "rule": "CL1",
+      "buggy": {
+        "parsed": false,
+        "returncode": 1,
+        "errorCount": 18,
+        "errors": [
+          ".deps/recall/trees/instant-ngp-6ee7724370/src/testbed_nerf.cu:2722:29: error: no matching function for call to 'NERF_CASCADES'",
+          ".deps/recall/trees/instant-ngp-6ee7724370/src/testbed_nerf.cu:2732:39: error: no matching function for call to 'NERF_CASCADES'",
+          ".deps/recall/trees/instant-ngp-6ee7724370/src/testbed_nerf.cu:2784:30: error: no matching function for call to 'NERF_GRID_N_CELLS'"
+        ],
+        "dependencies": {
+          "tcnn": "8d2536b8b324c998ff0ecec74e9d6a9c77bd45f3",
+          "glm": "efec5db081e3aad807d0731e172ac597f6a39447",
+          "tinylogger": "aea07e21a3c0f0590513dd23f2ea7b2271312dfc",
+          "cutlass": "1eb6355182a5124639ce9d3ff165732a94ed9a70",
+          "fmt": "b0c8263cb26ea178d3a5df1b984e1a61ef578950"
+        }
+      },
+      "fixed": {
+        "parsed": false,
+        "returncode": 1,
+        "errorCount": 18,
+        "errors": [
+          ".deps/recall/trees/instant-ngp-a96f45441f/src/testbed_nerf.cu:2722:29: error: no matching function for call to 'NERF_CASCADES'",
+          ".deps/recall/trees/instant-ngp-a96f45441f/src/testbed_nerf.cu:2732:39: error: no matching function for call to 'NERF_CASCADES'",
+          ".deps/recall/trees/instant-ngp-a96f45441f/src/testbed_nerf.cu:2784:30: error: no matching function for call to 'NERF_GRID_N_CELLS'"
+        ],
+        "dependencies": {
+          "tcnn": "8d2536b8b324c998ff0ecec74e9d6a9c77bd45f3",
+          "glm": "efec5db081e3aad807d0731e172ac597f6a39447",
+          "tinylogger": "aea07e21a3c0f0590513dd23f2ea7b2271312dfc",
+          "cutlass": "1eb6355182a5124639ce9d3ff165732a94ed9a70",
+          "fmt": "b0c8263cb26ea178d3a5df1b984e1a61ef578950"
+        }
+      },
+      "result": "not-analyzable"
+    },
+    {
+      "id": "gromacs-shift-vector-event",
+      "inRuleScope": true,
+      "rule": "CL4",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "functionsAnalyzed": 37,
+        "functionsOverBudget": 2,
+        "overBudgetFunctions": [
+          "gmx::alternatePmeNbGpuWaitReduce",
+          "gmx::do_force"
+        ],
+        "coverageGaps": [],
+        "unmodeledCudaCalls": [],
+        "seconds": 6.515837211,
+        "nodes": 592719,
+        "nodesCounted": "kept after reclamation",
+        "costliest": [
+          {
+            "exhausted": true,
+            "function": "gmx::do_force",
+            "milliseconds": 3217,
+            "nodes": 281100
+          },
+          {
+            "exhausted": true,
+            "function": "gmx::alternatePmeNbGpuWaitReduce",
+            "milliseconds": 1916,
+            "nodes": 252672
+          },
+          {
+            "exhausted": false,
+            "function": "gmx::postProcessForces",
+            "milliseconds": 80,
+            "nodes": 24426
+          },
+          {
+            "exhausted": false,
+            "function": "gmx::setupLocalGpuForceReduction",
+            "milliseconds": 35,
+            "nodes": 16335
+          },
+          {
+            "exhausted": false,
+            "function": "gmx::getExpectedLocalXReadyOnDeviceConsumptionCount",
+            "milliseconds": 8,
+            "nodes": 8636
+          },
+          {
+            "exhausted": false,
+            "function": "gmx::postProcessForceWithShiftForces",
+            "milliseconds": 6,
+            "nodes": 2156
+          },
+          {
+            "exhausted": false,
+            "function": "gmx::checkPotentialEnergyValidity",
+            "milliseconds": 2,
+            "nodes": 2024
+          },
+          {
+            "exhausted": false,
+            "function": "gmx::pme_receive_force_ener",
+            "milliseconds": 3,
+            "nodes": 1717
+          }
+        ],
+        "assumptions": []
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "functionsAnalyzed": 37,
+        "functionsOverBudget": 2,
+        "overBudgetFunctions": [
+          "gmx::alternatePmeNbGpuWaitReduce",
+          "gmx::do_force"
+        ],
+        "coverageGaps": [],
+        "unmodeledCudaCalls": [],
+        "seconds": 6.475601637,
+        "nodes": 591593,
+        "nodesCounted": "kept after reclamation",
+        "costliest": [
+          {
+            "exhausted": true,
+            "function": "gmx::do_force",
+            "milliseconds": 3090,
+            "nodes": 279974
+          },
+          {
+            "exhausted": true,
+            "function": "gmx::alternatePmeNbGpuWaitReduce",
+            "milliseconds": 1989,
+            "nodes": 252672
+          },
+          {
+            "exhausted": false,
+            "function": "gmx::postProcessForces",
+            "milliseconds": 89,
+            "nodes": 24426
+          },
+          {
+            "exhausted": false,
+            "function": "gmx::setupLocalGpuForceReduction",
+            "milliseconds": 38,
+            "nodes": 16335
+          },
+          {
+            "exhausted": false,
+            "function": "gmx::getExpectedLocalXReadyOnDeviceConsumptionCount",
+            "milliseconds": 8,
+            "nodes": 8636
+          },
+          {
+            "exhausted": false,
+            "function": "gmx::postProcessForceWithShiftForces",
+            "milliseconds": 6,
+            "nodes": 2156
+          },
+          {
+            "exhausted": false,
+            "function": "gmx::checkPotentialEnergyValidity",
+            "milliseconds": 2,
+            "nodes": 2024
+          },
+          {
+            "exhausted": false,
+            "function": "gmx::pme_receive_force_ener",
+            "milliseconds": 3,
+            "nodes": 1717
+          }
+        ],
+        "assumptions": []
+      },
+      "result": "missed"
+    },
+    {
+      "id": "gromacs-nonlocal-x-wait",
+      "inRuleScope": true,
+      "rule": "CL4",
+      "buggy": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "functionsAnalyzed": 0,
+        "functionsOverBudget": 0,
+        "overBudgetFunctions": [],
+        "coverageGaps": [],
+        "unmodeledCudaCalls": [],
+        "seconds": 0.453365216,
+        "nodes": 0,
+        "nodesCounted": "kept after reclamation",
+        "costliest": [],
+        "assumptions": []
+      },
+      "fixed": {
+        "parsed": true,
+        "returncode": 0,
+        "errorCount": 0,
+        "errors": [],
+        "diagnostics": [],
+        "functionsAnalyzed": 0,
+        "functionsOverBudget": 0,
+        "overBudgetFunctions": [],
+        "coverageGaps": [],
+        "unmodeledCudaCalls": [],
+        "seconds": 0.414155227,
+        "nodes": 0,
+        "nodesCounted": "kept after reclamation",
+        "costliest": [],
+        "assumptions": []
+      },
+      "result": "missed"
+    }
+  ]
+}

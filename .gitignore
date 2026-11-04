@@ -16,6 +16,7 @@ results/**/*.html
 !/results/mutants/
 !/results/real-bugs/
 !/results/real-bugs-heldout/
+!/results/real-bugs-heldout-0.6.0/
 !/results/baselines/
 !/results/probes/
 /results/probes/*
