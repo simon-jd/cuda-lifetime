@@ -51,6 +51,8 @@ struct AnalysisInfo {
   std::set<std::string> assumedModels;
   std::set<std::string> coverageUnknown;
   unsigned kernelLaunches = 0, escapes = 0, modeledCalls = 0, cudaFailurePathsSkipped = 0;
+  // Paths ended on entering a block from which every path throws or calls a function that never returns.
+  unsigned pathsEndedBeforeThrow = 0;
   unsigned pendingMemberCallUses = 0, pendingArgumentUses = 0, pendingPointerEscapes = 0;
   // Top-level functions CSA analyzed: the denominator for budgetExhausted.
   unsigned functionsAnalyzed = 0;

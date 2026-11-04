@@ -312,6 +312,7 @@ int main(int argc, const char **argv) {
       {"nodes",static_cast<int64_t>(totalNodes)}, {"nodesCounted", nodeProfile ? "all created" : "kept after reclamation"},
       {"entryPoints",std::move(entryPoints)},
       {"cudaFailurePathsSkipped",cudalifetime::info().cudaFailurePathsSkipped},
+      {"pathsEndedBeforeThrow",cudalifetime::info().pathsEndedBeforeThrow},
       {"defaultStreamMode",cudalifetime::info().perThread ? "per-thread" : "legacy"},
       {"seconds",seconds}, {"peakRssKiB",static_cast<int64_t>(usage.ru_maxrss)}, {"assumptions",std::move(assumptions)}};
   std::error_code ec;

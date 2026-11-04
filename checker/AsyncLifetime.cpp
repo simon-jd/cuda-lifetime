@@ -16,6 +16,7 @@
 #include "clang/StaticAnalyzer/Core/PathSensitive/ExprEngine.h"
 #include "clang/StaticAnalyzer/Core/PathSensitive/ProgramStateTrait.h"
 #include "clang/StaticAnalyzer/Frontend/CheckerRegistry.h"
+#include "llvm/ADT/BitVector.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/ImmutableSet.h"
 #include "llvm/ADT/SmallPtrSet.h"
@@ -259,7 +260,7 @@ public:
 class AsyncLifetimeChecker
     : public Checker<check::PreCall, check::PostCall, eval::Call, check::Location, check::Bind,
                      check::PostStmt<CUDAKernelCallExpr>, check::EndFunction, check::PointerEscape, check::EndAnalysis,
-                     check::LiveSymbols, check::BeginFunction> {
+                     check::LiveSymbols, check::BeginFunction, check::BlockEntrance> {
   // One bug type per (rule, level, memory kind, semantic ID), so reports that
   // differ only in those stay distinct, as CSA deduplicates by bug type.
   mutable std::map<std::string, std::unique_ptr<BugType>> bugTypes;
@@ -895,6 +896,32 @@ public:
       }
     return false;
   }
+  // The blocks of a CFG from which every path reaches a dead end before the
+  // function's exit (an error branch that formats a message and throws).
+  static llvm::BitVector doomedBlocks(const CFG &cfg) {
+    llvm::BitVector doomed(cfg.getNumBlockIDs());
+    for (const CFGBlock *block : cfg)
+      if (block && block != &cfg.getExit() && deadEnd(block))
+        doomed.set(block->getBlockID());
+    for (bool changed = true; changed;) {
+      changed = false;
+      for (const CFGBlock *block : cfg) {
+        if (!block || block == &cfg.getExit() || doomed.test(block->getBlockID()))
+          continue;
+        bool any = false, all = true;
+        for (const auto &next : block->succs())
+          if (const CFGBlock *successor = next.getReachableBlock()) {
+            any = true;
+            all &= doomed.test(successor->getBlockID());
+          }
+        if (any && all) {
+          doomed.set(block->getBlockID());
+          changed = true;
+        }
+      }
+    }
+    return doomed;
+  }
   // Whether every path from the body's entry to its normal exit passes the
   // call: paths that throw or call a function that never returns don't count.
   static bool alwaysReached(const FunctionDecl *fd, const CallExpr *call) {
@@ -1225,6 +1252,26 @@ public:
     for (auto entry : s->get<PendingOps>())
       reaper.markLive(entry.region);
   }
+  // CSA ends a path at a throw (it does not model exceptions), so a path that
+  // can only end in a throw or a call that never returns changes nothing the
+  // checker reports after it; end it where that becomes certain, before CSA
+  // explores the message formatting and stack-trace collection of the error
+  // branch (RAFT's exceptions walk the call stack in a loop).
+  void checkBlockEntrance(const BlockEntrance &entrance, CheckerContext &c) const {
+    const CFG *cfg = c.getStackFrame()->getCFG();
+    const CFGBlock *block = entrance.getBlock();
+    if (!cfg || !block)
+      return;
+    auto [it, inserted] = doomed.try_emplace(cfg);
+    if (inserted)
+      it->second = doomedBlocks(*cfg);
+    if (block->getBlockID() < it->second.size() && it->second.test(block->getBlockID())) {
+      ++cudalifetime::info().pathsEndedBeforeThrow;
+      c.generateSink(c.getState(), c.getPredecessor());
+    }
+  }
+  // Per top-level function: CSA may free the CFGs of one entry point before the next.
+  mutable llvm::DenseMap<const CFG *, llvm::BitVector> doomed;
   mutable std::chrono::steady_clock::time_point started;
   void checkBeginFunction(CheckerContext &c) const {
     if (c.inTopFrame())
@@ -1254,6 +1301,7 @@ public:
   }
   void checkEndAnalysis(ExplodedGraph &graph, BugReporter &, ExprEngine &engine) const {
     auto &stats = cudalifetime::info();
+    doomed.clear();
     ++stats.functionsAnalyzed;
     const Decl *decl = engine.getRootStackFrame()->getDecl();
     cudalifetime::EntryPoint entry;
