@@ -1,95 +1,76 @@
 # cuda-lifetime: a Clang Static Analyzer checker for CUDA asynchronous lifetimes
 
-**The problem.** CUDA host code queues work and returns immediately:
-`cudaMemcpyAsync`, kernel launches and `cudaFreeAsync` take effect later, in
-stream order. Code that reads a destination buffer, overwrites a source, or
-frees memory before that work is known to be complete has a race that tests
-rarely show, because the outcome depends on timing and, for pageable memory, on
-driver behavior.
+CUDA host code queues copies, kernel launches and frees that run later, in
+stream order. Reading a copy's destination, overwriting its source or
+freeing its memory before that work is complete is a race that tests rarely
+show. `cuda-lifetime` is an out-of-tree, path-sensitive checker for the
+Clang Static Analyzer that tracks each stream's pending work along every
+path through host code and reports a SARIF path from the queueing call to
+the conflicting access.
 
-**The approach.** `cuda-lifetime` is an out-of-tree, path-sensitive checker
-for the Clang Static Analyzer (LLVM 23.1.3). Along each path through host code
-it tracks every stream's queue, the buffers pending operations use, what each
-synchronization proves complete and what each event captures, and reports a
-SARIF path from the queueing call to the conflicting access. A Python driver
-translates an nvcc `compile_commands.json` into Clang host-only commands, runs
-one analyzer process per translation unit and reports coverage gaps instead of
-counting them as clean.
+**Scope:** host code, one translation unit at a time; LLVM/Clang 23.1.3 and
+CUDA 13.2; 29 fixed bugs from public CUDA projects, two small synthetic
+labelled corpora, and 477 TUs of cuda-samples 13.2, faiss 1.15.1 and RMM 26.10.
 
-**What it found: 0 confirmed defects.** On 477 host translation units of
-cuda-samples 13.2, faiss 1.15.1's GPU module and RMM 26.10, version 0.6.0
-reports 46 alerts, all warnings or notes, the same 46 as 0.5.0:
+| Set | Role | Positives | Found | Fix silences it | Stock CSA found | clang-tidy found |
+|---|---|---:|---:|---:|---:|---:|
+| Fixed bugs held out from 0.6.0 | held out, one run | 6 | 2 | 2 | not run | not run |
+| Fixed bugs held out from 0.5.0 | development set v2 | 10 | 6 | 3 | 0 | 1 |
+| First fixed-bug set, within the rules | development set | 8 | 3 | 3 | 0 | 0 |
+| Holdout corpus (synthetic), 0.1.0's first run | held out; freeze not verifiable from git | 25 | 25 | – | 4 | 4 |
 
-- **32 portability findings**, 29 of them in faiss: host code that reads or
-  frees ordinary `malloc`/`new[]`/`std::vector` memory right after
-  `cudaMemcpyAsync`, with no synchronization in between. It works only
-  because current drivers make pageable copies synchronous, which CUDA
-  permits but does not promise. Pin the same buffers, a common optimization,
-  and the copy no longer waits: reading a pinned D2H destination early,
-  [`probes/stale_read.cu`](probes/stale_read.cu) got the stale value in 20 of
-  20 runs on an RTX 4090, against 0 of 20 with pageable memory.
-- 3 informational notes and 11 false positives, 8 of them from one faiss
-  helper whose result the analyzer cannot relate to the pointer.
+Version 0.6.0 unless noted, from `results/real-bugs-heldout-0.6.0/results.json`,
+`results/real-bugs-heldout/results-0.6.0.json`, `results/real-bugs/results-0.6.0.json`,
+`results/holdout-first/metrics.json` and `results/baselines/`. The first and
+last rows are held out; 0.6.0 was developed on the second row's bugs and 0.5.0
+on the third's, so those rows are development results. "Fix silences it" is
+the runner's `fixSilencesOnSiteLines`. None of the baselines' hits is about the
+race (they are dead-store, narrowing and signed-bitwise warnings), and on the
+holdout each baseline also makes 4 false reports (0.1.0: 1). On the three
+projects 0.6.0 reports 46 alerts and no confirmed defect
+(`results/real-projects/summary.json`).
 
-**On 13 real fixed bugs it finds 3, but these 13 are a development set.**
-Of 13 stream-ordering bugs that cuDF, RMM, llama.cpp and other projects
-fixed, eight are of the kinds the rules describe. Version 0.4.0 found none
-of them; version 0.5.0 was built to analyze these cases, and it finds three,
-each silenced by its fix. The 0.5.0 features came from these 13: copy and
-synchronization summaries generated from RMM's and cuDF's own translation
-units, ownership of a host container's buffer, a fix for a crash in the
-tool, and a patched cuDF header. So 3 of 13 is a development result, not a
-measure of how the checker does on bugs it has not seen. Of the other five
-in-scope cases, one does not parse (a missing dependency), one
-exhausts the node budget, and three need what a per-TU, per-path checker
-does not see: the caller's storage, driver API copies across calls, an
-event's role across calls ([docs/evaluation.md](docs/evaluation.md#fixed-bugs-from-public-projects)).
-Version 0.6.0 gives all 13 the same result.
+## Limitations
 
-**On 6 fixed bugs held out from 0.6.0 it finds 2, and both fixes remove the
-report.** Six bugs from cuCollections, cuOpt, spark-rapids-jni, instant-ngp
-and GROMACS, projects whose histories no earlier search used, were labelled
-and committed before 0.6.0 ran on them once. Two TUs do not parse
-(constructs nvcc accepts and Clang rejects in the project's own `.cu`
-file), and both misses are event dependencies whose records and waits are
-in other translation units
-([corpus/real-bugs-heldout-0.6.0/README.md](corpus/real-bugs-heldout-0.6.0/README.md)).
-"Removes the report" is the runner's `fixSilencesOnSiteLines`: no report on
-the labelled lines of the fixed revision.
+- **Low recall on unseen bugs:** 2 of 6. Two held-out TUs do not parse under
+  Clang, and two bugs are event dependencies across translation units.
+- **No confirmed defect in real code:** of 46 alerts, 32 are portability
+  findings, 3 notes and 11 false positives; 26–38% of each project's
+  top-level functions exhaust the node budget.
+- **Fixes not recognized:** on development set v2, 3 of the 6 found bugs are
+  still reported after their fix.
+- **Scope:** one host thread, device and TU; no driver API, device code or
+  graph contents; a `cudaMemcpyDefault` copy with an operand of unknown
+  memory kind is left out, as a coverage gap.
+- **The synthetic corpora** were written from the same semantics document as
+  the rules, so they test conformance, not recall.
 
-**The 10 bugs held out from 0.5.0 are 0.6.0's second development set.**
-Fixed in NCCL, cuVS, cuML, RAFT, cuGraph and Warp and labelled before 0.5.0
-ran on them, they scored 4 found, with 2 fixes recognized: two fixes wait
-through RAFT's interruptible synchronize, which calls `cudaStreamQuery`
-through a function pointer, five misses exhausted the node budget, and one
-TU did not parse. Version 0.6.0 was built on them, and it finds 6; 3 of
-those fixes leave no report on the labelled lines (`fixSilencesOnSiteLines`).
-The waits through the
-function pointer are resolved, the CCCL 3.1 TU parses with a patched header,
-and one budget miss is found by analyzing an unreached callee on its own;
-four still exhaust their budgets
-([corpus/real-bugs-heldout/README.md](corpus/real-bugs-heldout/README.md#development-set-v2-version-060)).
-Clang's stock analyzer and clang-tidy, run on the same units with the same
-flags, report nothing about these races: on the corpora and both bug sets
-their only hits on labelled lines are dead-store, narrowing and
-signed-bitwise warnings, present in the fixed code too
-([docs/evaluation.md](docs/evaluation.md#stock-analyzer-and-clang-tidy)).
+[How it works](#how-it-works) · [design trade-offs](docs/design-tradeoffs.md) ·
+[full results and version history](docs/evaluation.md) · [result files](results/README.md) ·
+[reproducing](docs/evaluation.md#reproduce) · [modeling limits](#modeling-limits)
 
-compute-sanitizer is a dynamic, device-side tool, so it complements the
-checker rather than serving as a baseline for it: on the same stale-read
-program and five timing-dependent lifetime scenarios it reports the one
-device-side fault, a kernel using a stream-ordered allocation before it is
-ordered, and none of the host reads or frees racing an in-flight copy,
-which are not device accesses
-([docs/evaluation.md](docs/evaluation.md#what-compute-sanitizer-sees)).
-CuSan, a dynamic host/device race detector built on ThreadSanitizer, reports
-the four host reads racing a D2H copy, but not the frees with work pending
-or the stream-ordered allocation race
-([docs/evaluation.md](docs/evaluation.md#cusan)).
-On its hand-written labelled corpora it scores 10/0/0/10 (seed) and 25/1/0/23
-(holdout, first run after its freeze) as TP/FP/FN/TN. Large parts of the scanned code
-were only partly explored, and several CUDA idioms are not modeled; see
-[Limitations](#limitations) before reading the zero as "no races".
+## A bug it finds
+
+cuCollections' `dynamic_map::insert`, one of the six held-out bugs, copied a
+submap's success counter to the host and used it at once
+(`include/cuco/detail/dynamic_map.inl` at `ad9c478`, lines 172–179, condensed):
+
+```cpp
+std::size_t h_num_successes;
+cudaMemcpyAsync(&h_num_successes, submap_num_successes_[submap_idx],
+                sizeof(atomic_ctr_type), cudaMemcpyDeviceToHost, stream);
+submaps_[submap_idx]->size_ += h_num_successes;  // line 178: CL1
+size_ += h_num_successes;                         // line 179: CL1
+```
+
+The checker reports both reads as CL1 ("Host reads the destination before
+asynchronous D2H completion"), with the copy on line 173 on the path, and the
+same two reports in `erase` (lines 221–227). They are warnings: a stack
+variable is pageable memory, and current drivers happen to finish such a copy
+before `cudaMemcpyAsync` returns. The fix (`71bcfa4`) synchronizes the stream
+after each copy, and the fixed revision has no report in the file.
+
+With pinned memory the same read is a CL1 error:
 
 ```cpp
 int early_read(void *device, cudaStream_t stream) {
@@ -99,6 +80,9 @@ int early_read(void *device, cudaStream_t stream) {
   return *static_cast<int *>(host);  // CL1 error: read before the D2H completes
 }
 ```
+
+On an RTX 4090, [`probes/stale_read.cu`](probes/stale_read.cu) reads the stale
+value this way in 20 of 20 runs, against 0 of 20 with pageable memory.
 
 ## Rules
 
@@ -198,43 +182,69 @@ continued to the read. With that fixed, this version scores 25/0/0/24 on the
 holdout, but the set has been seen, so that is a regression result, not a
 held-out score.
 
+**Fixed bugs.** Each bug is labelled from its fix commit (rule, file, site
+lines) before any analyzer runs on it, and `scripts/run_real_bugs.py`
+analyzes the buggy and the fixed revision of its translation unit. A bug is
+found when the buggy revision has a CL1–CL4 report on a site line. The fix
+silences it when the fixed revision has none on those lines, as the fix's
+diff moved them (`fixSilencesOnSiteLines`). Three sets were labelled in
+turn:
+
+- 13 bugs from cuDF, RMM, llama.cpp and other projects, 8 of them of the kinds
+  the rules describe. Version 0.4.0 found none; 0.5.0 was developed on them.
+- 10 bugs from NCCL, cuVS, cuML, RAFT, cuGraph and Warp, labelled before 0.5.0
+  ran on them. Version 0.6.0 was then developed on them.
+- 6 bugs from cuCollections, cuOpt, spark-rapids-jni, instant-ngp and
+  GROMACS, projects no earlier search used, labelled before 0.6.0 ran on them
+  once.
+
+The per-case reasons are in the corpus READMEs
+([first](corpus/real-bugs/README.md), [second](corpus/real-bugs-heldout/README.md),
+[third](corpus/real-bugs-heldout-0.6.0/README.md)), and how each version
+scored and what changed between them in
+[docs/evaluation.md](docs/evaluation.md#fixed-bugs-from-public-projects).
+Clang's stock analyzer and clang-tidy, run on the same units with the same
+flags, report nothing about these races: on the corpora and the first two
+bug sets their only hits on labelled lines are dead-store, narrowing and
+signed-bitwise warnings, present in the fixed code too
+([docs/evaluation.md](docs/evaluation.md#stock-analyzer-and-clang-tidy)).
+
+compute-sanitizer is a dynamic, device-side tool, so it complements the
+checker rather than serving as a baseline for it: on the same stale-read
+program and five timing-dependent lifetime scenarios it reports the one
+device-side fault, a kernel using a stream-ordered allocation before it is
+ordered, and none of the host reads or frees racing an in-flight copy,
+which are not device accesses
+([docs/evaluation.md](docs/evaluation.md#what-compute-sanitizer-sees)).
+CuSan, a dynamic host/device race detector built on ThreadSanitizer, reports
+the four host reads racing a D2H copy, but not the frees with work pending
+or the stream-ordered allocation race
+([docs/evaluation.md](docs/evaluation.md#cusan)).
+
 **Real projects.** Every configured host compilation command of cuda-samples
 13.2 (233; samples whose optional dependencies were missing are not
 configured), faiss 1.15.1's GPU module (190) and RMM 26.10 (54), at a budget of
 225,000 nodes and 180 s per TU. cuda-samples and faiss were translated with a
 header profile that puts a CCCL development snapshot ahead of CUDA 13.2's own
 CCCL headers ([docs/compatibility-profile.md](docs/compatibility-profile.md)); without
-it most faiss CUDA sources do not parse. Each of these alerts was triaged
-against the source. None of the previous version's 76 alerts was a
-confirmed defect either (45 false positives, 31 with insufficient evidence);
-23 of those were triaged against the source and 53 carry over the judgment of
-an earlier triage of the same sites, matched by fingerprint:
+it most faiss CUDA sources do not parse. Each alert was triaged against the
+source (`results/real-projects/triage.csv`):
 
-| Project | TUs (parsed) | Alerts, 0.2.0 | Alerts, 0.4.0 | Alerts, 0.5.0 | Alerts, 0.6.0 | Portability | Informational | False positive |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| cuda-samples 13.2 | 233 (223) | 32 | 7 | 7 | 7 | 3 | 3 | 1 |
-| faiss 1.15.1, GPU module | 190 (189) | 42 | 29 | 39 | 39 | 29 | 0 | 10 |
-| RMM 26.10 | 54 (54) | 2 | 0 | 0 | 0 | 0 | 0 | 0 |
-| Total | 477 | 76 | 36 | 46 | 46 | 32 | 3 | 11 |
+| Project | TUs (parsed) | Alerts | Portability | Informational | False positive |
+|---|---:|---:|---:|---:|---:|
+| cuda-samples 13.2 | 233 (223) | 7 | 3 | 3 | 1 |
+| faiss 1.15.1, GPU module | 190 (189) | 39 | 29 | 0 | 10 |
+| RMM 26.10 | 54 (54) | 0 | 0 | 0 | 0 |
+| Total | 477 | 46 | 32 | 3 | 11 |
 
-Versions 0.3.0 and 0.4.0 reported the same 36 alerts; 0.5.0 adds 10 faiss
-CL2 warnings from the host-container rule, `std::vector`s destroyed with a
-copy from or into them still queued, all portability findings, and 0.6.0
-reports the same 46. In the 0.6.0 scan 397 of 1,034, 234 of 731 and 61 of
-237 top-level functions exhaust the node budget (0.5.0: 385 of 837, 232 of
-720, 60 of 233; 0.6.0 adds fallback entry points), so these projects are
+All 46 are warnings or notes. In the 0.6.0 scan 397 of 1,034, 234 of 731 and
+61 of 237 top-level functions exhaust the node budget, so these projects are
 only partly explored. The summed per-TU analysis time is 586 s, 1,232 s and
-126 s (0.5.0: 718 s, 1,363 s, 137 s), and the wall time with six analyzer
-processes 105 s, 211 s and 24 s ([docs/evaluation.md](docs/evaluation.md#real-projects);
-per-TU times in `results/real-projects/timings.csv`).
-
-The alerts that went away after 0.2.0 came from five modeling gaps, each fixed by a rule
-change: blocking `cudaMemcpy` was not modeled (13), events with no history on
-the path were treated as never recorded (16), calls CSA inlines or that only
-query pointer attributes were reported as opaque (12), captured graph work was
-treated as running (6), and waits were reported for work already ordered (4).
-Four more were repeat reports of the pageable pattern below at calls CSA now
-inlines. [docs/evaluation.md](docs/evaluation.md) has the per-family table.
+126 s, and the wall time with six analyzer processes 105 s, 211 s and 24 s
+(per-TU times in `results/real-projects/timings.csv`). Earlier versions
+reported 76 alerts (0.2.0), 36 (0.3.0 and 0.4.0) and the same 46 (0.5.0);
+[docs/evaluation.md](docs/evaluation.md#real-projects) has the per-version
+counts, the modeling gaps behind the drop after 0.2.0, and the 0.2.0 triage.
 
 **What remains is mostly one pattern.** 29 faiss reports and 3 cuda-samples
 reports are host code that reads or frees ordinary `new[]`/`malloc`/`std::vector` memory right
@@ -300,7 +310,7 @@ used for the cuda-samples and faiss results), and
 [docs/evaluation.md](docs/evaluation.md#reproduce) the steps behind the
 results above.
 
-## Limitations
+## Modeling limits
 
 - One host thread, one device and one translation unit at a time; no driver
   API (`cu*`), no device-code analysis, no CUDA Graph contents. Other

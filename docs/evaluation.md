@@ -1,5 +1,20 @@
 # Evaluation
 
+## Versions
+
+What each version changed, and the results this document gives for it. The
+sections below have the details; the commits and dates of the result files
+are in [results/README.md](../results/README.md).
+
+| Version | Main changes | Results |
+|---|---|---|
+| 0.1.0 | the first frozen version | holdout corpus, first run after the freeze: 25/1/0/23 |
+| 0.2.0 | | 76 alerts on the three projects, none a confirmed defect |
+| 0.3.0 | blocking `cudaMemcpy`, unknown event history, graph capture and already-ordered waits modeled; inlined calls no longer reported as opaque; the holdout false positive fixed | 36 alerts |
+| 0.4.0 | `cudaMemcpyDefault` direction from memory kinds, CUDA calls recognized by their declaring header, SARIF fields | the same 36 alerts; 0 of the 13 first fixed bugs |
+| 0.5.0 | summaries generated from helper TUs, host-container ownership, a crash fix, a patched cuDF header, all made on the first fixed-bug set | 46 alerts; 3 of 13 (development set); 4 of 10 held out |
+| 0.6.0 | node-budget changes and fallback entry points, waits through a function pointer, RMM 26's out-of-line stream accessors, CCCL 3.1 headers, all made on development set v2 | the same 46 alerts; 6 of 10 (development set); 2 of 6 held out |
+
 ## Labelled corpora
 
 Each case is a small C++17 program using the declarations in
