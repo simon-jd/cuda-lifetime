@@ -5,11 +5,14 @@ these files are relative to the repository root; analyzed upstream sources
 appear under `.deps/<project>-<version>/`, where `scripts/prepare_targets.py`
 puts them.
 
-## `real-projects/`: the 0.5.0 scan
+## `real-projects/`: the 0.6.0 scan
 
-Produced by `scripts/analyze_parallel.py --jobs 10` per project and published
-with `scripts/summarize_scan.py`, which also checks that the triage matches
-the scan's alerts one to one.
+Produced by `scripts/analyze_parallel.py --jobs 6` per project, on the same
+translated databases as the 0.5.0 scan (run with `--jobs 10`; its SARIF,
+summary and timings are in the history at `cbb289e`), and published with
+`scripts/summarize_scan.py`, which also checks that the triage matches the
+scan's alerts one to one. Version 0.6.0 reports exactly the 46 alerts of
+0.5.0, so the triage is unchanged.
 
 - `cuda-samples.sarif`, `faiss.sarif`, `rmm.sarif`: SARIF 2.1.0, one run per
   parsed translation unit, with the analyzer's `codeFlows`. Each result's rule,
@@ -29,7 +32,7 @@ the scan's alerts one to one.
   analyzed and those that exhausted the node budget, wall-clock timeouts,
   coverage gaps, unmodeled CUDA API functions, and wall and per-TU times.
 - `timings.csv`: per TU, the analysis time, peak memory, top-level functions
-  analyzed and those over budget. Times were measured with ten TUs analyzed
+  analyzed and those over budget. Times were measured with six TUs analyzed
   at a time.
 
 The per-TU logs and coverage records of the scan are not included.

@@ -1,5 +1,5 @@
 {
-  "version": "0.5.0",
+  "version": "0.6.0",
   "budget": {
     "maxNodes": 225000,
     "timeoutSeconds": 180.0
@@ -34,13 +34,11 @@
         ".deps/cuda-samples-13.2/Samples/6_Performance/alignedTypes/alignedTypes.cu",
         ".deps/cuda-samples-13.2/Samples/6_Performance/transpose/transpose.cu"
       ],
-      "functionsAnalyzed": 837,
-      "functionsOverBudget": 385,
+      "functionsAnalyzed": 1034,
+      "functionsOverBudget": 397,
       "wallClockTimeouts": 0,
-      "coverageGaps": 50,
+      "coverageGaps": 48,
       "unmodeledCudaFunctions": [
-        "cuArrayCreate_v2",
-        "cuArrayDestroy",
         "cuCtxCreate_v4",
         "cuCtxDestroy_v2",
         "cuCtxEnablePeerAccess",
@@ -57,7 +55,6 @@
         "cuDeviceTotalMem_v2",
         "cuDriverGetVersion",
         "cuGetErrorName",
-        "cuGetErrorString",
         "cuInit",
         "cuLaunchKernel",
         "cuLinkAddData_v2",
@@ -78,7 +75,6 @@
         "cuMemRelease",
         "cuMemSetAccess",
         "cuMemUnmap",
-        "cuMemcpy2D_v2",
         "cuMemcpyDtoHAsync_v2",
         "cuMemcpyDtoH_v2",
         "cuMemcpyHtoD_v2",
@@ -93,13 +89,9 @@
         "cuOccupancyMaxPotentialBlockSize",
         "cuPointerGetAttribute",
         "cuStreamCreate",
-        "cuStreamDestroy_v2",
         "cuStreamSynchronize",
-        "cuTexObjectCreate",
-        "cuTexObjectDestroy",
         "cudaCreateSurfaceObject",
         "cudaCreateTextureObject",
-        "cudaCtxResetPersistingL2Cache",
         "cudaDestroySurfaceObject",
         "cudaDestroyTextureObject",
         "cudaDeviceDisablePeerAccess",
@@ -157,18 +149,17 @@
         "cudaStreamAttachMemAsync",
         "cudaStreamGetCaptureInfo",
         "cudaStreamGetFlags",
-        "cudaStreamSetAttribute",
         "cudaStreamSynchronize",
         "cudaStreamUpdateCaptureDependencies",
         "kernel-launch"
       ],
-      "wallSeconds": 81.0,
-      "jobs": 10,
+      "wallSeconds": 104.9,
+      "jobs": 6,
       "tuSeconds": {
-        "sum": 718.0,
-        "median": 2.37,
-        "p95": 7.48,
-        "max": 57.9
+        "sum": 585.6,
+        "median": 1.87,
+        "p95": 6.18,
+        "max": 55.7
       }
     },
     "faiss": {
@@ -177,29 +168,29 @@
       "failed": [
         ".deps/faiss-1.15.1/faiss/gpu/GpuDistance.cu"
       ],
-      "functionsAnalyzed": 720,
-      "functionsOverBudget": 232,
+      "functionsAnalyzed": 731,
+      "functionsOverBudget": 234,
       "wallClockTimeouts": 0,
       "coverageGaps": 565,
       "unmodeledCudaFunctions": [
         "cudaMallocManaged",
         "kernel-launch"
       ],
-      "wallSeconds": 146.1,
-      "jobs": 10,
+      "wallSeconds": 210.5,
+      "jobs": 6,
       "tuSeconds": {
-        "sum": 1363.0,
-        "median": 4.02,
-        "p95": 20.2,
-        "max": 122.5
+        "sum": 1231.6,
+        "median": 3.77,
+        "p95": 20.75,
+        "max": 121.8
       }
     },
     "rmm": {
       "translationUnits": 54,
       "parsed": 54,
       "failed": [],
-      "functionsAnalyzed": 233,
-      "functionsOverBudget": 60,
+      "functionsAnalyzed": 237,
+      "functionsOverBudget": 61,
       "wallClockTimeouts": 0,
       "coverageGaps": 118,
       "unmodeledCudaFunctions": [
@@ -211,13 +202,13 @@
         "cudaMemPoolSetAttribute",
         "cudaMemPrefetchAsync"
       ],
-      "wallSeconds": 18.1,
-      "jobs": 10,
+      "wallSeconds": 23.7,
+      "jobs": 6,
       "tuSeconds": {
-        "sum": 137.0,
-        "median": 1.79,
-        "p95": 8.68,
-        "max": 15.6
+        "sum": 126.3,
+        "median": 1.67,
+        "p95": 7.03,
+        "max": 18.8
       }
     }
   },
