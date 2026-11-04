@@ -40,6 +40,17 @@ void copy_one(void *dst, const void *src, unsigned long count, stream_view strea
 void stream_view::synchronize() const {
   if (int status = cudaStreamSynchronize(stream_)) throw_error(status);
 }
+// Returns before its throw when the status is success, like RAFT's
+// check_cuda_error: not an error path that never returns.
+void check_status(int status) {
+  if (status == 0) return;
+  throw status;
+}
+// Synchronizes on one branch; the other checks a status and returns: no summary.
+void sync_unless_failed(stream_view stream, int status) {
+  if (status) check_status(status);
+  else cudaStreamSynchronize(stream.value());
+}
 // Synchronizes on some paths only: no summary.
 void maybe_sync(stream_view stream, bool wait) {
   if (wait) cudaStreamSynchronize(stream.value());

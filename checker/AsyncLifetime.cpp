@@ -836,6 +836,22 @@ public:
     }
     return out;
   }
+  static bool mayReturn(const Stmt *statement) {
+    struct Returns : RecursiveASTVisitor<Returns> {
+      bool found = false;
+      bool VisitReturnStmt(ReturnStmt *) {
+        found = true;
+        return false;
+      }
+      bool VisitCoreturnStmt(CoreturnStmt *) {
+        found = true;
+        return false;
+      }
+      bool TraverseLambdaExpr(LambdaExpr *) { return true; } // returns from the lambda only
+    } returns;
+    returns.TraverseStmt(const_cast<Stmt *>(statement));
+    return returns.found;
+  }
   // Declared noreturn, or every path through the body ends in a throw or a
   // noreturn call (a syntactic check: statements in sequence, if/else).
   static bool endsInThrow(const Stmt *statement, unsigned depth = 0) {
@@ -850,13 +866,33 @@ public:
       return false;
     }
     if (const auto *block = dyn_cast<CompoundStmt>(statement)) {
-      for (const auto *child : block->body())
+      // A statement that may return first (if (ok) return;) leaves the
+      // function before a later throw.
+      for (const auto *child : block->body()) {
         if (endsInThrow(child, depth + 1))
           return true;
+        if (mayReturn(child))
+          return false;
+      }
       return false;
     }
     if (const auto *branch = dyn_cast<IfStmt>(statement))
       return endsInThrow(branch->getThen(), depth + 1) && endsInThrow(branch->getElse(), depth + 1);
+    return false;
+  }
+  // A block that ends its path: a throw (the CFG keeps it as the block's last
+  // statement, with the exit or a handler as successor), or a call that never returns.
+  static bool deadEnd(const CFGBlock *block) {
+    if (block->hasNoReturnElement() || isa_and_nonnull<CXXThrowExpr>(block->getTerminatorStmt()))
+      return true;
+    for (const auto &element : *block)
+      if (auto statement = element.getAs<CFGStmt>()) {
+        if (isa<CXXThrowExpr>(statement->getStmt()))
+          return true;
+        if (const auto *inner = dyn_cast<CallExpr>(statement->getStmt());
+            inner && inner->getDirectCallee() && neverReturns(inner->getDirectCallee()))
+          return true;
+      }
     return false;
   }
   // Whether every path from the body's entry to its normal exit passes the
@@ -866,16 +902,6 @@ public:
     if (!cfg)
       return false;
     llvm::SmallPtrSet<const CFGBlock *, 4> at;
-    auto deadEnd = [](const CFGBlock *block) {
-      if (block->hasNoReturnElement() || isa_and_nonnull<CXXThrowExpr>(block->getTerminatorStmt()))
-        return true;
-      for (const auto &element : *block)
-        if (auto statement = element.getAs<CFGStmt>())
-          if (const auto *inner = dyn_cast<CallExpr>(statement->getStmt());
-              inner && inner->getDirectCallee() && neverReturns(inner->getDirectCallee()))
-            return true;
-      return false;
-    };
     for (const CFGBlock *block : *cfg)
       for (const auto &element : *block)
         if (auto statement = element.getAs<CFGStmt>(); statement && statement->getStmt() == call)
