@@ -24,7 +24,11 @@ on either revision:
 
 A case counts as found when the parent revision has a CL1–CL4 diagnostic on
 one of those lines (primary location or any code-flow location in that file),
-and the fix silences it when the fixed revision has none there.
+and the fix silences it when the fixed revision has none there. The runner
+records that as `fixSilencesOnSiteLines`, with the site lines moved to the
+fixed revision by its diff (`fixedSiteLines`), next to a coarser
+`fixSilences`: no diagnostic with a matched report's rule and message
+anywhere in the labelled file.
 
 ## Results
 
@@ -36,7 +40,8 @@ for gpe's generated `gpe_kernels.h`, and the helper translation units whose
 generated summaries are loaded (RMM's `cuda_memcpy.cpp`,
 `cuda_stream_view.cpp` and `device_buffer.cpp`, cuDF's `cuda_memcpy.cu`).
 The labels are those written before the first run. Three bugs are found,
-and their fixes silence the reports.
+and their fixes silence the reports (`fixSilencesOnSiteLines` and
+`fixSilences` are both true for all three).
 
 This is a development set: version 0.4.0 ran on these cases first, and the
 summaries, container ownership, crash fix and header patches of 0.5.0 were

@@ -4,7 +4,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from scripts.run_real_bugs import ROOT, compiler_errors, costliest, expand, on_lines, overlay, relative, text_results
+from scripts.run_real_bugs import (ROOT, compiler_errors, costliest, expand, map_lines, on_lines, overlay, relative, score,
+                                   text_results)
 
 
 class RealBugMatchingTests(unittest.TestCase):
@@ -18,6 +19,26 @@ class RealBugMatchingTests(unittest.TestCase):
         self.assertFalse(on_lines(self.diagnostic("file:///t/src/a.cu", 11), path, lines))
         # The same line number in another file does not count.
         self.assertFalse(on_lines(self.diagnostic("file:///t/src/b.cu", 10, [("file:///t/include/x.h", 12)]), path, lines))
+
+    def test_site_lines_follow_the_fix(self):
+        # Two lines inserted after line 5, lines 20-21 replaced by one, line 40 deleted.
+        hunks = [(5, 0, 6, 2), (20, 2, 22, 1), (40, 1, 40, 0)]
+        self.assertEqual(map_lines([3, 6, 20, 30, 40, 50], hunks), [3, 8, 22, 31, 50])
+        self.assertEqual(map_lines([7], []), [7])
+
+    def test_the_fine_field_ignores_reports_off_the_site_lines(self):
+        case = {"file": "src/a.cu", "siteLines": [10]}
+        report = {"ruleId": "CL2", "message": "m", "uri": "file:///t/src/a.cu", "line": 10, "flow": []}
+        elsewhere = dict(report, line=90)
+        row = {"buggy": {"parsed": True, "diagnostics": [report]}, "fixed": {"parsed": True, "diagnostics": [elsewhere]}}
+        score(row, case, [12])
+        self.assertEqual((row["result"], row["fixSilences"], row["fixSilencesOnSiteLines"]), ("found", False, True))
+        row["fixed"]["diagnostics"] = [dict(report, line=12)]
+        self.assertFalse(score(row, case, [12])["fixSilencesOnSiteLines"])
+        row["fixed"] = {"parsed": False}
+        self.assertFalse(score(row, case, [12])["fixSilencesOnSiteLines"])
+        row["buggy"]["diagnostics"] = [elsewhere]
+        self.assertNotIn("fixSilencesOnSiteLines", score(row, case, [12]))
 
     def test_costliest_functions_are_those_with_the_most_nodes(self):
         entries = [{"function": name, "nodes": nodes} for name, nodes in (("a", 5), ("b", 225000), ("c", 40))]

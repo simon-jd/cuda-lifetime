@@ -8426,7 +8426,12 @@
         "diagnosticCount": 1312
       },
       "result": "found",
-      "fixSilences": false
+      "fixSilences": false,
+      "fixedSiteLines": [
+        1445,
+        1448
+      ],
+      "fixSilencesOnSiteLines": false
     }
   ]
 }

@@ -31714,7 +31714,12 @@
         "diagnosticCount": 38
       },
       "result": "found",
-      "fixSilences": false
+      "fixSilences": false,
+      "fixedSiteLines": [
+        331,
+        338
+      ],
+      "fixSilencesOnSiteLines": false
     },
     {
       "id": "csc-pingpong-mpi-send",

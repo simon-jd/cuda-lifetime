@@ -5,10 +5,22 @@ Reads corpus/real-bugs/cases.json (labels) and commands.json (how to compile
 each case's translation unit), checks out both revisions from local clones of
 the projects, analyzes the translation unit at each, and writes one record
 per case: whether it parsed, its diagnostics, whether one is on the labelled
-lines (found), and whether the fix silences it.
+lines (found), and whether the fix silences it, in two ways:
+
+- fixSilences (coarse): the fixed revision has no diagnostic anywhere in the
+  labelled file with the rule and message of a matched one, so an unrelated
+  report of the same kind elsewhere in the file makes it false;
+- fixSilencesOnSiteLines: the fixed revision has no diagnostic whose primary
+  or code-flow location in the labelled file is on the site lines as the fix
+  moved them (fixedSiteLines: shifted past the hunks of git diff -U0 before
+  them; a changed site line becomes the lines that replace its hunk).
 
     python3 scripts/run_real_bugs.py --clones .deps/recall --native build/cuda-lifetime-native \\
       --cuda-path /usr/local/cuda-13.2 --gcc-toolchain /usr --out results/real-bugs/results.json
+
+--rescore RESULTS recomputes found and both fix fields of an earlier run
+from its stored diagnostics (the clones are needed only for the diff),
+without analyzing anything, and writes the records to --out.
 
 --clones holds one git clone per project, named after the repository; the
 revisions are checked out as worktrees under --clones/trees. A case may name
@@ -235,6 +247,65 @@ def on_lines(diagnostic, path, lines):
     return any(uri.endswith(path) and line in lines for uri, line in places)
 
 
+def diff_hunks(clones, repository, parent, fix, path):
+    """The git diff -U0 hunks of path from parent to fix: (old start, old count, new start, new count)."""
+    clone = clones / repository.rstrip("/").split("/")[-1]
+    output = subprocess.run(["git", "-C", str(clone), "diff", "--no-ext-diff", "--no-color", "-U0", parent, fix,
+                             "--", path], check=True, capture_output=True, text=True).stdout
+    return [(int(a), int(b) if b else 1, int(c), int(d) if d else 1)
+            for a, b, c, d in re.findall(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", output, re.M)]
+
+
+def map_lines(lines, hunks):
+    """Where lines of the parent revision are in the fixed one: shifted past the hunks before them, or,
+    for a line a hunk changes, every line that replaces the hunk (none when the hunk only deletes)."""
+    mapped = set()
+    for line in lines:
+        shift = 0
+        for old, old_count, new, new_count in sorted(hunks):
+            if (old_count == 0 and line > old) or (old_count and line >= old + old_count):
+                shift += new_count - old_count
+            elif old_count and line >= old:
+                mapped.update(range(new, new + new_count))
+                break
+        else:
+            mapped.add(line + shift)
+    return sorted(mapped)
+
+
+def score(row, case, fixed_lines):
+    """Set found/missed and, for a found case, both fix fields (see the module docstring)."""
+    buggy, fixed = row["buggy"], row["fixed"]
+    for key in ("result", "fixSilences", "fixSilencesOnSiteLines", "fixedSiteLines"):
+        row.pop(key, None)
+    if not buggy["parsed"]:
+        row["result"] = "not-analyzable"
+        return row
+    matched = [d for d in buggy["diagnostics"] if on_lines(d, case["file"], case["siteLines"])]
+    row["result"] = "found" if matched else "missed"
+    if matched:
+        same = {(d["ruleId"], d["message"]) for d in matched}
+        row["fixSilences"] = fixed["parsed"] and not any(
+            d["uri"].endswith(case["file"]) and (d["ruleId"], d["message"]) in same for d in fixed["diagnostics"])
+        row["fixedSiteLines"] = fixed_lines
+        row["fixSilencesOnSiteLines"] = fixed["parsed"] and not any(
+            on_lines(d, case["file"], fixed_lines) for d in fixed["diagnostics"])
+    return row
+
+
+def rescore(args):
+    run = json.loads(args.rescore.read_text())
+    cases = {case["id"]: case for case in json.loads(args.cases.read_text())["cases"]}
+    for row in run["cases"]:
+        case = cases[row["id"]]
+        lines = map_lines(case["siteLines"], diff_hunks(args.clones, case["repository"], case["parentCommit"],
+                                                        case["fixCommit"], case["file"]))
+        score(row, case, lines)
+        print(row["id"], row["result"], row.get("fixSilences"), row.get("fixSilencesOnSiteLines"), flush=True)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(run, indent=2) + "\n")
+
+
 def relative(record, tree, label):
     text = json.dumps(record).replace("file://" + str(tree) + "/", label + "/").replace(str(tree) + "/", label + "/")
     return json.loads(text.replace(str(ROOT) + "/", ""))
@@ -257,7 +328,10 @@ def main():
     parser.add_argument("--node-profile", action="store_true",
                         help="record where the costliest functions' exploded-graph nodes are")
     parser.add_argument("--max-nodes", type=int, help="the analyzer's node budget per top-level function (default its own)")
+    parser.add_argument("--rescore", type=Path, help="recompute the matching of this earlier run instead of analyzing")
     args = parser.parse_args()
+    if args.rescore:
+        return rescore(args)
     if args.tool == "cuda-lifetime" and not args.native:
         parser.error("--native is required with --tool cuda-lifetime")
     executable = {"csa": args.clang, "syntax": args.clang, "clang-tidy": args.tidy}.get(args.tool, args.native)
@@ -306,17 +380,9 @@ def main():
                     row[name]["diagnosticCount"] = len(every)
                     row[name]["diagnostics"] = [d for d in every if d["uri"].endswith(case["file"]) or
                                                 any(f["uri"].endswith(case["file"]) for f in d["flow"])]
-        buggy, fixed = row["buggy"], row["fixed"]
-        if not buggy["parsed"]:
-            row["result"] = "not-analyzable"
-        else:
-            matched = [d for d in buggy["diagnostics"] if on_lines(d, case["file"], case["siteLines"])]
-            row["result"] = "found" if matched else "missed"
-            if matched:
-                same = {(d["ruleId"], d["message"]) for d in matched}
-                row["fixSilences"] = fixed["parsed"] and not any(
-                    d["uri"].endswith(case["file"]) and (d["ruleId"], d["message"]) in same for d in fixed["diagnostics"])
-        records.append(row)
+        lines = map_lines(case["siteLines"], diff_hunks(args.clones, case["repository"], case["parentCommit"],
+                                                        case["fixCommit"], case["file"]))
+        records.append(score(row, case, lines))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps({"schemaVersion": 1, "tool": args.tool, "toolVersion": version,
                                     "cases": records}, indent=2) + "\n")

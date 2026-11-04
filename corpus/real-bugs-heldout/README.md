@@ -38,7 +38,8 @@ translation unit needs to parse (checked with the compiler alone), not from
 checker output. The matching rule is the development set's: a case is found
 when the buggy revision has a CL1–CL4 diagnostic on one of its `siteLines`
 in the labelled file, and the fix silences it when the fixed revision has
-none there. Labels are not changed after the first run.
+none there (`fixSilencesOnSiteLines`, on the site lines as the fix moved
+them). Labels are not changed after the first run.
 
 ## Results of version 0.5.0
 
@@ -48,15 +49,15 @@ none there. Labels are not changed after the first run.
 development set, after the labels and the commands were committed. Nine of
 the ten translation units parse. The checker reports **4 of the 10** on a
 labelled line of the buggy revision; in 2 of those 4 the fix removes the
-report, and in the other 2 the fixed revision gets the same report, a false
-positive.
+report (`fixSilencesOnSiteLines`), and in the other 2 the fixed revision
+gets the same report, a false positive.
 
 | Case | Rule | Result | Why |
 |---|---|---|---|
-| `nccl-ep-mask-clean` | CL2 | found; the fix removes it | the vector's destruction at the return (line 3154) is reported with the copy on line 3150 on the path. Both revisions also have a CL2 at line 1252, off the labelled lines (not triaged), which is why the runner's coarse `fixSilences` (no report with the same rule and message anywhere in the file) is false |
+| `nccl-ep-mask-clean` | CL2 | found; the fix removes it | the vector's destruction at the return (line 3154) is reported with the copy on line 3150 on the path. Both revisions also have a CL2 at line 1252, off the labelled lines (not triaged), which is why the runner's coarse `fixSilences` (no report with the same rule and message anywhere in the file) is false while `fixSilencesOnSiteLines` is true |
 | `cuml-cd-alpha-temporary` | CL2 | found, fix silences | a CL2 at `cdFit`'s return (line 306) has the copy from the temporary behind `cublas_alpha(1.0, stream)` (line 216) on its path: the checker ends the temporary's storage with the function, not with the full expression. The fix removes the copy. Two CL1 reports elsewhere in `cdFit` (line 162 and in RAFT's `operators.hpp`) are in both revisions (not triaged) |
 | `raft-device-reference-read` | CL1 | found; fix not recognized | CL1 and CL2 on `return v` after `update_host`. The fix synchronizes with `raft::interruptible::synchronize`, which calls `cudaStreamQuery` through a function pointer (`synchronize_impl(cudaStreamQuery, stream, ...)`); the checker does not resolve that call, so it reports the fixed revision the same way |
-| `cugraph-bfs-source-temporary` | CL2 | found; fix not recognized | the device scalar's copy from the converted temporary on line 141 is on the path of eight CL2 reports at the test's returns (lines 213 to 259), where the checker ends the temporary's storage; the fix's `handle.sync_stream()` also ends in `raft::interruptible::synchronize`, so the fixed revision keeps them |
+| `cugraph-bfs-source-temporary` | CL2 | found; fix not recognized | the device scalar's copy from the converted temporary on line 141 is on the path of seven CL2 reports at the test's returns (lines 213 to 259), where the checker ends the temporary's storage; the fix's `handle.sync_stream()` also ends in `raft::interruptible::synchronize`, so the fixed revision keeps them |
 | `cuvs-vamana-serialize-dataset` | CL1 | missed | the one top-level function analyzed (`serialize`) exhausts the node budget; `raft::copy` copies with `cudaMemcpyDefault`, and an operand of unknown memory kind (the host matrix's heap storage, the device dataset) leaves its direction unmodeled |
 | `cuvs-all-neighbors-host-dataset` | CL1 | missed | the test's constructor, body and destructor exhaust the node budget; the same `cudaMemcpyDefault` gap |
 | `cuml-tsne-min-max-source` | CL1 | missed | `min_max` is reached only from `TSNE_fit` and `TSNE_fit_sparse`, both of which exhaust the node budget |
@@ -88,10 +89,11 @@ checker before the budget changes (commit `9bfcdb4`: 0.5.0's analysis with
 the node accounting and the function-pointer waits, and the CCCL commands)
 and of 0.6.0. The "before" seconds are the 0.5.0 run's
 (`results.json`); both columns add the buggy and the fixed revision.
+"Fix silences" is `fixSilencesOnSiteLines` in the two result files.
 
 | Case | 0.5.0 | 0.6.0 | Nodes (millions), before → 0.6.0 | Seconds, 0.5.0 → 0.6.0 | Functions over budget / analyzed (buggy), 0.5.0 → 0.6.0 |
 |---|---|---|---:|---:|---:|
-| `nccl-ep-mask-clean` | found | found | 4.01 → 3.71 | 24 → 17 | 4/24 → 4/24 |
+| `nccl-ep-mask-clean` | found, fix silences | found, fix silences | 4.01 → 3.71 | 24 → 17 | 4/24 → 4/24 |
 | `cuvs-vamana-serialize-dataset` | missed | missed | 0.76 → 0.76 | 19 → 20 | 1/1 → 1/1 |
 | `cuvs-binary-quantizer-threshold` | not analyzable | found | 5.93 → 9.03 | – → 158 | – → 10/28 |
 | `cuvs-all-neighbors-host-dataset` | missed | missed | 2.29 → 6.25 | 59 → 97 | 3/24 → 5/35 |
@@ -102,22 +104,28 @@ and of 0.6.0. The "before" seconds are the 0.5.0 run's
 | `cugraph-bfs-source-temporary` | found | found | 4.56 → 4.54 | 166 → 172 | 6/29 → 6/32 |
 | `warp-memtile-scratch-free` | missed | missed | 22.23 → 22.20 | 86 → 100 | 28/188 → 28/188 |
 
-Version 0.6.0 finds **6 of the 10** (0.5.0: 4). In 5 of the 6 the fixed
-revision has no report touching the labelled code: `cuml-cd-alpha-temporary`
-and `raft-device-reference-read` (also by the runner's coarse `fixSilences`),
-and `nccl-ep-mask-clean`, `cuml-tsne-min-max-source` and
-`cugraph-bfs-source-temporary`, whose fixed revisions keep reports with the
-same rule and message elsewhere in the file (not triaged). The sixth,
-`cuvs-binary-quantizer-threshold`, is reported again after its fix.
+Version 0.6.0 finds **6 of the 10** (0.5.0: 4). In 3 of the 6 the fixed
+revision has no report on the labelled lines (`fixSilencesOnSiteLines`):
+`cuml-cd-alpha-temporary` and `raft-device-reference-read` (also by the
+runner's coarse `fixSilences`) and `nccl-ep-mask-clean`, whose fixed
+revision keeps a CL2 off the labelled lines (line 1252, not triaged). The
+other three fixes are not recognized:
+
+- `cuvs-binary-quantizer-threshold`: the fixed revision reports the same
+  read (line 453; see "Parsed" below).
+- `cuml-tsne-min-max-source`: the labelled CL1, the host write to the copy's
+  source, is gone, but a CL2 at `min_max`'s return (line 152) keeps the
+  copy from `max_init` (line 139) on its path.
+- `cugraph-bfs-source-temporary`: seven CL2 reports at the test's returns
+  keep the device scalar's copy, now from `source` on line 142, on their
+  path; the fix's `handle.sync_stream()` does not retire it.
 
 - **Waits recognized.** `raft-device-reference-read`'s fix waits with
   `raft::interruptible::synchronize`, which polls `cudaStreamQuery` through a
   function pointer; the summary of the polling helper resolves it. That
   alone was not enough: the copy is queued on `stream.value()`, which RMM 26
   defines in `cuda_stream_view.cpp`, so each call had returned a fresh value;
-  the accessor now returns the view's handle. `cugraph-bfs-source-temporary`'s
-  fix (`handle.sync_stream()`) now leaves no report with the labelled copy
-  (line 141) on its path.
+  the accessor now returns the view's handle.
 - **Parsed.** `cuvs-binary-quantizer-threshold` parses with a patched copy of
   CCCL 3.1's `cuda/std/string_view` (its deduction guides are marked
   `__host__`, which nvcc accepts and Clang 23 rejects; a deduction guide has

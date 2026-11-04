@@ -66,7 +66,8 @@ translation units can parse here. The compile commands are committed
 afterwards in `commands.json`. The matching rule is that of both earlier
 sets: a case is found when the buggy revision has a CL1–CL4 diagnostic on
 one of its `siteLines` in the labelled file, and the fix silences it when the
-fixed revision has none there. Labels are not changed after the first run,
+fixed revision has none there (`fixSilencesOnSiteLines`, on the site lines
+as the fix moved them). Labels are not changed after the first run,
 which is run once, with the 0.6.0 build.
 
 ## Results of version 0.6.0
@@ -77,12 +78,13 @@ After the labels and then the compile commands were committed,
 0.6.0 build and produced `results/real-bugs-heldout-0.6.0/results.json`.
 Four of the six translation units parse. The checker reports **2 of the 6**
 on a labelled line of the buggy revision, and in both the fixed revision has
-no report on the labelled lines.
+no report on the labelled lines (`fixSilencesOnSiteLines` is true for both;
+the coarse `fixSilences` only for `cuco-dynamic-map-success-count`).
 
 | Case | Rule | Result | Why |
 |---|---|---|---|
 | `cuco-dynamic-map-success-count` | CL1 | found; the fix removes it | CL1 reads of `h_num_successes` and `h_submap_num_successes` on lines 178, 179, 226 and 227 after the D2H copies; the fixed revision has no report in the file. The buggy revision also has CL2 reports on lines 149 and 219 (the same stack counters at the functions' ends), not triaged |
-| `cuopt-route-view-staging` | CL2 | found; the fix removes it | `route_view`'s storage ends with the `set_element_async` copy from it (line 299) on the path; the report is placed where the inlined `set_route_views` returns to its callers (lines 68 and 239). The fixed revision keeps other CL2 and CL1 reports in the file, all with copies through `device_scalar` at unlabelled sites (not triaged), which is why the runner's coarse `fixSilences` (no report with the same rule and message anywhere in the file) is false |
+| `cuopt-route-view-staging` | CL2 | found; the fix removes it | `route_view`'s storage ends with the `set_element_async` copy from it (line 299) on the path; the report is placed where the inlined `set_route_views` returns to its callers (lines 68 and 239). The fixed revision keeps other CL2 and CL1 reports in the file, all with copies through `device_scalar` at unlabelled sites (not triaged), which is why the runner's coarse `fixSilences` (no report with the same rule and message anywhere in the file) is false while `fixSilencesOnSiteLines` is true |
 | `spark-rapids-shuffle-offset-info` | CL2 | not analyzable | the file itself writes `operator+ __host__ __device__(int)`, which Clang rejects, and cuDF's `type_dispatcher.hpp` reports 24 deferred host/device errors |
 | `ngp-exposure-gradient-read` | CL1 | not analyzable | 18 calls from host code to `constexpr __device__` functions, which nvcc accepts with `--expt-relaxed-constexpr` and Clang does not |
 | `gromacs-shift-vector-event` | CL4 | missed | the event record and the wait are in the nonbonded module's translation units; `sim_util.cpp` sees only calls into them, and no diagnostic is reported in either revision |

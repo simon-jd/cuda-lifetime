@@ -54,14 +54,17 @@ and committed before 0.6.0 ran on them once. Two TUs do not parse
 file), and both misses are event dependencies whose records and waits are
 in other translation units
 ([corpus/real-bugs-heldout-0.6.0/README.md](corpus/real-bugs-heldout-0.6.0/README.md)).
+"Removes the report" is the runner's `fixSilencesOnSiteLines`: no report on
+the labelled lines of the fixed revision.
 
 **The 10 bugs held out from 0.5.0 are 0.6.0's second development set.**
 Fixed in NCCL, cuVS, cuML, RAFT, cuGraph and Warp and labelled before 0.5.0
 ran on them, they scored 4 found, with 2 fixes recognized: two fixes wait
 through RAFT's interruptible synchronize, which calls `cudaStreamQuery`
 through a function pointer, five misses exhausted the node budget, and one
-TU did not parse. Version 0.6.0 was built on them, and it finds 6, with 5
-fixes leaving no report on the labelled code. The waits through the
+TU did not parse. Version 0.6.0 was built on them, and it finds 6; 3 of
+those fixes leave no report on the labelled lines (`fixSilencesOnSiteLines`).
+The waits through the
 function pointer are resolved, the CCCL 3.1 TU parses with a patched header,
 and one budget miss is found by analyzing an unreached callee on its own;
 four still exhaust their budgets

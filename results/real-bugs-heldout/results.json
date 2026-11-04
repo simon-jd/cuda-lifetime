@@ -1401,7 +1401,14 @@
         "assumptions": []
       },
       "result": "found",
-      "fixSilences": false
+      "fixSilences": false,
+      "fixedSiteLines": [
+        3154,
+        3155,
+        3160,
+        3161
+      ],
+      "fixSilencesOnSiteLines": true
     },
     {
       "id": "cuvs-vamana-serialize-dataset",
@@ -3738,7 +3745,13 @@
         }
       },
       "result": "found",
-      "fixSilences": true
+      "fixSilences": true,
+      "fixedSiteLines": [
+        216,
+        217,
+        218
+      ],
+      "fixSilencesOnSiteLines": true
     },
     {
       "id": "raft-mst-edge-count",
@@ -7206,7 +7219,12 @@
         }
       },
       "result": "found",
-      "fixSilences": false
+      "fixSilences": false,
+      "fixedSiteLines": [
+        58,
+        60
+      ],
+      "fixSilencesOnSiteLines": false
     },
     {
       "id": "cugraph-bfs-source-temporary",
@@ -10767,7 +10785,14 @@
         }
       },
       "result": "found",
-      "fixSilences": false
+      "fixSilences": false,
+      "fixedSiteLines": [
+        141,
+        142,
+        143,
+        144
+      ],
+      "fixSilencesOnSiteLines": false
     },
     {
       "id": "warp-memtile-scratch-free",

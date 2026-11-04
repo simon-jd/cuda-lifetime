@@ -300,11 +300,17 @@ build (`results/real-bugs-heldout/results.json`). Version 0.6.0 was then
 developed on these ten cases, so its result on them is a development
 result, like 0.5.0's on the first set:
 
-| | Cases | Found | No report on the labelled code after the fix | Missed | Not analyzable |
+| | Cases | Found | Fix silences it (`fixSilencesOnSiteLines`) | Missed | Not analyzable |
 |---|---:|---:|---:|---:|---:|
 | 0.5.0, held out | 10 | 4 | 2 | 5 | 1 |
-| 0.6.0, development set v2 | 10 | 6 | 5 | 4 | 0 |
+| 0.6.0, development set v2 | 10 | 6 | 3 | 4 | 0 |
 | 0.6.0, held out from it (below) | 6 | 2 | 2 | 2 | 2 |
+
+"Fix silences it" means the fixed revision has no CL1–CL4 report on the
+site lines, moved to the fixed revision by its diff. The runner's coarser
+`fixSilences` (no report with a matched report's rule and message anywhere
+in the labelled file) is true for 1, 2 and 1 of these: unrelated reports
+elsewhere in the same file make it false.
 
 With 0.5.0, two found bugs whose fixes synchronize through
 `raft::interruptible::synchronize` were reported again on the fixed
@@ -324,7 +330,9 @@ one TU did not parse (CCCL 3.1 under Clang 23). For 0.6.0:
 - **The function pointer.** The polling helper is summarized as calling
   its function-pointer parameter, which resolves to `cudaStreamQuery` at
   the call, and RMM 26's out-of-line `cuda_stream_view::value()` returns the
-  view's handle; both fixes now leave no report on the labelled code.
+  view's handle. That fix now leaves no report on the labelled lines.
+  cuGraph's `handle.sync_stream()` fix is still not recognized: CL2 reports
+  at the test's returns keep the copy on their path.
 - **CCCL 3.1.** The TU parses with a patched copy of `cuda/std/string_view`,
   whose `__host__`-only deduction guides Clang rejects in CUDA mode (a
   deduction guide has no body, so the patch drops the annotation), and an
@@ -344,7 +352,8 @@ spark-rapids-jni, instant-ngp and two from GROMACS: two CL1, two CL2, two
 CL4). Labels, then compile commands, were committed before 0.6.0 ran on
 them once (`results/real-bugs-heldout-0.6.0/results.json`). It finds **2 of
 the 6** (cuCollections' `dynamic_map` counters, cuOpt's per-iteration route
-view), and both fixes remove the report from the labelled code. Two TUs do
+view), and both fixes remove the report from the labelled lines
+(`fixSilencesOnSiteLines`). Two TUs do
 not parse (spark-rapids-jni's own `operator+ __host__ __device__`
 declaration; instant-ngp's host calls to `constexpr __device__` functions,
 which need nvcc's `--expt-relaxed-constexpr`), and both GROMACS misses are

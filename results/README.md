@@ -76,6 +76,18 @@ gaps, the generated summaries loaded (`summaries`: each helper TU, its
 status and the functions summarized), and whether a diagnostic is on the
 labelled lines. Paths are relative to the case's checked-out revision.
 
+For a found case two fields say whether the fix silences it.
+`fixSilencesOnSiteLines` is true when the fixed revision has no diagnostic
+on `fixedSiteLines`, the site lines moved to the fixed revision by
+`git diff -U0` (a site line the fix changes becomes the lines that replace
+it). `fixSilences` is coarser: true when the fixed revision has no
+diagnostic with a matched report's rule and message anywhere in the
+labelled file. `fixSilencesOnSiteLines` and `fixedSiteLines` were added
+to the found cases of every `real-bugs*` run here, the checker's and the
+baselines', from the stored diagnostics with
+`scripts/run_real_bugs.py --rescore`, which analyzes nothing; found,
+missed and `fixSilences` came out as originally recorded.
+
 ## `real-bugs/ctu-trial.json`
 
 The attempt to reach cuDF's `cuda_memcpy_async_impl` with CSA's

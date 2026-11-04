@@ -199,7 +199,17 @@
         }
       },
       "result": "found",
-      "fixSilences": true
+      "fixSilences": true,
+      "fixedSiteLines": [
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
+      ],
+      "fixSilencesOnSiteLines": true
     },
     {
       "id": "cudf-device-view-staging",
@@ -383,7 +393,13 @@
         }
       },
       "result": "found",
-      "fixSilences": true
+      "fixSilences": true,
+      "fixedSiteLines": [
+        87,
+        88,
+        89
+      ],
+      "fixSilencesOnSiteLines": true
     },
     {
       "id": "cudf-string-scalar-source",
@@ -1296,7 +1312,14 @@
         }
       },
       "result": "found",
-      "fixSilences": true
+      "fixSilences": true,
+      "fixedSiteLines": [
+        59,
+        109,
+        116,
+        117
+      ],
+      "fixSilencesOnSiteLines": true
     },
     {
       "id": "cudf-arrow-stream-chunk",
