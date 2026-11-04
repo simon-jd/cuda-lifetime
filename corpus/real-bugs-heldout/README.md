@@ -1,9 +1,13 @@
-# Held-out fixed bugs
+# Fixed bugs held out from 0.5.0 (development set v2)
 
 `cases.json` lists 10 stream-ordering and lifetime bugs that public CUDA
 projects fixed in host code, none of which was used while version 0.5.0 was
 developed. The 13 cases in [`../real-bugs/`](../real-bugs/README.md) drove
-0.5.0's changes and are a development set; these are the held-out set.
+0.5.0's changes and are a development set; these were the held-out set for
+0.5.0. Version 0.6.0 was developed on them, so for 0.6.0 they are
+development set v2, and [`../real-bugs-heldout-0.6.0/`](../real-bugs-heldout-0.6.0/README.md)
+is its held-out set. The 0.5.0 results below are the held-out score; the
+0.6.0 results at the end are a development result.
 
 **How they were found.** After 0.5.0 was released, the histories of NCCL,
 cuVS, cuML, RAFT, cuGraph, Warp and other CUDA projects were searched for
@@ -67,3 +71,88 @@ budget exhaustion in large RAPIDS and Warp translation units and copies
 through `cudaMemcpyDefault` with operands whose memory kind is unknown; the
 two unrecognized fixes are one synchronization idiom, RAFT's interruptible
 wait.
+
+## Development set v2: version 0.6.0
+
+These ten cases drove 0.6.0's changes: the node profile of the budget
+misses (`--node-profile`), the waits through RAFT's interruptible
+synchronize, the headers that make the CCCL 3.1 case parse, RMM 26's
+out-of-line stream accessors, and the budget changes in
+[design-tradeoffs.md](../../docs/design-tradeoffs.md#spending-the-node-budget-where-cuda-state-can-change).
+The labels are unchanged; `commands.json` gained a header patch and an
+OpenMP stand-in for `cuvs-binary-quantizer-threshold` after the 0.5.0 run.
+`results/real-bugs-heldout/results-0.6.0.json` is the 0.6.0 run, and
+`nodes-before.json` and `nodes-0.6.0.json` are node-profile runs (node
+reclamation off, so every exploded-graph node created is counted) of the
+checker before the budget changes (commit `9bfcdb4`: 0.5.0's analysis with
+the node accounting and the function-pointer waits, and the CCCL commands)
+and of 0.6.0. The "before" seconds are the 0.5.0 run's
+(`results.json`); both columns add the buggy and the fixed revision.
+
+| Case | 0.5.0 | 0.6.0 | Nodes (millions), before → 0.6.0 | Seconds, 0.5.0 → 0.6.0 | Functions over budget / analyzed (buggy), 0.5.0 → 0.6.0 |
+|---|---|---|---:|---:|---:|
+| `nccl-ep-mask-clean` | found | found | 4.01 → 3.71 | 24 → 17 | 4/24 → 4/24 |
+| `cuvs-vamana-serialize-dataset` | missed | missed | 0.76 → 0.76 | 19 → 20 | 1/1 → 1/1 |
+| `cuvs-binary-quantizer-threshold` | not analyzable | found | 5.93 → 9.03 | – → 158 | – → 10/28 |
+| `cuvs-all-neighbors-host-dataset` | missed | missed | 2.29 → 6.25 | 59 → 97 | 3/24 → 5/35 |
+| `cuml-tsne-min-max-source` | missed | found | 1.55 → 4.65 | 113 → 152 | 2/2 → 6/10 |
+| `cuml-cd-alpha-temporary` | found, fix silences | found, fix silences | 6.46 → 6.06 | 132 → 136 | 8/10 → 7/24 |
+| `raft-mst-edge-count` | missed | missed | 2.74 → 2.35 | 97 → 90 | 3/12 → 3/19 |
+| `raft-device-reference-read` | found | found, fix silences | 11.65 → 11.45 | 270 → 277 | 13/63 → 13/64 |
+| `cugraph-bfs-source-temporary` | found | found | 4.56 → 4.54 | 166 → 172 | 6/29 → 6/32 |
+| `warp-memtile-scratch-free` | missed | missed | 22.23 → 22.20 | 86 → 100 | 28/188 → 28/188 |
+
+Version 0.6.0 finds **6 of the 10** (0.5.0: 4). In 5 of the 6 the fixed
+revision has no report touching the labelled code: `cuml-cd-alpha-temporary`
+and `raft-device-reference-read` (also by the runner's coarse `fixSilences`),
+and `nccl-ep-mask-clean`, `cuml-tsne-min-max-source` and
+`cugraph-bfs-source-temporary`, whose fixed revisions keep reports with the
+same rule and message elsewhere in the file (not triaged). The sixth,
+`cuvs-binary-quantizer-threshold`, is reported again after its fix.
+
+- **Waits recognized.** `raft-device-reference-read`'s fix waits with
+  `raft::interruptible::synchronize`, which polls `cudaStreamQuery` through a
+  function pointer; the summary of the polling helper resolves it. That
+  alone was not enough: the copy is queued on `stream.value()`, which RMM 26
+  defines in `cuda_stream_view.cpp`, so each call had returned a fresh value;
+  the accessor now returns the view's handle. `cugraph-bfs-source-temporary`'s
+  fix (`handle.sync_stream()`) now leaves no report with the labelled copy
+  (line 141) on its path.
+- **Parsed.** `cuvs-binary-quantizer-threshold` parses with a patched copy of
+  CCCL 3.1's `cuda/std/string_view` (its deduction guides are marked
+  `__host__`, which nvcc accepts and Clang 23 rejects; a deduction guide has
+  no body, so the patch drops the annotation) and a stand-in `omp.h`
+  declaring the four OpenMP routines RAFT's headers call. The read on line
+  447 is found, but the fixed revision reports the same read (line 453): the
+  copy is queued on `raft::resource::get_cuda_stream(res)` and the fix waits
+  with `raft::resource::sync_stream(res)`, which looks the stream up again
+  through a virtual call on RAFT's resource registry, so the two lookups
+  give different stream values.
+- **Found through a fallback entry point.** `cuml-tsne-min-max-source`'s
+  `min_max` is never inlined from `TSNE_fit`, whose budget runs out; it
+  launches a kernel itself, so it was analyzed as an entry point of its own and reports the host write on line 136.
+- **Still missed.** `cuvs-vamana-serialize-dataset`: `serialize` exhausts its
+  budget in nested loops over the graph and in mdspan and resource code;
+  CSA inlined `serialize_dataset` on some path, so it is not a fallback entry
+  point, and its `raft::copy` passes `cudaMemcpyDefault` with operands of
+  unknown memory kind. `cuvs-all-neighbors-host-dataset` and
+  `raft-mst-edge-count`: the test bodies exhaust their budgets, and the
+  functions with the bug call RAFT's copy rather than the CUDA API, so they
+  are not fallback entry points. `warp-memtile-scratch-free`: Warp's
+  functions call the driver API through function pointers with checked
+  failure paths that print and continue, and the 28 functions over budget
+  are unchanged.
+
+The node counts show where the changes act. In the budget-exhausting
+functions of the RAPIDS misses, the frames of RAFT's error branches
+(exception construction, stack-trace collection, message formatting) were
+among the twelve largest of each profile before, with 7,500 to 23,800 of
+about 380,000 nodes, and are absent from them in 0.6.0; the shared_ptr
+frames among the twelve largest of cuVS's `serialize` held 69,600 nodes
+before and 28,800 in 0.6.0 (`profile.byFrame` in the two files). Those functions still exhaust the budget, so
+their node counts do not fall; a case's total rises where fallback entry
+points add functions (`cuml-tsne-min-max-source`, `cuvs-all-neighbors-host-dataset`,
+`cuvs-binary-quantizer-threshold`). Over the ten cases 0.6.0 takes 1,219 s
+against 966 s for 0.5.0; 158 s of the difference is the TU that now parses,
+and the rest is mostly fallback entry points (the build without them took
+987 s).

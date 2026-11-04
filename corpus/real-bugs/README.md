@@ -62,3 +62,12 @@ cases they were made for; they are not a held-out result.
 Of the eight bugs within the rules, three are found, four are analyzed and
 missed, and one cannot be analyzed. Version 0.4.0 found none: five could not
 be analyzed (one because the tool crashed) and three were missed.
+
+## Version 0.6.0
+
+`results/real-bugs/results-0.6.0.json` reruns the 13 cases with 0.6.0: the
+same three are found and silenced by their fixes, and every case has the
+same buggy-revision diagnostics in its labelled file, and the same number of
+fixed-revision diagnostics, as with 0.5.0. One fewer function of
+`llama-set-tensor-visibility` exhausts its budget (55 of the buggy
+revision's, against 56).

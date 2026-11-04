@@ -89,12 +89,35 @@ the buggy revision's diagnostic lines and the fixed revision's diagnostic
 count, and whether the runs match each other and `results.json` (they do,
 apart from timings).
 
+## `real-bugs/results-0.6.0.json`
+
+The same runner on the same 13 cases with the 0.6.0 build. Every case has
+the result of `results.json`, the same buggy-revision diagnostics in its
+labelled file and the same number of fixed-revision diagnostics.
+
 ## `real-bugs-heldout/results.json`
 
 The same runner and 0.5.0 build on the held-out cases in
 `corpus/real-bugs-heldout/` (`--cases` and `--commands` pointing there):
 one record per case with both revisions' diagnostics, coverage and loaded
 summaries, and the dependency commits used.
+
+## `real-bugs-heldout/results-0.6.0.json`, `nodes-before.json`, `nodes-0.6.0.json`
+
+The 0.6.0 build on the same ten cases, now development set v2, and two runs
+with `--node-profile` (node reclamation off, every node created counted;
+per revision `nodes`, and for the eight top-level functions with the most
+nodes `costliest`, each with its nodes, time, whether it exhausted its
+budget or is a fallback entry point, and `profile`: the twelve largest
+frames, direct callees, lines and project lines by nodes). `nodes-before.json`
+is the checker at `9bfcdb4`, before the budget changes;
+`nodes-0.6.0.json` is 0.6.0.
+
+## `real-bugs-heldout-0.6.0/results.json`
+
+The single run of the 0.6.0 build on the six cases held out from it
+(`corpus/real-bugs-heldout-0.6.0/`), made after their labels and compile
+commands were committed.
 
 ## `baselines/`
 
