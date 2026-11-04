@@ -80,6 +80,32 @@
         "results": 25,
         "sarifDigest": "5f61e8172647f1d01ddaa9824cfb403775618e1fb2055bbf079c70625e10f77f"
       }
+    },
+    {
+      "build": "0.6.0 (b46b8b3)",
+      "nativeSha256": "2ebf937160039ed9157faeff8b5817989396eef4d96b77a0176b39db04c9f863",
+      "seed": {
+        "totals": {
+          "tp": 10,
+          "fp": 0,
+          "fn": 0,
+          "tn": 10
+        },
+        "metricsSha256": "fd19e51b54edc864ed2db2cf97901b8d870dc52e7c1cfa10d5b57516c3ab6183",
+        "results": 10,
+        "sarifDigest": "1ed663f1bccd41d1f3f36ab8927b520a62140af6dee49c92275ed5abd57e8e97"
+      },
+      "holdout": {
+        "totals": {
+          "tp": 25,
+          "fp": 0,
+          "fn": 0,
+          "tn": 24
+        },
+        "metricsSha256": "e943f37223cdca651823559a6a30840291f0e647b83abf5529458af437ccaa1a",
+        "results": 25,
+        "sarifDigest": "5f61e8172647f1d01ddaa9824cfb403775618e1fb2055bbf079c70625e10f77f"
+      }
     }
   ],
   "unchanged": true,
