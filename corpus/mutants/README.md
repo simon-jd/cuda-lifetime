@@ -60,7 +60,8 @@ changed no code and no line numbers.
 ## Results of version 0.5.0
 
 `results/mutants/` has the analysis of the three originals and five variants
-with version 0.5.0 (SARIF, coverage, per-TU logs) and the oracle comparison.
+with version 0.5.0 (SARIF, coverage, the per-TU coverage records the
+comparison reads) and the oracle comparison.
 Version 0.4.0's run failed to parse `simpleMultiCopy.cu` and its three
 variants: Clang's CUDA headers declare `max(float, float)` for the device
 only, where nvcc's `crt/math_functions.hpp` declares it for host and device,

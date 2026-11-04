@@ -5,6 +5,32 @@ these files are relative to the repository root; analyzed upstream sources
 appear under `.deps/<project>-<version>/`, where `scripts/prepare_targets.py`
 puts them.
 
+## What is here
+
+Every tracked file backs a claim in the README, `docs/evaluation.md` or a
+corpus README, directly or as the raw output a cited file was computed
+from; nothing else is kept. "Recorded" is the commit that wrote the
+measurement. Commit `226b10f` later added `fixSilencesOnSiteLines` to the
+`real-bugs*` runs from their stored diagnostics (see below).
+
+| Files | Recorded | What it measured |
+|---|---|---|
+| `real-projects/` (3 SARIF, `summary.json`, `timings.csv`, 2 triage CSVs) | `bdd6090`, 2026-11-04 (triage `cbb289e`; 0.2.0 triage `855f843`) | 0.6.0 on 477 TUs of cuda-samples, faiss and RMM: 46 alerts, coverage, times; the 0.2.0 triage of 76 alerts |
+| `holdout-first/` (5 files) | `855f843`, 2026-10-30 (run 2026-10-14) | 0.1.0's first holdout run after the freeze: 25/1/0/23 |
+| `regression/` (3 files) | `a35540d`, 2026-10-31; reruns `4c8cca8`, 2026-11-04 | seed and holdout metrics as development sets, rerun with 0.5.0, two refactored builds and 0.6.0 |
+| `mutants/` (4 files, 8 per-TU coverage records) | `898a730`, 2026-11-02 | 0.5.0 on 3 cuda-samples files and 5 variants against their oracle |
+| `real-bugs/results.json`, `ctu-trial.json`, `parquet-budget.json` | `cbb289e`, 2026-11-01 | 0.5.0 on the 13 development cases (3 found); the CTU attempt; the parquet case at 2,000,000 nodes |
+| `real-bugs/determinism.json` | `4d7c5d2`, 2026-11-02 | three 0.5.0 reruns of one case |
+| `real-bugs/results-0.6.0.json` | `df17ca1`, 2026-11-04 | 0.6.0 on the same 13 (the same 3 found) |
+| `real-bugs-heldout/results.json` | `5fbbc32`, 2026-11-02 | 0.5.0 on the 10 cases held out from it (4 found, 2 fixes silence them) |
+| `real-bugs-heldout/results-0.6.0.json`, `nodes-before.json`, `nodes-0.6.0.json` | `df17ca1`, 2026-11-04 | 0.6.0 on those 10, its development set v2 (6 found, 3 fixes silence them), and node profiles |
+| `real-bugs-heldout-0.6.0/results.json` | `bf30a29`, 2026-11-04 | 0.6.0's single run on the 6 cases held out from it (2 found, both fixes silence them) |
+| `baselines/` (8 scored runs, 4 raw reports) | `c385310`, 2026-11-02 | stock CSA and clang-tidy on the corpora and the first two bug sets |
+| `probes/completion.json` | `855f843`, 2026-10-30 | when `cudaMemcpyAsync` D2H returns, pinned against pageable |
+| `probes/stale-read.json` | `d56fbe6`, 2026-10-31 | the stale pinned read, 20 runs per memory kind |
+| `probes/sanitizer.json` | `3f1af57`, 2026-11-01 | compute-sanitizer on the probe programs |
+| `probes/cusan.json` | `16d565b`, 2026-11-02 | CuSan on the probe programs |
+
 ## `real-projects/`: the 0.6.0 scan
 
 Produced by `scripts/analyze_parallel.py --jobs 6` per project, on the same
@@ -61,11 +87,15 @@ copy of the labels with another `split` value.)
 
 ## `mutants/`: the cuda-samples mutants with version 0.5.0
 
-The commands, SARIF, coverage and per-TU logs of analyzing the three original
+The commands (`compile_commands.json`), SARIF, coverage and per-TU coverage
+records (`out.logs/*.coverage.json`) of analyzing the three original
 cuda-samples files and five mutated variants in `corpus/mutants/`, and
 `comparison.json`, the comparison with their predetermined oracle sites
 (`eval.mutation_report`). Paths were made relative to the repository root;
-`corpus/mutants/README.md` explains the results.
+`corpus/mutants/README.md` explains the results. The per-TU SARIF files,
+native argument lists and (empty) native logs of the run are not included:
+`out.sarif` holds the same four results, and the comparison reads only the
+per-TU coverage records, from which it is recomputed unchanged.
 
 ## `real-bugs/results.json`
 
