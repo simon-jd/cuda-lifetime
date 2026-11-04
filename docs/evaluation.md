@@ -17,8 +17,8 @@ fares on code written by others; that is what the real-project scan below is
 for.
 
 **Seed** (`corpus/seed/`): ten positive/negative pairs, one per rule family,
-used during development. 10 TP, 0 FP, 0 FN, 10 TN with versions 0.4.0 and
-0.5.0, whose metrics files are byte-identical
+used during development. 10 TP, 0 FP, 0 FN, 10 TN with versions 0.4.0,
+0.5.0 and 0.6.0, whose metrics files are byte-identical
 (`results/regression/seed-metrics.json`, `results/regression/reruns.json`).
 
 **Holdout** (`corpus/holdout/`): 48 translation units and 49 labels covering
@@ -51,8 +51,8 @@ the read. Artifacts: `results/holdout-first/` (see
 Version 0.3.0 fixed that (a call in statement position, including an `if` or
 loop body, discards its status; `tests/native/checked_return_helpers.cpp`
 covers both forms) and changed other rules after the holdout was seen.
-Versions 0.4.0 and 0.5.0 score 25 TP, 0 FP, 0 FN, 24 TN on the holdout, as
-0.3.0 did (`results/regression/holdout-metrics.json`); because the set has been seen,
+Versions 0.4.0, 0.5.0 and 0.6.0 score 25 TP, 0 FP, 0 FN, 24 TN on the
+holdout, as 0.3.0 did, and 0.6.0's SARIF results are identical to 0.5.0's (`results/regression/holdout-metrics.json`); because the set has been seen,
 that is a regression result, not a held-out score. The first, frozen run above
 remains the holdout result.
 
@@ -86,11 +86,11 @@ The scan covers every configured command of cuda-samples and RMM and the
 dependencies (graphics, MPI, FreeImage, NvSCI) are missing on the build host,
 so those samples are not among its 233 commands.
 
-| Project | TUs | Parsed | Alerts, 0.2.0 | Alerts, 0.3.0 | Alerts, 0.4.0 | Alerts, 0.5.0 |
-|---|---:|---:|---:|---:|---:|---:|
-| cuda-samples 13.2 | 233 | 223 | 32 | 7 | 7 | 7 |
-| faiss 1.15.1, `faiss/gpu/` | 190 | 189 | 42 | 29 | 29 | 39 |
-| RMM 26.10 | 54 | 54 | 2 | 0 | 0 | 0 |
+| Project | TUs | Parsed | Alerts, 0.2.0 | Alerts, 0.3.0 | Alerts, 0.4.0 | Alerts, 0.5.0 | Alerts, 0.6.0 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| cuda-samples 13.2 | 233 | 223 | 32 | 7 | 7 | 7 | 7 |
+| faiss 1.15.1, `faiss/gpu/` | 190 | 189 | 42 | 29 | 29 | 39 | 39 |
+| RMM 26.10 | 54 | 54 | 2 | 0 | 0 | 0 | 0 |
 
 The ten cuda-samples parse failures are nine `min`/`max` overload errors (for
 example in `simpleMultiCopy.cu` and `transpose.cu`) and one unsupported
@@ -98,25 +98,30 @@ initialization of a `__shared__` variable (`globalToShmemAsyncCopy.cu`);
 faiss's one is a `min` overload error in `GpuDistance.cu`.
 
 Parsed is not the same as fully explored. `scripts/summarize_scan.py` writes
-the per-project totals of the 0.5.0 scan to `results/real-projects/summary.json`
-and the per-TU figures to `results/real-projects/timings.csv`:
+the per-project totals of the 0.6.0 scan to `results/real-projects/summary.json`
+and the per-TU figures to `results/real-projects/timings.csv` (the 0.5.0
+files are in the history at `cbb289e`):
 
-| Project | Top-level functions analyzed | Exhausted the node budget | Hit the 180 s limit | Wall time, 10 processes (0.4.0) | Per-TU time, median / max |
-|---|---:|---:|---:|---:|---:|
-| cuda-samples 13.2 | 837 | 385 (46%) | 0 | 81 s (97 s) | 2.4 s / 58 s |
-| faiss 1.15.1, `faiss/gpu/` | 720 | 232 (32%) | 0 | 146 s (166 s) | 4.0 s / 122 s |
-| RMM 26.10 | 233 | 60 (26%) | 0 | 18 s (20 s) | 1.8 s / 16 s |
+| Project | Top-level functions analyzed, 0.5.0 → 0.6.0 | Exhausted the node budget, 0.6.0 (0.5.0) | Hit the 180 s limit | Summed per-TU time, 0.5.0 → 0.6.0 | Per-TU time, median / max, 0.6.0 | Wall time, 0.6.0 with 6 processes (0.5.0 with 10) |
+|---|---:|---:|---:|---:|---:|---:|
+| cuda-samples 13.2 | 837 → 1,034 | 397, 38% (385, 46%) | 0 | 718 s → 586 s | 1.9 s / 56 s | 105 s (81 s) |
+| faiss 1.15.1, `faiss/gpu/` | 720 → 731 | 234, 32% (232, 32%) | 0 | 1,363 s → 1,232 s | 3.8 s / 122 s | 211 s (146 s) |
+| RMM 26.10 | 233 → 237 | 61, 26% (60, 26%) | 0 | 137 s → 126 s | 1.7 s / 19 s | 24 s (18 s) |
 
 A function that exhausts the budget was explored only partly, so a TU with one
-is never counted as clean. The wall times are for one run with ten TUs
-analyzed at a time on a 32-thread machine (the 0.5.0 run shared it with one
-more analyzer process, the real-bug runner); the per-TU times include that
-concurrency. The differences from 0.4.0 are run-to-run variation, not a
-speed-up: the 0.5.0 checker does strictly more work per call. The scans use
-the shipped models only, without a summary pass over each project's TUs. `unmodeledCudaFunctions` lists the CUDA Runtime and Driver API
-functions the analysis met but does not model (122 in cuda-samples, mostly
-driver API calls); a function counts as a CUDA API call only if it is declared
-in one of the toolkit's API headers.
+is never counted as clean. The 0.6.0 scan ran six TUs at a time on a
+32-thread machine shared with one more analyzer process, the real-bug runner
+(0.5.0: ten at a time, also beside the runner); the per-TU times include that
+concurrency, so the wall times of the two runs are not comparable, and the
+summed per-TU times only roughly. Of the 197 more top-level functions in
+cuda-samples, 131 are fallback entry points (faiss 11, RMM 2); the other 66
+are main-file functions that no analyzed path inlines any more, which CSA
+then analyzes on their own. The scans use the shipped models only, without a
+summary pass over each project's TUs. `unmodeledCudaFunctions` lists the CUDA
+Runtime and Driver API functions the analysis met but does not model (113 in
+cuda-samples with 0.6.0, 122 with 0.5.0, mostly driver API calls); a function
+counts as a CUDA API call only if it is declared in one of the toolkit's API
+headers.
 
 ### What changed from 0.2.0 to 0.3.0
 
@@ -181,6 +186,21 @@ still has none: modeling `cudaMemcpyBatchAsync` and RMM's `memcpy_async`
 direction drops RMM's unmodeled-call visits from 273 to 33, but their
 operands inside RMM are of unknown memory kind.
 
+### From 0.5.0 to 0.6.0
+
+Version 0.6.0 reports the same 46 alerts: `summarize_scan.py` matched the
+0.5.0 triage to its scan one to one. Its changes were made for the ten
+fixed bugs of development set v2 (below): paths that can only end in a throw
+end at the branch, shared_ptr reference counting, iostreams and locks are not
+inlined, header functions that a budget-exhausted function calls become
+fallback entry points, waits through a function-pointer parameter and RMM
+26's out-of-line stream accessors are modeled, and a function that returns
+before its throw is no longer taken as never returning
+([design-tradeoffs.md](design-tradeoffs.md#spending-the-node-budget-where-cuda-state-can-change)).
+The fallback entry points add no alert here, 12 more cuda-samples functions
+and a few in faiss and RMM exhaust the budget, and cuda-samples' coverage
+gaps fall from 50 to 48.
+
 ### The 46 alerts
 
 None of the 46 is a confirmed defect, and all are warnings or notes, so
@@ -223,10 +243,10 @@ then scored on the same cases. Its 3 of 13 therefore shows what the new
 features do on the bugs they were built for, not how the checker does on
 bugs it has not seen.
 
-| | Cases | 0.4.0 found | 0.5.0 found | Missed | Not analyzable |
-|---|---:|---:|---:|---:|---:|
-| Within the rules | 8 | 0 | 3 | 4 | 1 |
-| Outside the rules | 5 | 0 | 0 | 3 | 2 |
+| | Cases | 0.4.0 found | 0.5.0 found | 0.6.0 found | Missed | Not analyzable |
+|---|---:|---:|---:|---:|---:|---:|
+| Within the rules | 8 | 0 | 3 | 3 | 4 | 1 |
+| Outside the rules | 5 | 0 | 0 | 0 | 3 | 2 |
 
 Version 0.5.0 finds 3 of the 8 in-scope bugs (3 of 13 overall), and each
 fix silences its report: cuDF's scoped `single_node` passed to
@@ -265,31 +285,71 @@ a temporary that end while queued (portability findings, pageable memory).
 [corpus/real-bugs/README.md](../corpus/real-bugs/README.md) lists every case
 with its reason.
 
-### Held-out fixed bugs
+Version 0.6.0 gives every one of the 13 the same result and the same
+buggy-revision diagnostics in its labelled file
+(`results/real-bugs/results-0.6.0.json`).
+
+### Fixed bugs held out from 0.5.0, development set v2 for 0.6.0
 
 `corpus/real-bugs-heldout/` has ten bugs mined after 0.5.0 was released,
 from fix commits not used in its development, all of kinds the rules
 describe (five CL1, four CL2, one CL3; NCCL, cuVS, cuML, RAFT, cuGraph,
 Warp). The labels were committed before any run, then the compile commands
 (from compiler-only syntax checks), then the results of the same 0.5.0
-build (`results/real-bugs-heldout/results.json`):
+build (`results/real-bugs-heldout/results.json`). Version 0.6.0 was then
+developed on these ten cases, so its result on them is a development
+result, like 0.5.0's on the first set:
 
-| | Cases | Found | Fix removes the report | Missed | Not analyzable |
+| | Cases | Found | No report on the labelled code after the fix | Missed | Not analyzable |
 |---|---:|---:|---:|---:|---:|
-| Held out, within the rules | 10 | 4 | 2 | 5 | 1 |
-| Development set, within the rules | 8 | 3 | 3 | 4 | 1 |
+| 0.5.0, held out | 10 | 4 | 2 | 5 | 1 |
+| 0.6.0, development set v2 | 10 | 6 | 5 | 4 | 0 |
+| 0.6.0, held out from it (below) | 6 | 2 | 2 | 2 | 2 |
 
-The two found bugs whose fixes are not recognized synchronize through
-`raft::interruptible::synchronize`, which passes `cudaStreamQuery` to a
-helper as a function pointer; the checker does not resolve the indirect
-call, so the fixed revisions are reported again, false positives. The five
-misses are in functions that exhaust the node budget (cuVS's `serialize`
-and test bodies, cuML's `TSNE_fit`, RAFT's MST test, Warp's
-`wp_memtile_device`), and the RAPIDS copies go through `cudaMemcpyDefault`
-with operands of unknown memory kind, whose direction the checker leaves
-unmodeled. One TU does not parse (CCCL 3.1 under Clang 23). The per-case
-reasons are in
-[corpus/real-bugs-heldout/README.md](../corpus/real-bugs-heldout/README.md).
+With 0.5.0, two found bugs whose fixes synchronize through
+`raft::interruptible::synchronize` were reported again on the fixed
+revisions, five misses were in functions that exhaust the node budget, and
+one TU did not parse (CCCL 3.1 under Clang 23). For 0.6.0:
+
+- **Budget.** The node profile of the five budget misses showed RAFT's error
+  branches (message formatting and stack-trace collection before a throw)
+  and shared_ptr reference counting among the largest consumers, on top of
+  nested loops, mdspan extent arithmetic and RAFT's resource registry. Paths
+  that can only throw now end at the branch, the library internals are not
+  inlined, and the CUDA-calling callees of a function whose budget ran out
+  are analyzed on their own. That turns one miss into a find (cuML's
+  `TSNE::min_max`, as a fallback entry point); the other four still exhaust
+  their budgets (cuVS's `serialize` and all-neighbors test, RAFT's MST test,
+  Warp's driver-API code, whose checked failures print and continue).
+- **The function pointer.** The polling helper is summarized as calling
+  its function-pointer parameter, which resolves to `cudaStreamQuery` at
+  the call, and RMM 26's out-of-line `cuda_stream_view::value()` returns the
+  view's handle; both fixes now leave no report on the labelled code.
+- **CCCL 3.1.** The TU parses with a patched copy of `cuda/std/string_view`,
+  whose `__host__`-only deduction guides Clang rejects in CUDA mode (a
+  deduction guide has no body, so the patch drops the annotation), and an
+  OpenMP stand-in header. Its bug is found, but the fix waits through
+  `raft::resource::sync_stream(res)`, which looks the stream up again through
+  a virtual call, so the wait does not match the copy's stream and the fixed
+  revision is reported again.
+
+Per-case nodes, times and reasons are in
+[corpus/real-bugs-heldout/README.md](../corpus/real-bugs-heldout/README.md#development-set-v2-version-060).
+
+### Fixed bugs held out from 0.6.0
+
+`corpus/real-bugs-heldout-0.6.0/` has six bugs from projects whose
+histories neither earlier search used (cuCollections, cuOpt,
+spark-rapids-jni, instant-ngp and two from GROMACS: two CL1, two CL2, two
+CL4). Labels, then compile commands, were committed before 0.6.0 ran on
+them once (`results/real-bugs-heldout-0.6.0/results.json`). It finds **2 of
+the 6** (cuCollections' `dynamic_map` counters, cuOpt's per-iteration route
+view), and both fixes remove the report from the labelled code. Two TUs do
+not parse (spark-rapids-jni's own `operator+ __host__ __device__`
+declaration; instant-ngp's host calls to `constexpr __device__` functions,
+which need nvcc's `--expt-relaxed-constexpr`), and both GROMACS misses are
+event dependencies whose records and waits are in other translation units
+([corpus/real-bugs-heldout-0.6.0/README.md](../corpus/real-bugs-heldout-0.6.0/README.md)).
 
 ## Stock analyzer and clang-tidy
 
@@ -406,13 +466,20 @@ python3 tests/run_seed.py --native build/cuda-lifetime-native --out results/seed
 ```
 
 The fixed bugs, development and held-out, with cuda-lifetime and the two
-baselines (LLVM 23.1.3 release binaries for the baselines):
+baselines (LLVM 23.1.3 release binaries for the baselines; the baselines
+were not run on the set held out from 0.6.0). `--node-profile` adds the
+node profiles of `results/real-bugs-heldout/nodes-*.json`:
 
 ```sh
-for set in real-bugs real-bugs-heldout; do
+for set in real-bugs real-bugs-heldout real-bugs-heldout-0.6.0; do
   python3 scripts/run_real_bugs.py --cases corpus/$set/cases.json \
     --commands corpus/$set/commands.json --clones .deps/recall \
     --native build/cuda-lifetime-native --out results/$set-run.json
+done
+python3 scripts/run_real_bugs.py --cases corpus/real-bugs-heldout/cases.json \
+  --commands corpus/real-bugs-heldout/commands.json --clones .deps/recall \
+  --native build/cuda-lifetime-native --node-profile --out results/nodes.json
+for set in real-bugs real-bugs-heldout; do
   for tool in csa clang-tidy; do
     python3 scripts/run_real_bugs.py --tool $tool --clang $LLVM/bin/clang++ \
       --tidy $LLVM/bin/clang-tidy --cases corpus/$set/cases.json \
@@ -454,7 +521,7 @@ python3 probes/completion.py --out results/probes/completion.json
 
 `analyze_targets.py` restricts faiss to `faiss/gpu/` and runs one TU at a time
 per project. The committed results were produced with
-`scripts/analyze_parallel.py --jobs 10` on databases translated with the same
+`scripts/analyze_parallel.py --jobs 6` on databases translated with the same
 profiles (faiss already restricted to its `faiss/gpu/` entries), which runs the
 same per-TU analysis in parallel and records the wall time;
 `summarize_scan.py` reads either layout and refuses a triage that does not

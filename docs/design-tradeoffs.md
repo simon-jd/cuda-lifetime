@@ -1,10 +1,11 @@
 # Design trade-offs
 
 Most of what cuda-lifetime reports, and most of what it misses, follows from
-twelve choices: analyzing host code path by path inside CSA, judging copies by
+thirteen choices: analyzing host code path by path inside CSA, judging copies by
 CUDA's documented contract rather than by what today's driver does, treating
-opaque calls and wrapper models with suspicion, and refusing to call a
-translation unit clean when its coverage is incomplete. The sections below
+opaque calls and wrapper models with suspicion, spending CSA's node budget
+where CUDA state can change, and refusing to call a translation unit clean
+when its coverage is incomplete. The sections below
 take them one at a time, with the options that were passed over and the
 alerts or blind spots each choice causes. The numbers come from
 [evaluation.md](evaluation.md): the labelled corpora and the scan of 477 host
@@ -180,15 +181,87 @@ hand-written model. Path-sensitive summaries would be more precise but need
 the checker to treat parameters' unknown memory symbolically, which its state
 model does not do.
 
+A body that polls a function its caller passes (RAFT's
+`interruptible::synchronize` hands `cudaStreamQuery` or `cudaEventQuery` to
+`synchronize_impl`, which calls it in a loop until it stops returning
+`cudaErrorNotReady`) is summarized as calling that parameter with the
+arguments it forwards; the summary resolves once the caller names the
+function, statically or as the argument's value at the call. CSA needs this
+because the polling loop reaches its block-visit limit on the not-ready
+path, and CSA then replays the call without inlining and stops inlining the
+helper for the rest of the translation unit
+(`tests/native/interruptible_wait.cpp`). A const accessor without parameters
+on a single-member stream or event wrapper, declared but defined in another
+unit (RMM 26's `cuda_stream_view::value()`), returns that member
+(`tests/native/handle_accessor.cpp`); before 0.6.0 each call returned a fresh
+value, so a copy on `stream.value()` never matched a wait on the same view.
+
 **Cost.** Summaries are flow-insensitive "may" claims: a copy on any path
 counts, so a helper that copies only on some paths makes every call look
-pending. A body that synchronizes anything gets no summary, and one whose
-paths copy different parameters gets none either. Only copies are
-summarized, not frees, events or synchronization, and a summary carries no
-memory kind: it creates a pending operation only when the caller knows the
-operand is host memory. Which helper units to summarize must be named
-(`summarize` in `corpus/real-bugs/commands.json`); the whole-project scans do
-not run a summary pass.
+pending. A body that synchronizes anything gets no copy summary, and one whose
+paths copy different parameters gets none either. Besides copies, only a
+stream, device or event synchronization on every path that returns is
+summarized, not frees or event records, and a summary carries no memory
+kind: it creates a pending operation only when the caller knows the operand
+is host memory. A wait through a function pointer is resolved only when the
+pointer is a parameter that the caller sets to a modeled query or
+synchronization. Which helper units to summarize must be named (`summarize`
+in `corpus/real-bugs/commands.json`); the whole-project scans do not run a
+summary pass.
+
+## Spending the node budget where CUDA state can change
+
+**Decision.** Three changes in 0.6.0 keep CSA's budget of 225,000 nodes per
+top-level function from going to code that cannot change what the checker
+reports. A path ends on entering a block from which every path reaches a
+throw or a call that never returns. Standard-library internals that branch
+on values no path determines (shared_ptr reference counts, iostream state,
+mutexes) are evaluated as CSA evaluates a call it does not inline, unless a
+pending buffer reaches the call. And when a top-level function exhausts its
+budget, the header functions it calls, directly or through other project
+functions, that themselves call the CUDA API, a model or a kernel become
+entry points of their own if CSA never inlined them, up to 16 per
+translation unit.
+
+**Alternatives.** A larger budget; lower inlining limits (stack depth,
+inlinable size) or no inlining of the standard library for every call; loop
+widening; summaries of each RAFT and RMM helper.
+
+**Why.** The node profile (`--node-profile`, which attributes every node of
+a top-level function to the function, the direct callee and the line it is
+in) of the development cases that exhausted their budgets showed where the
+nodes went. On every checked CUDA call, RAFT's error branch formats a
+message with streams and collects a stack trace in a loop before it throws,
+and CSA ends the path only at the throw; 7,500 to 23,800 of the roughly
+380,000 nodes of each such function were in those frames, and none are
+after the change. Each shared_ptr copy and release splits a path on the
+count and on whether the process is threaded, and RAFT's resource lookups
+copy several per call (in cuVS's `serialize`, 69,600 nodes before and 28,800
+after). CSA stops at a throw anyway, so ending the path earlier loses only the
+accesses between the branch and the throw, and a library call that a pending
+buffer reaches is still inlined. A larger
+budget only moves the problem (cuDF's parquet case still exhausts at
+2,000,000 nodes), and global inlining limits would also cut the wrappers that
+queue copies. Fallback entry points recover a callee the exhausted caller never
+reached: cuML's `TSNE::min_max`, whose report was the one budget miss these
+changes turned into a find.
+
+**Cost.** Accesses on a branch that can only throw are not checked
+(`tests/native/throw_paths.cpp`), and the deleter that a shared_ptr's last
+reference runs is not followed. A fallback entry point starts with nothing
+known about its parameters, so its reports depend only on what it allocates
+and queues itself, and analyzing it costs budget too: on development set v2 the
+build without fallback entry points took 987 s and 0.6.0 1,219 s, 158 s of
+it on a translation unit that now parses
+([corpus/real-bugs-heldout/README.md](../corpus/real-bugs-heldout/README.md#development-set-v2-version-060)).
+On the three projects 131, 11 and 2 fallback entry points were analyzed
+(cuda-samples, faiss, RMM) without adding an alert, and the summed per-TU
+analysis time still fell, from 718, 1,363 and 137 s with 0.5.0 to 586, 1,232
+and 126 s. The functions that still exhaust their
+budget mostly spend it in mdspan extent arithmetic, RAFT's resource
+registry, gtest's message streams and nested loops over host data, and
+Warp's driver calls through function pointers with checked failure paths
+that print and continue.
 
 ## Host containers own their buffer
 

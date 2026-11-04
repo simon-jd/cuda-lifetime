@@ -17,8 +17,8 @@ one analyzer process per translation unit and reports coverage gaps instead of
 counting them as clean.
 
 **What it found: 0 confirmed defects.** On 477 host translation units of
-cuda-samples 13.2, faiss 1.15.1's GPU module and RMM 26.10, version 0.5.0
-reports 46 alerts, all warnings or notes:
+cuda-samples 13.2, faiss 1.15.1's GPU module and RMM 26.10, version 0.6.0
+reports 46 alerts, all warnings or notes, the same 46 as 0.5.0:
 
 - **32 portability findings**, 29 of them in faiss: host code that reads or
   frees ordinary `malloc`/`new[]`/`std::vector` memory right after
@@ -44,17 +44,28 @@ in-scope cases, one does not parse (a missing dependency), one
 exhausts the node budget, and three need what a per-TU, per-path checker
 does not see: the caller's storage, driver API copies across calls, an
 event's role across calls ([docs/evaluation.md](docs/evaluation.md#fixed-bugs-from-public-projects)).
+Version 0.6.0 gives all 13 the same result.
 
-**On 10 held-out fixed bugs it finds 4, and recognizes 2 of the fixes.**
-Ten more bugs of the kinds the rules describe, fixed in NCCL, cuVS, cuML,
-RAFT, cuGraph and Warp, were labelled and committed before 0.5.0 ran on
-them. It reports 4 on a labelled line. Two fixes remove the report; the
-other two synchronize through RAFT's interruptible wait, which calls
-`cudaStreamQuery` through a function pointer the checker does not resolve,
-so the fixed revisions are reported again. Of the six misses, five are in
-functions that exhaust the node budget, several with `cudaMemcpyDefault`
-copies whose direction is unknown, and one does not parse
-([corpus/real-bugs-heldout/README.md](corpus/real-bugs-heldout/README.md)).
+**On 6 fixed bugs held out from 0.6.0 it finds 2, and both fixes remove the
+report.** Six bugs from cuCollections, cuOpt, spark-rapids-jni, instant-ngp
+and GROMACS, projects whose histories no earlier search used, were labelled
+and committed before 0.6.0 ran on them once. Two TUs do not parse
+(constructs nvcc accepts and Clang rejects in the project's own `.cu`
+file), and both misses are event dependencies whose records and waits are
+in other translation units
+([corpus/real-bugs-heldout-0.6.0/README.md](corpus/real-bugs-heldout-0.6.0/README.md)).
+
+**The 10 bugs held out from 0.5.0 are 0.6.0's second development set.**
+Fixed in NCCL, cuVS, cuML, RAFT, cuGraph and Warp and labelled before 0.5.0
+ran on them, they scored 4 found, with 2 fixes recognized: two fixes wait
+through RAFT's interruptible synchronize, which calls `cudaStreamQuery`
+through a function pointer, five misses exhausted the node budget, and one
+TU did not parse. Version 0.6.0 was built on them, and it finds 6, with 5
+fixes leaving no report on the labelled code. The waits through the
+function pointer are resolved, the CCCL 3.1 TU parses with a patched header,
+and one budget miss is found by analyzing an unreached callee on its own;
+four still exhaust their budgets
+([corpus/real-bugs-heldout/README.md](corpus/real-bugs-heldout/README.md#development-set-v2-version-060)).
 Clang's stock analyzer and clang-tidy, run on the same units with the same
 flags, report nothing about these races: on the corpora and both bug sets
 their only hits on labelled lines are dead-store, narrowing and
@@ -138,8 +149,18 @@ Warnings are shown by default; `--errors-only` hides them.
   queues on its parameters, or the synchronization every path through it
   performs, composed through the calls it makes. Bodies CSA declines to
   inline in the analyzed TU (container methods) get the same summary at the
-  call. CSA's own cross-TU analysis was tried and fails on libstdc++ code
+  call. A helper that polls a function its caller passes (RAFT's
+  interruptible wait hands it `cudaStreamQuery`) is summarized as calling
+  that parameter. CSA's own cross-TU analysis was tried and fails on
+  libstdc++ code
   ([docs/design-tradeoffs.md](docs/design-tradeoffs.md#helpers-in-other-translation-units-generated-summaries-not-ctu)).
+- **The node budget.** A path ends where it can only reach a throw or a call
+  that never returns; shared_ptr reference counting, iostreams and locks are
+  not inlined unless a pending buffer reaches them; and the CUDA-calling
+  callees of a function whose budget ran out are analyzed on their own
+  (fallback entry points). `--node-profile` records where each top-level
+  function's exploded-graph nodes are
+  ([docs/design-tradeoffs.md](docs/design-tradeoffs.md#spending-the-node-budget-where-cuda-state-can-change)).
 - **Host containers.** The buffer `data()` returns from `std::vector`,
   `std::basic_string` or `thrust::host_vector` (and classes derived from
   them, like cuDF's `host_vector`), or from a view of one, belongs to the
@@ -186,20 +207,22 @@ confirmed defect either (45 false positives, 31 with insufficient evidence);
 23 of those were triaged against the source and 53 carry over the judgment of
 an earlier triage of the same sites, matched by fingerprint:
 
-| Project | TUs (parsed) | Alerts, 0.2.0 | Alerts, 0.4.0 | Alerts, 0.5.0 | Portability | Informational | False positive |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| cuda-samples 13.2 | 233 (223) | 32 | 7 | 7 | 3 | 3 | 1 |
-| faiss 1.15.1, GPU module | 190 (189) | 42 | 29 | 39 | 29 | 0 | 10 |
-| RMM 26.10 | 54 (54) | 2 | 0 | 0 | 0 | 0 | 0 |
-| Total | 477 | 76 | 36 | 46 | 32 | 3 | 11 |
+| Project | TUs (parsed) | Alerts, 0.2.0 | Alerts, 0.4.0 | Alerts, 0.5.0 | Alerts, 0.6.0 | Portability | Informational | False positive |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| cuda-samples 13.2 | 233 (223) | 32 | 7 | 7 | 7 | 3 | 3 | 1 |
+| faiss 1.15.1, GPU module | 190 (189) | 42 | 29 | 39 | 39 | 29 | 0 | 10 |
+| RMM 26.10 | 54 (54) | 2 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Total | 477 | 76 | 36 | 46 | 46 | 32 | 3 | 11 |
 
 Versions 0.3.0 and 0.4.0 reported the same 36 alerts; 0.5.0 adds 10 faiss
 CL2 warnings from the host-container rule, `std::vector`s destroyed with a
-copy from or into them still queued, all portability findings. With ten analyzer
-processes the 0.5.0 scan takes 81 s, 146 s and 18 s of wall time (0.4.0: 97 s,
-166 s, 20 s), and 385 of 837,
-232 of 720 and 60 of 233 top-level functions exhaust the node budget, so
-these projects are only partly explored ([docs/evaluation.md](docs/evaluation.md#real-projects);
+copy from or into them still queued, all portability findings, and 0.6.0
+reports the same 46. In the 0.6.0 scan 397 of 1,034, 234 of 731 and 61 of
+237 top-level functions exhaust the node budget (0.5.0: 385 of 837, 232 of
+720, 60 of 233; 0.6.0 adds fallback entry points), so these projects are
+only partly explored. The summed per-TU analysis time is 586 s, 1,232 s and
+126 s (0.5.0: 718 s, 1,363 s, 137 s), and the wall time with six analyzer
+processes 105 s, 211 s and 24 s ([docs/evaluation.md](docs/evaluation.md#real-projects);
 per-TU times in `results/real-projects/timings.csv`).
 
 The alerts that went away after 0.2.0 came from five modeling gaps, each fixed by a rule
@@ -280,9 +303,14 @@ results above.
   API (`cu*`), no device-code analysis, no CUDA Graph contents. Other
   translation units are seen only through generated summaries of the helper
   TUs named for a run (copies and synchronizations only, not frees or
-  events); the whole-project scans below use none.
+  event records); the whole-project scans below use none.
 - CSA explores bounded paths: loops and large functions exhaust budgets
   (reported per function), and calls it does not inline lose their effects.
+  Accesses on a branch that can only throw are not checked, and the deleter
+  a shared_ptr's last reference runs is not followed. A stream looked up
+  again through a virtual call (RAFT's `resource::get_cuda_stream`) gets a
+  new value each time, so `raft::resource::sync_stream(res)` is not known to
+  cover a copy queued on an earlier lookup.
 - Accesses through global variables inside opaque callees are not reported;
   buffer ranges with symbolic offsets count as overlapping.
 - Device-to-device races between streams are reported only for stream-ordered
